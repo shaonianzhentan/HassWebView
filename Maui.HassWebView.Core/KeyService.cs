@@ -1,6 +1,6 @@
-
 using System;
 using System.Timers;
+using Timer = System.Timers.Timer;
 
 namespace Maui.HassWebView.Core
 {

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="./Maui.HassWebView.Core/Maui.HassWebView.Core.csproj" />
+  <Project Path="./Maui.HassWebView.Demo/Maui.HassWebView.Demo.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+</Solution>
