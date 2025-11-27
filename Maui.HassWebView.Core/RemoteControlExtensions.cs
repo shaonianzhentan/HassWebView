@@ -11,6 +11,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.Maui.Handlers;
 #endif
+using Microsoft.Maui;
 
 namespace Maui.HassWebView.Core
 {
@@ -29,7 +30,7 @@ namespace Maui.HassWebView.Core
                     // Hook into the main activity's creation
                     android.OnCreate((activity, bundle) =>
                     {
-                        var keyService = builder.Services.BuildServiceProvider().GetService<KeyService>();
+                        var keyService = (activity.Application as MauiApplication)?.Services.GetService<KeyService>();
                         if (keyService == null)
                         {
                             Debug.WriteLine("KeyService not found. Make sure it's registered.");
@@ -42,6 +43,7 @@ namespace Maui.HassWebView.Core
                         window.Callback = new Platforms.Android.KeyCallback(originalCallback, keyService);
                     });
                 });
+
 #endif
             });
 
