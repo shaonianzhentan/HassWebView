@@ -1,4 +1,5 @@
-﻿using Maui.HassWebView.Core;
+
+using Maui.HassWebView.Core;
 using Microsoft.Extensions.Logging;
 
 namespace Maui.HassWebView.Demo
@@ -15,7 +16,8 @@ namespace Maui.HassWebView.Demo
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 })
-                .UseHassWebView();
+                .UseHassWebView()
+                .UseRemoteControl(); // 启用遥控器服务
 
 #if DEBUG
     		builder.Logging.AddDebug();
