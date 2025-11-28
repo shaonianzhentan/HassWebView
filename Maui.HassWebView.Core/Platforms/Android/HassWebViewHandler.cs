@@ -9,7 +9,7 @@ using WebView = Com.Tencent.Smtt.Sdk.WebView;
 
 public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
 {
-    public static PropertyMapper Mapper = new PropertyMapper<HassWebView>()
+    public static PropertyMapper propertyMapper = new PropertyMapper<HassWebView>()
     {
         [nameof(HassWebView.Source)] = (handler, view) =>
         {
@@ -24,7 +24,25 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         }
     };
 
-    public HassWebViewHandler() : base(Mapper)
+    public static CommandMapper commandMapper = new CommandMapper<HassWebView>()
+    {
+        [nameof(HassWebView.GoBack)] = (handler, view, args) =>
+        {
+            if (handler.PlatformView is WebView wv)
+            {
+                wv.GoBack();
+            }
+        },
+        [nameof(HassWebView.GoForward)] = (handler, view, args) =>
+        {
+            if (handler.PlatformView is WebView wv)
+            {
+                wv.GoForward();
+            }
+        }
+    };
+
+    public HassWebViewHandler() : base(propertyMapper, commandMapper)
     {
     }
 

@@ -16,7 +16,7 @@ namespace Maui.HassWebView.Demo
             // Subscribe to WebView navigation events
             wv.Navigating += Wv_Navigating;
             wv.Navigated += Wv_Navigated;
-
+            
             Loaded += MainPage_Loaded;
         }
 
@@ -105,11 +105,13 @@ namespace Maui.HassWebView.Demo
                     case "Left":
                     case "DpadLeft":
                         Debug.WriteLine("Action: Left was pressed.");
+                        wv.Source = "https://www.baidu.com";
                         break;
 
                     case "Right":
                     case "DpadRight":
                         Debug.WriteLine("Action: Right was pressed.");
+                        wv.Source = "https://google.com";
                         break;
                     
                     // Now you can handle ANY key without changing the Core library

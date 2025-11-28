@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.Maui.Handlers;
+﻿using Microsoft.Maui.Handlers;
 using Microsoft.Web.WebView2.Core;
+using System;
 
 namespace Maui.HassWebView.Core.Platforms.Windows;
 
@@ -24,7 +24,25 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         }
     };
 
-    public HassWebViewHandler() : base(Mapper)
+    public static CommandMapper CommandMapper = new CommandMapper<HassWebView>()
+    {
+        [nameof(HassWebView.GoBack)] = (handler, view, args) =>
+        {
+            if (handler.PlatformView is WebView wv)
+            {
+                wv.GoBack();
+            }
+        },
+        [nameof(HassWebView.GoForward)] = (handler, view, args) =>
+        {
+            if (handler.PlatformView is WebView wv)
+            {
+                wv.GoForward();
+            }
+        }
+    };
+
+    public HassWebViewHandler() : base(Mapper, CommandMapper)
     {
 
     }
@@ -69,6 +87,8 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         var state = args.IsSuccess ? WebNavigationResult.Success : WebNavigationResult.Failure;
         var mauiArgs = new WebNavigatedEventArgs(WebNavigationEvent.NewPage, VirtualView.Source, sender.Source, state);
         VirtualView.SendNavigated(mauiArgs);
+        VirtualView.SetValue(global::Microsoft.Maui.Controls.WebView.CanGoBackProperty, sender.CanGoBack);
+        VirtualView.SetValue(global::Microsoft.Maui.Controls.WebView.CanGoForwardProperty, sender.CanGoForward);
     }
 
     protected override void DisconnectHandler(WebView platformView)
