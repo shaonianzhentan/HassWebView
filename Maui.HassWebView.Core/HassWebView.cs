@@ -1,4 +1,4 @@
-﻿namespace Maui.HassWebView.Core;
+namespace Maui.HassWebView.Core;
 
 public class HassWebView : WebView
 {
@@ -14,5 +14,18 @@ public class HassWebView : WebView
     {
         get => (bool)GetValue(EnableZoomProperty);
         set => SetValue(EnableZoomProperty, value);
+    }
+
+    public event EventHandler<WebNavigatingEventArgs> Navigating;
+    public event EventHandler<WebNavigatedEventArgs> Navigated;
+
+    internal void SendNavigating(WebNavigatingEventArgs args)
+    {
+        Navigating?.Invoke(this, args);
+    }
+
+    internal void SendNavigated(WebNavigatedEventArgs args)
+    {
+        Navigated?.Invoke(this, args);
     }
 }

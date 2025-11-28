@@ -1,4 +1,4 @@
-﻿using Com.Tencent.Smtt.Export.External;
+using Com.Tencent.Smtt.Export.External;
 using Com.Tencent.Smtt.Sdk;
 using Microsoft.Maui.Handlers;
 
@@ -38,7 +38,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         var webView = new WebView(MauiApplication.Current.ApplicationContext);
         webView.Settings.JavaScriptEnabled = true;
         webView.WebChromeClient = new WebChromeClientHandler();
-        webView.WebViewClient = new WebViewClientHandler();
+        webView.WebViewClient = new WebViewClientHandler(VirtualView);
         return webView;
     }
 
@@ -65,4 +65,3 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         base.DisconnectHandler(platformView);
     }
 }
-

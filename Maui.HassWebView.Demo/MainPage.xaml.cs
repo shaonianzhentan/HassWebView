@@ -13,7 +13,27 @@ namespace Maui.HassWebView.Demo
             InitializeComponent();
             _keyService = keyService; // Store the injected service
 
+            // Subscribe to WebView navigation events
+            wv.Navigating += Wv_Navigating;
+            wv.Navigated += Wv_Navigated;
+
             Loaded += MainPage_Loaded;
+        }
+
+        private void Wv_Navigating(object sender, WebNavigatingEventArgs e)
+        {
+            Debug.WriteLine($">>> WebView Navigating: {e.Url}");
+            // Example of how to cancel navigation to a specific URL
+            if (e.Url.Host.Contains("microsoft.com"))
+            {
+                Debug.WriteLine(">>> Canceling navigation to Microsoft.com!");
+                e.Cancel = true;
+            }
+        }
+
+        private void Wv_Navigated(object sender, WebNavigatedEventArgs e)
+        {
+            Debug.WriteLine($">>> WebView Navigated to: {e.Url}");
         }
 
         private void MainPage_Loaded(object? sender, EventArgs e)
@@ -42,6 +62,10 @@ namespace Maui.HassWebView.Demo
             _keyService.SingleClick -= OnSingleClick;
             _keyService.DoubleClick -= OnDoubleClick;
             _keyService.LongClick -= OnLongClick;
+            
+            // It's also good practice to unsubscribe from WebView events
+            wv.Navigating -= Wv_Navigating;
+            wv.Navigated -= Wv_Navigated;
         }
 
         private void HandleKeyEvent(string eventType, string keyName)
@@ -65,7 +89,7 @@ namespace Maui.HassWebView.Demo
                     case "Escape":
                     case "Back":
                         Debug.WriteLine("Action: Back/Escape was pressed.");
-                        // e.g., if (wv.CanGoBack) { wv.GoBack(); }
+                        if (wv.CanGoBack) { wv.GoBack(); }
                         break;
 
                     case "Up":
