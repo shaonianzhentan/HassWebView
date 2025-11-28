@@ -37,8 +37,8 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     {
         var webView = new WebView(MauiApplication.Current.ApplicationContext);
         webView.Settings.JavaScriptEnabled = true;
-        webView.WebChromeClient = new BasicChrome();
-        webView.WebViewClient = new BasicClient();
+        webView.WebChromeClient = new WebChromeClientHandler();
+        webView.WebViewClient = new WebViewClientHandler();
         return webView;
     }
 
@@ -66,5 +66,3 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     }
 }
 
-class BasicClient : WebViewClient { }
-class BasicChrome : WebChromeClient { }
