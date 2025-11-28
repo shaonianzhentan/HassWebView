@@ -31,6 +31,13 @@ public static class MauiAppBuilderExtensions
                     // Hook into the main activity's creation
                     android.OnCreate((activity, bundle) =>
                     {
+                        // 在调用TBS初始化、创建WebView之前进行如下配置
+                        QbSdk.InitTbsSettings(new Dictionary<string, Java.Lang.Object>
+                        {
+                            { TbsCoreSettings.TbsSettingsUseSpeedyClassloader, true },
+                            { TbsCoreSettings.TbsSettingsUseDexloaderService, true },
+                        });
+
                         QbSdk.DownloadWithoutWifi = true;
 
                         var tbsListener = new TencentTbsListener();
@@ -50,8 +57,7 @@ public static class MauiAppBuilderExtensions
                         var preInitCallback = new PreInitCallback();
                         preInitCallback.CoreInitFinished += (s, e) =>
                         {
-                            Console.WriteLine("CoreInitFinished");
-                            //WebViewBtn_Clicked(null, null);
+                            Console.WriteLine($"CoreInitFinished {e}");
                         };
                         preInitCallback.ViewInitFinished += (s, e) =>
                         {

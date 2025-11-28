@@ -26,12 +26,6 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
 
     public HassWebViewHandler() : base(Mapper)
     {
-        // 在调用TBS初始化、创建WebView之前进行如下配置
-        QbSdk.InitTbsSettings(new Dictionary<string, Java.Lang.Object>
-        {
-            { TbsCoreSettings.TbsSettingsUseSpeedyClassloader, true },
-            { TbsCoreSettings.TbsSettingsUseDexloaderService, true },
-        });
     }
 
     protected override WebView CreatePlatformView()
