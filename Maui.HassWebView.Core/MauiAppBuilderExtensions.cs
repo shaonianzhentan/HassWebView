@@ -1,4 +1,11 @@
-﻿
+﻿#if ANDROID
+using Com.Tencent.Smtt.Export.External;
+using Com.Tencent.Smtt.Sdk;
+using Maui.HassWebView.Core.Platforms.Android.TencentX5;
+#endif
+
+using Microsoft.Maui.LifecycleEvents;
+
 namespace Maui.HassWebView.Core;
 
 public static class MauiAppBuilderExtensions

@@ -1,4 +1,5 @@
 using Android.Graphics;
+using Com.Tencent.Smtt.Export.External.Interfaces;
 using Com.Tencent.Smtt.Sdk;
 
 namespace Maui.HassWebView.Core.Platforms.Android;
@@ -14,7 +15,7 @@ public class WebViewClientHandler : WebViewClient
     public override bool ShouldOverrideUrlLoading(global::Com.Tencent.Smtt.Sdk.WebView view, IWebResourceRequest request)
     {
         var url = request.Url.ToString();
-        var args = new WebNavigatingEventArgs(url);
+        var args = new WebNavigatingEventArgs(WebNavigationEvent.NewPage, new UrlWebViewSource{ Url = url }, url);
         _webView.SendNavigating(args);
 
         if (args.Cancel)
@@ -29,6 +30,6 @@ public class WebViewClientHandler : WebViewClient
     public override void OnPageFinished(global::Com.Tencent.Smtt.Sdk.WebView view, string url)
     {
         base.OnPageFinished(view, url);
-        _webView.SendNavigated(new WebNavigatedEventArgs(url));
+        _webView.SendNavigated(new WebNavigatedEventArgs(WebNavigationEvent.NewPage, new UrlWebViewSource { Url = url }, url, WebNavigationResult.Success));
     }
 }

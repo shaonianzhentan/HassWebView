@@ -24,7 +24,7 @@ namespace Maui.HassWebView.Demo
         {
             Debug.WriteLine($">>> WebView Navigating: {e.Url}");
             // Example of how to cancel navigation to a specific URL
-            if (e.Url.Host.Contains("microsoft.com"))
+            if (e.Url.Contains("microsoft.com"))
             {
                 Debug.WriteLine(">>> Canceling navigation to Microsoft.com!");
                 e.Cancel = true;
