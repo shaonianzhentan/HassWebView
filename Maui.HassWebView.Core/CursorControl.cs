@@ -1,4 +1,5 @@
-﻿using Microsoft.Maui.Controls;
+using Microsoft.Maui.Controls;
+using System.Threading.Tasks;
 
 namespace Maui.HassWebView.Core
 {
@@ -65,6 +66,13 @@ namespace Maui.HassWebView.Core
         public void Click()
         {
             _wv.SimulateTouch((int)X, (int)Y);
+        }
+
+        public async Task DoubleClick(int delay=100)
+        {
+            Click();
+            await Task.Delay(delay); // Wait 100ms between clicks
+            Click();
         }
 
         // Page scroll up
