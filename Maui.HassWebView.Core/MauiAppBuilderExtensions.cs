@@ -27,15 +27,19 @@ public static class MauiAppBuilderExtensions
             {
 #if ANDROID
 
-                // 在调用TBS初始化、创建WebView之前进行如下配置
-                QbSdk.InitTbsSettings(new Dictionary<string, Java.Lang.Object>
-                {
-                    { TbsCoreSettings.TbsSettingsUseSpeedyClassloader, true },
-                    { TbsCoreSettings.TbsSettingsUseDexloaderService, true },
-                });
-
+                
                 events.AddAndroid(android =>
                 {
+                    android.OnApplicationCreate(app =>
+                    {
+                        // 在调用TBS初始化、创建WebView之前进行如下配置
+                        QbSdk.InitTbsSettings(new Dictionary<string, Java.Lang.Object>
+                        {
+                            { TbsCoreSettings.TbsSettingsUseSpeedyClassloader, true },
+                            { TbsCoreSettings.TbsSettingsUseDexloaderService, true }
+                        });
+                    });
+
                     // Hook into the main activity's creation
                     android.OnCreate((activity, bundle) =>
                     {

@@ -123,9 +123,7 @@ namespace Maui.HassWebView.Core
         public void VideoPlayPause()
         {
             _wv.EvaluateJavaScriptAsync($@"(function() {{
-                    const video = document.fullscreenElement?.querySelector('video') || 
-                                    (document.fullscreenElement?.tagName === 'VIDEO' ? document.fullscreenElement : null) || 
-                                    document.querySelector('video');
+                    var video = document.querySelector('video');
                     if (video) video.paused ? video.play() : video.pause();
                 }})()");
         }
