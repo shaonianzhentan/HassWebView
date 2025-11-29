@@ -41,6 +41,7 @@ namespace Maui.HassWebView.Demo
             _keyService.SingleClick += OnSingleClick;
             _keyService.DoubleClick += OnDoubleClick;
             _keyService.LongClick += OnLongClick;
+            _keyService.KeyUp += OnKeyUp; // <-- SUBSCRIBED to KeyUp event
         }
 
         protected override void OnDisappearing()
@@ -50,11 +51,11 @@ namespace Maui.HassWebView.Demo
             _keyService.SingleClick -= OnSingleClick;
             _keyService.DoubleClick -= OnDoubleClick;
             _keyService.LongClick -= OnLongClick;
+            _keyService.KeyUp -= OnKeyUp; // <-- UNSUBSCRIBED from KeyUp event
             wv.Navigating -= Wv_Navigating;
             wv.Navigated -= Wv_Navigated;
         }
 
-        // Parameter type updated to RemoteKeyEventArgs
         private void HandleKeyEvent(string eventType, RemoteKeyEventArgs e)
         {
             if (e.KeyName == "VolumeUp" || e.KeyName == "VolumeDown")
@@ -144,19 +145,17 @@ namespace Maui.HassWebView.Demo
             });
         }
 
-        // Parameter type updated to RemoteKeyEventArgs
         private void OnSingleClick(RemoteKeyEventArgs e)
         {
             HandleKeyEvent("SingleClick", e);
         }
 
-        // Parameter type updated to RemoteKeyEventArgs
         private void OnDoubleClick(RemoteKeyEventArgs e)
         {
             HandleKeyEvent("DoubleClick", e);
         }
 
-        // Parameter type updated to RemoteKeyEventArgs
+        // --- MODIFIED: OnLongClick now starts a repeating action ---
         private void OnLongClick(RemoteKeyEventArgs e)
         {
             if (e.KeyName == "VolumeUp" || e.KeyName == "VolumeDown")
@@ -165,29 +164,44 @@ namespace Maui.HassWebView.Demo
                 return;
             }
 
-            MainThread.BeginInvokeOnMainThread(() =>
+            Debug.WriteLine($"--- OnLongClick: {e.KeyName} ---");
+
+            // The interval for repeating the action, in milliseconds.
+            int repeatInterval = 100; 
+
+            switch (e.KeyName)
             {
-                Debug.WriteLine($"--- OnLongClick: {e.KeyName} ---");
-                switch (e.KeyName)
-                {
-                    case "Up":
-                    case "DpadUp":
-                        cursorControl.SlideUp();
-                        break;
-                    case "Down":
-                    case "DpadDown":
-                        cursorControl.SlideDown();
-                        break;
-                    case "Left":
-                    case "DpadLeft":
-                        cursorControl.SlideLeft();
-                        break;
-                    case "Right":
-                    case "DpadRight":
-                        cursorControl.SlideRight();
-                        break;
-                }
-            });
+                case "Up":
+                case "DpadUp":
+                    _keyService.StartRepeatingAction(() => cursorControl.MoveUp(), repeatInterval);
+                    break;
+                case "Down":
+                case "DpadDown":
+                    _keyService.StartRepeatingAction(() => cursorControl.MoveDown(), repeatInterval);
+                    break;
+                case "Left":
+                case "DpadLeft":
+                    if (wv.IsVideoFullscreen) {
+                        cursorControl.VideoSeek(-15);
+                    } else {
+                        _keyService.StartRepeatingAction(() => cursorControl.MoveLeft(), repeatInterval);
+                    }
+                    break;
+                case "Right":
+                case "DpadRight":
+                     if (wv.IsVideoFullscreen) {
+                        cursorControl.VideoSeek(15);
+                    } else {
+                        _keyService.StartRepeatingAction(() => cursorControl.MoveRight(), repeatInterval);
+                    }
+                    break;
+            }
+        }
+
+        private void OnKeyUp(RemoteKeyEventArgs e)
+        {
+            Debug.WriteLine($"--- OnKeyUp: {e.KeyName} ---");
+            // The KeyService automatically stops the repeating action on KeyUp.
         }
     }
 }
