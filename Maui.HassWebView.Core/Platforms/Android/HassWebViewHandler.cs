@@ -45,6 +45,13 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
                 wv.GoForward();
             }
         },
+        [nameof(HassWebView.ExitFullscreen)] = (handler, view, args) =>
+        {
+            if (handler.PlatformView is WebView wv)
+            {
+                handler.PlatformView.WebChromeClient.OnHideCustomView();
+            }
+        },
         [nameof(HassWebView.EvaluateJavaScriptAsync)] = (handler, _, args) =>
         {
             if (args is not HassWebView.EvaluateJavaScriptAsyncRequest request) return;

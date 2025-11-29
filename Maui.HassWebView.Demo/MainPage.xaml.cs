@@ -95,7 +95,14 @@ namespace Maui.HassWebView.Demo
                     case "Escape":
                     case "Back":
                         Debug.WriteLine("Action: Back/Escape was pressed.");
-                        if (wv.CanGoBack) { wv.GoBack(); }
+                        if (wv.IsVideoFullscreen)
+                        {
+                            wv.ExitFullscreen();
+                        }
+                        else if (wv.CanGoBack)
+                        {
+                            wv.GoBack();
+                        }
                         break;
 
                     case "Up":

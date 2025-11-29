@@ -109,6 +109,11 @@ public class HassWebView : WebView
 
         Handler.Invoke(nameof(SimulateTouchSlide), new SimulateTouchSlideRequest(x1, y1, x2, y2, duration));
     }
+    public void ExitFullscreen()
+    {
+        if (Handler == null) return;
+        Handler.Invoke(nameof(ExitFullscreen));
+    }
 
     internal class EvaluateJavaScriptAsyncRequest
     {
