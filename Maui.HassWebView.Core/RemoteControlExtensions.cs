@@ -17,9 +17,13 @@ namespace Maui.HassWebView.Core
 {
     public static class RemoteControlExtensions
     {
-        public static MauiAppBuilder UseRemoteControl(this MauiAppBuilder builder, int longPressTimeout = 750, int doubleClickTimeout = 300, int downInterval = 100)
+        public static MauiAppBuilder UseRemoteControl(
+            this MauiAppBuilder builder, 
+            int longPressTimeout = 750, 
+            int doubleClickTimeout = 300, 
+            int downInterval = 100)
         {
-            // 1. Register KeyService as a singleton
+            // 1. Register KeyService as a singleton with the provided timings
             builder.Services.AddSingleton(new KeyService(longPressTimeout, doubleClickTimeout, downInterval));
 
             builder.ConfigureLifecycleEvents(events =>
@@ -37,13 +41,12 @@ namespace Maui.HassWebView.Core
                             return;
                         }
 
-                        // Hijack the window's callback to intercept key events
+                        // Hijack the window's callback to intercept all key events
                         var window = activity.Window;
                         var originalCallback = window.Callback;
                         window.Callback = new Platforms.Android.KeyCallback(originalCallback, keyService);
                     });
                 });
-
 #endif
             });
 
@@ -63,16 +66,18 @@ namespace Maui.HassWebView.Core
                     return;
                 }
                 
+                // Intercept all KeyDown events
                 ui.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler((s, e) =>
                 {
                     keyService.OnPressed(e.Key.ToString());
-                    e.Handled = true;
+                    e.Handled = true; // Mark as handled to prevent default system behavior
                 }), true); // handledEventsToo = true
 
+                // Intercept all KeyUp events
                 ui.AddHandler(UIElement.KeyUpEvent, new KeyEventHandler((s, e) =>
                 {
                     keyService.OnReleased();
-                    e.Handled = true;
+                    e.Handled = true; // Mark as handled
                 }), true); // handledEventsToo = true
             });
 #endif

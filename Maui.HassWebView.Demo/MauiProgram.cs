@@ -16,7 +16,12 @@ namespace Maui.HassWebView.Demo
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 })
                 .UseHassWebView()
-                .UseRemoteControl(downInterval: 50); // 启用遥控器服务
+                // Enable the remote control service with an optional down interval customization.
+                // All keys will be intercepted by default.
+                // You can control whether a key is handled by the system 
+                // within the event handlers (e.g., OnSingleClick) in MainPage.xaml.cs
+                // by setting e.Handled = false.
+                .UseRemoteControl(downInterval: 50);
 
 #if DEBUG
     		builder.Logging.AddDebug();

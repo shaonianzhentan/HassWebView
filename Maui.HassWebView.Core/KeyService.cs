@@ -1,127 +1,101 @@
-using System.Timers;
+using System.Diagnostics;
 
-namespace Maui.HassWebView.Core
+namespace Maui.HassWebView.Core;
+
+public class KeyService
 {
-    public class KeyService
+    // Events using the new KeyEventArgs
+    public event Action<KeyEventArgs> SingleClick;
+    public event Action<KeyEventArgs> DoubleClick;
+    public event Action<KeyEventArgs> LongClick;
+    public event Action<KeyEventArgs> Down;
+
+    private readonly int _longPressTimeout;
+    private readonly int _doubleClickTimeout;
+    private readonly int _downInterval;
+
+    private System.Threading.Timer _longPressTimer;
+    private System.Threading.Timer _doubleClickTimer;
+    private System.Threading.Timer _downTimer;
+    private string _lastKey;
+    private int _pressCount = 0;
+
+    public KeyService(int longPressTimeout = 750, int doubleClickTimeout = 300, int downInterval = 100)
     {
-        public event Action<string> SingleClick;
-        public event Action<string> DoubleClick;
-        public event Action<string> LongClick;
-        public event Action<string> Down;
+        _longPressTimeout = longPressTimeout;
+        _doubleClickTimeout = doubleClickTimeout;
+        _downInterval = downInterval;
+    }
 
-        private readonly System.Timers.Timer _longPressTimer;
-        private readonly System.Timers.Timer _clickTimer;
-        private readonly System.Timers.Timer _downTimer;
-
-        private readonly object _lock = new object();
-
-        private string _currentKeyName;
-        private bool _isLongPress = false;
-        private int _pressCount = 0;
-
-        public KeyService(int longPressTimeout = 750, int doubleClickTimeout = 300, int downInterval = 100)
+    public void OnPressed(string keyName)
+    {
+        // If a different key is pressed, reset everything.
+        if (_lastKey != keyName)
         {
-            _longPressTimer = new System.Timers.Timer(longPressTimeout);
-            _longPressTimer.Elapsed += OnLongPressTimerElapsed;
-            _longPressTimer.AutoReset = false;
-
-            _clickTimer = new System.Timers.Timer(doubleClickTimeout);
-            _clickTimer.Elapsed += OnClickTimerElapsed;
-            _clickTimer.AutoReset = false;
-
-            _downTimer = new System.Timers.Timer(downInterval);
-            _downTimer.Elapsed += OnDownTimerElapsed;
-            _downTimer.AutoReset = true;
+            ResetDoubleClick();
+            _pressCount = 0;
         }
+        
+        _lastKey = keyName;
+        _pressCount++;
 
-        private void OnDownTimerElapsed(object sender, ElapsedEventArgs e)
+        // Stop the double-click timer since a new press has occurred.
+        _doubleClickTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+
+        if (_pressCount == 1)
         {
-            lock (_lock)
-            {
-                if (_pressCount > 0)
-                {
-                    Down?.Invoke(_currentKeyName);
-                }
-            }
+            // Start the long press timer on the first press.
+            _longPressTimer = new System.Threading.Timer(LongPressTimerCallback, keyName, _longPressTimeout, Timeout.Infinite);
+            // Start the down timer.
+            _downTimer = new System.Threading.Timer(DownTimerCallback, keyName, 0, _downInterval);
         }
+    }
 
-        internal void OnPressed(string keyName)
+    public void OnReleased()
+    {
+        _longPressTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+        _downTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+
+        if (_pressCount == 1)
         {
-            lock (_lock)
-            {
-                // 忽略长按过程中的按键重复事件
-                if (_pressCount > 0 && !_clickTimer.Enabled)
-                {
-                    return;
-                }
-
-                _currentKeyName = keyName;
-                _pressCount++;
-
-                _clickTimer.Stop();
-
-                if (_pressCount == 1) // 第一次按下
-                {
-                    _isLongPress = false;
-                    _longPressTimer.Start();
-                    _downTimer.Start();
-                }
-                else if (_pressCount == 2) // 第二次按下 (用于双击)
-                {
-                    _longPressTimer.Stop();
-                    _downTimer.Stop();
-                    DoubleClick?.Invoke(_currentKeyName);
-                    _pressCount = 0;
-                }
-            }
+            // This could be a single click, start the double-click timer to check.
+            _doubleClickTimer = new System.Threading.Timer(DoubleClickTimerCallback, _lastKey, _doubleClickTimeout, Timeout.Infinite);
         }
-
-        internal void OnReleased()
+        else if (_pressCount >= 2)
         {
-            lock (_lock)
-            {
-                _longPressTimer.Stop();
-                _downTimer.Stop();
-
-                // 如果已经触发了长按，则重置所有状态并立即返回
-                if (_isLongPress)
-                {
-                    _isLongPress = false;
-                    _pressCount = 0;
-                    return;
-                }
-
-                if (_pressCount == 1)
-                {
-                    // 启动计时器以区分单击和双击
-                    _clickTimer.Start();
-                }
-            }
+            // This is a double click.
+            Debug.WriteLine("DoubleClick detected");
+            DoubleClick?.Invoke(new KeyEventArgs(_lastKey));
+            ResetDoubleClick();
         }
+    }
 
-        private void OnLongPressTimerElapsed(object sender, ElapsedEventArgs e)
-        {
-            lock (_lock)
-            {
-                if (_pressCount == 1)
-                {
-                    _isLongPress = true; // 标记已发生长按
-                    LongClick?.Invoke(_currentKeyName);
-                    // 注意：此处不再重置 _pressCount，交由 OnReleased 处理
-                }
-            }
-        }
+    private void DownTimerCallback(object state)
+    {
+        string keyName = (string)state;
+        Debug.WriteLine($"Down event for {keyName}");
+        Down?.Invoke(new KeyEventArgs(keyName));
+    }
 
-        private void OnClickTimerElapsed(object sender, ElapsedEventArgs e)
-        {
-            lock (_lock)
-            {
-                if (_pressCount == 1)
-                {
-                    SingleClick?.Invoke(_currentKeyName);
-                }
-                _pressCount = 0; // 重置状态
-            }
-        }
+    private void LongPressTimerCallback(object state)
+    { 
+        _downTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+        Debug.WriteLine("LongClick detected");
+        LongClick?.Invoke(new KeyEventArgs((string)state));
+        ResetDoubleClick();
+    }
+
+    private void DoubleClickTimerCallback(object state)
+    {
+        // If the timer fires, it means no second click occurred in time.
+        Debug.WriteLine("SingleClick detected");
+        SingleClick?.Invoke(new KeyEventArgs((string)state));
+        ResetDoubleClick();
+    }
+
+    private void ResetDoubleClick()
+    {
+        _pressCount = 0;
+        _doubleClickTimer?.Change(Timeout.Infinite, Timeout.Infinite);
     }
 }

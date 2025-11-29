@@ -24,12 +24,6 @@ namespace Maui.HassWebView.Demo
         private void Wv_Navigating(object sender, WebNavigatingEventArgs e)
         {
             Debug.WriteLine($">>> WebView Navigating: {e.Url}");
-            // Example of how to cancel navigation to a specific URL
-            if (e.Url.Contains("microsoft.com"))
-            {
-                Debug.WriteLine(">>> Canceling navigation to Microsoft.com!");
-                e.Cancel = true;
-            }
         }
 
         private void Wv_Navigated(object sender, WebNavigatedEventArgs e)
@@ -46,7 +40,6 @@ namespace Maui.HassWebView.Demo
         {
             base.OnAppearing();
             Debug.WriteLine("MainPage Appearing: Subscribing to KeyService events.");
-            // Subscribe to the events
             _keyService.SingleClick += OnSingleClick;
             _keyService.DoubleClick += OnDoubleClick;
             _keyService.LongClick += OnLongClick;
@@ -57,35 +50,24 @@ namespace Maui.HassWebView.Demo
         {
             base.OnDisappearing();
             Debug.WriteLine("MainPage Disappearing: Unsubscribing from KeyService events.");
-            // Unsubscribe from the events to prevent memory leaks
             _keyService.SingleClick -= OnSingleClick;
             _keyService.DoubleClick -= OnDoubleClick;
             _keyService.LongClick -= OnLongClick;
             _keyService.Down -= OnDown;
-            
-            // It's also good practice to unsubscribe from WebView events
             wv.Navigating -= Wv_Navigating;
-            wv.Navigated -= Wv_Navigated;
+            wv.Navigated -= wv_Navigated;
         }
 
-        private void HandleKeyEvent(string eventType, string keyName)
+        private void HandleKeyEvent(string eventType, KeyEventArgs e)
         {
-            // IMPORTANT: Ensure UI updates are on the main thread
             MainThread.BeginInvokeOnMainThread(async () =>
             {
-                Debug.WriteLine($"--- MainPage: {eventType} Detected ---");
-                Debug.WriteLine($"Key Name: {keyName}");
+                Debug.WriteLine($"--- {eventType}: {e.KeyName} ---");
 
-                // Handle the key name using a switch statement on the string
-                switch (keyName)
+                switch (e.KeyName)
                 {
-                    // You can handle multiple key names in one case for mapping
-                    case "A":
-                        wv.Source = "https://www.bilibili.com/video/BV1U3o7YmEoz/";
-                        break;
                     case "Enter":
                     case "DpadCenter":
-                        Debug.WriteLine("Action: OK/Enter was pressed.");
                         if (wv.IsVideoFullscreen)
                         {
                             cursorControl.VideoPlayPause();
@@ -95,148 +77,126 @@ namespace Maui.HassWebView.Demo
                             if (eventType == "DoubleClick")
                             {
                                 await cursorControl.DoubleClick();
-                                break;
                             }
-                            cursorControl.Click();
+                            else // SingleClick
+                            {
+                                cursorControl.Click();
+                            }
                         }
                         break;
 
                     case "Escape":
                     case "Back":
-                        Debug.WriteLine("Action: Back/Escape was pressed.");
-                        if (wv.IsVideoFullscreen)
+                        if (eventType == "SingleClick")
                         {
-                            wv.ExitFullscreen();
+                            if (wv.IsVideoFullscreen)
+                            {
+                                wv.ExitFullscreen();
+                            }
+                            else if (wv.CanGoBack)
+                            {
+                                wv.GoBack();
+                            }
+                            else
+                            {
+                                e.Handled = false; // Let the system handle it (e.g., exit app)
+                            }
                         }
-                        else if (wv.CanGoBack)
+                        break;
+
+                    case "Left":
+                    case "DpadLeft":
+                         if (eventType == "SingleClick" && wv.IsVideoFullscreen)
+                         {
+                            cursorControl.VideoSeek(-5);
+                         }
+                        break;
+
+                    case "Right":
+                    case "DpadRight":
+                        if (eventType == "SingleClick" && wv.IsVideoFullscreen)
                         {
-                            wv.GoBack();
+                            cursorControl.VideoSeek(5);
                         }
                         break;
 
                     case "Up":
                     case "DpadUp":
-                        Debug.WriteLine("Action: Up was pressed.");
-                        break;
-
                     case "Down":
                     case "DpadDown":
-                        Debug.WriteLine("Action: Down was pressed.");
-                        break;
-
-                    case "Left":
-                    case "DpadLeft":
-                        Debug.WriteLine("Action: Left was pressed.");
-                        if (wv.IsVideoFullscreen)
-                        {
-                            cursorControl.VideoSeek(-5);
-                        }
-                        break;
-
-                    case "Right":
-                    case "DpadRight":
-                        Debug.WriteLine("Action: Right was pressed.");
-                        if (wv.IsVideoFullscreen)
-                        {
-                            cursorControl.VideoSeek(5);
-                        }
-                        break;
-                    
-                    // Now you can handle ANY key without changing the Core library
-                    case "Menu":
-                        Debug.WriteLine("Action: Menu key was pressed.");
-                        break;
-
-                    case "ChannelUp":
-                        Debug.WriteLine("Action: Channel Up key was pressed.");
+                        // Intercept clicks to prevent system sounds, but do nothing.
+                        // The main logic is in OnDown/OnLongClick.
                         break;
 
                     default:
-                        Debug.WriteLine($"Action: An unhandled key '{keyName}' was pressed.");
+                        // For any other unhandled key, pass it to the system.
+                        e.Handled = false; 
+                        Debug.WriteLine($"Unhandled {eventType} for {e.KeyName}. Passing to system.");
                         break;
                 }
             });
         }
 
-        private void OnSingleClick(string keyName)
+        private void OnSingleClick(KeyEventArgs e)
         {
-            HandleKeyEvent("SingleClick", keyName);
+            HandleKeyEvent("SingleClick", e);
         }
 
-        private void OnDoubleClick(string keyName)
+        private void OnDoubleClick(KeyEventArgs e)
         {
-            HandleKeyEvent("DoubleClick", keyName);
+            HandleKeyEvent("DoubleClick", e);
         }
 
-        private void OnDown(string keyName)
+        private void OnDown(KeyEventArgs e)
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                switch (keyName)
+                switch (e.KeyName)
                 {
                     case "Up":
                     case "DpadUp":
                         cursorControl.MoveUp();
                         break;
-
                     case "Down":
                     case "DpadDown":
                         cursorControl.MoveDown();
                         break;
-
                     case "Left":
                     case "DpadLeft":
                         if (!wv.IsVideoFullscreen)
-                        {
                             cursorControl.MoveLeft();
-                        }
                         break;
-
                     case "Right":
                     case "DpadRight":
                         if (!wv.IsVideoFullscreen)
-                        {
                             cursorControl.MoveRight();
-                        }
                         break;
                 }
             });
         }
 
-        private void OnLongClick(string keyName)
+        private void OnLongClick(KeyEventArgs e)
         {
-            Debug.WriteLine($"--- MainPage: OnLongClick Detected ---");
-            Debug.WriteLine($"Key Name: {keyName}");
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                switch (keyName)
+                Debug.WriteLine($"--- OnLongClick: {e.KeyName} ---");
+                switch (e.KeyName)
                 {
                     case "Up":
                     case "DpadUp":
-                        Debug.WriteLine("Action: Up was pressed.");
                         cursorControl.SlideUp();
                         break;
-
                     case "Down":
                     case "DpadDown":
-                        Debug.WriteLine("Action: Down was pressed.");
                         cursorControl.SlideDown();
                         break;
-
                     case "Left":
                     case "DpadLeft":
-                        Debug.WriteLine("Action: Left was pressed.");
                         cursorControl.SlideLeft();
                         break;
-
                     case "Right":
                     case "DpadRight":
-                        Debug.WriteLine("Action: Right was pressed.");
                         cursorControl.SlideRight();
-                        break;
-
-                    default:
-                        Debug.WriteLine($"Action: An unhandled key '{keyName}' was pressed.");
                         break;
                 }
             });
