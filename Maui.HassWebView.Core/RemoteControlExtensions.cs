@@ -20,18 +20,16 @@ namespace Maui.HassWebView.Core
         public static MauiAppBuilder UseRemoteControl(
             this MauiAppBuilder builder, 
             int longPressTimeout = 750, 
-            int doubleClickTimeout = 300, 
-            int downInterval = 100)
+            int doubleClickTimeout = 300)
         {
             // 1. Register KeyService as a singleton with the provided timings
-            builder.Services.AddSingleton(new KeyService(longPressTimeout, doubleClickTimeout, downInterval));
+            builder.Services.AddSingleton(new KeyService(longPressTimeout, doubleClickTimeout));
 
             builder.ConfigureLifecycleEvents(events =>
             {
 #if ANDROID
                 events.AddAndroid(android =>
                 {
-                    // Hook into the main activity's creation
                     android.OnCreate((activity, bundle) =>
                     {
                         var keyService = (activity.Application as MauiApplication)?.Services.GetService<KeyService>();
@@ -41,7 +39,6 @@ namespace Maui.HassWebView.Core
                             return;
                         }
 
-                        // Hijack the window's callback to intercept all key events
                         var window = activity.Window;
                         var originalCallback = window.Callback;
                         window.Callback = new Platforms.Android.KeyCallback(originalCallback, keyService);
@@ -66,19 +63,17 @@ namespace Maui.HassWebView.Core
                     return;
                 }
                 
-                // Intercept all KeyDown events
                 ui.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler((s, e) =>
                 {
                     keyService.OnPressed(e.Key.ToString());
-                    e.Handled = true; // Mark as handled to prevent default system behavior
-                }), true); // handledEventsToo = true
+                    e.Handled = true;
+                }), true);
 
-                // Intercept all KeyUp events
                 ui.AddHandler(UIElement.KeyUpEvent, new KeyEventHandler((s, e) =>
                 {
                     keyService.OnReleased();
-                    e.Handled = true; // Mark as handled
-                }), true); // handledEventsToo = true
+                    e.Handled = true;
+                }), true);
             });
 #endif
 

@@ -13,10 +13,8 @@ namespace Maui.HassWebView.Demo
             InitializeComponent();
             _keyService = keyService; // Store the injected service
 
-            // Subscribe to WebView navigation events
             wv.Navigating += Wv_Navigating;
             wv.Navigated += Wv_Navigated;
-
             Loaded += MainPage_Loaded;
             cursorControl = new CursorControl(cursor, root, wv);
         }
@@ -43,7 +41,6 @@ namespace Maui.HassWebView.Demo
             _keyService.SingleClick += OnSingleClick;
             _keyService.DoubleClick += OnDoubleClick;
             _keyService.LongClick += OnLongClick;
-            _keyService.Down += OnDown;
         }
 
         protected override void OnDisappearing()
@@ -53,19 +50,26 @@ namespace Maui.HassWebView.Demo
             _keyService.SingleClick -= OnSingleClick;
             _keyService.DoubleClick -= OnDoubleClick;
             _keyService.LongClick -= OnLongClick;
-            _keyService.Down -= OnDown;
             wv.Navigating -= Wv_Navigating;
             wv.Navigated -= wv_Navigated;
         }
 
         private void HandleKeyEvent(string eventType, KeyEventArgs e)
         {
+            // --- ADDED: Immediately release volume keys to the system ---
+            if (e.KeyName == "VolumeUp" || e.KeyName == "VolumeDown")
+            {
+                e.Handled = false;
+                return;
+            }
+
             MainThread.BeginInvokeOnMainThread(async () =>
             {
                 Debug.WriteLine($"--- {eventType}: {e.KeyName} ---");
 
                 switch (e.KeyName)
                 {
+                    // OK / Enter Key
                     case "Enter":
                     case "DpadCenter":
                         if (wv.IsVideoFullscreen)
@@ -75,70 +79,73 @@ namespace Maui.HassWebView.Demo
                         else
                         {
                             if (eventType == "DoubleClick")
-                            {
                                 await cursorControl.DoubleClick();
-                            }
                             else // SingleClick
-                            {
                                 cursorControl.Click();
-                            }
                         }
                         break;
 
+                    // Back / Escape Key
                     case "Escape":
                     case "Back":
                         if (eventType == "SingleClick")
                         {
                             if (wv.IsVideoFullscreen)
-                            {
                                 wv.ExitFullscreen();
-                            }
                             else if (wv.CanGoBack)
-                            {
                                 wv.GoBack();
-                            }
                             else
-                            {
-                                e.Handled = false; // Let the system handle it (e.g., exit app)
-                            }
+                                e.Handled = false; // Let system handle it
                         }
                         break;
+                    
+                    // Directional Keys (Up, Down, Left, Right)
+                    case "Up":
+                    case "DpadUp":
+                        if (eventType == "SingleClick") cursorControl.MoveUp();
+                        break;
 
+                    case "Down":
+                    case "DpadDown":
+                        if (eventType == "SingleClick") cursorControl.MoveDown();
+                        break;
+                        
                     case "Left":
                     case "DpadLeft":
-                         if (eventType == "SingleClick" && wv.IsVideoFullscreen)
+                         if (eventType == "SingleClick")
                          {
-                            cursorControl.VideoSeek(-5);
+                            if(wv.IsVideoFullscreen)
+                                cursorControl.VideoSeek(-5);
+                            else
+                                cursorControl.MoveLeft();
                          }
                         break;
 
                     case "Right":
                     case "DpadRight":
-                        if (eventType == "SingleClick" && wv.IsVideoFullscreen)
+                        if (eventType == "SingleClick")
                         {
-                            cursorControl.VideoSeek(5);
+                            if(wv.IsVideoFullscreen)
+                                cursorControl.VideoSeek(5);
+                            else
+                                cursorControl.MoveRight();
                         }
                         break;
 
-                    case "Up":
-                    case "DpadUp":
-                    case "Down":
-                    case "DpadDown":
-                        // Intercept clicks to prevent system sounds, but do nothing.
-                        // The main logic is in OnDown/OnLongClick.
-                        break;
-
+                    // Unhandled Keys
                     default:
-                        // For any other unhandled key, pass it to the system.
-                        e.Handled = false; 
-                        Debug.WriteLine($"Unhandled {eventType} for {e.KeyName}. Passing to system.");
+                        if (eventType == "SingleClick")
+                        {
+                            e.Handled = false; 
+                            Debug.WriteLine($"Unhandled {eventType} for {e.KeyName}. Passing to system.");
+                        }
                         break;
                 }
             });
         }
 
         private void OnSingleClick(KeyEventArgs e)
-        {
+        { 
             HandleKeyEvent("SingleClick", e);
         }
 
@@ -147,36 +154,15 @@ namespace Maui.HassWebView.Demo
             HandleKeyEvent("DoubleClick", e);
         }
 
-        private void OnDown(KeyEventArgs e)
-        {
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                switch (e.KeyName)
-                {
-                    case "Up":
-                    case "DpadUp":
-                        cursorControl.MoveUp();
-                        break;
-                    case "Down":
-                    case "DpadDown":
-                        cursorControl.MoveDown();
-                        break;
-                    case "Left":
-                    case "DpadLeft":
-                        if (!wv.IsVideoFullscreen)
-                            cursorControl.MoveLeft();
-                        break;
-                    case "Right":
-                    case "DpadRight":
-                        if (!wv.IsVideoFullscreen)
-                            cursorControl.MoveRight();
-                        break;
-                }
-            });
-        }
-
         private void OnLongClick(KeyEventArgs e)
         {
+            // --- ADDED: Immediately release volume keys to the system ---
+            if (e.KeyName == "VolumeUp" || e.KeyName == "VolumeDown")
+            {
+                e.Handled = false;
+                return;
+            }
+
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 Debug.WriteLine($"--- OnLongClick: {e.KeyName} ---");
