@@ -159,7 +159,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         webView.FocusableInTouchMode = true;
         webView.Clickable = true;
 
-        webView.WebChromeClient = new WebChromeClientHandler();
+        webView.WebChromeClient = new WebChromeClientHandler(VirtualView);
         webView.WebViewClient = new WebViewClientHandler(VirtualView);
 
         var x5object = webView.X5WebViewExtension;

@@ -47,6 +47,22 @@ public class HassWebView : WebView
         internal set => SetValue(CanGoForwardProperty, value);
     }
 
+    private static readonly BindablePropertyKey IsVideoFullscreenPropertyKey =
+        BindableProperty.CreateReadOnly(nameof(IsVideoFullscreen), typeof(bool), typeof(HassWebView), false);
+
+    public static readonly BindableProperty IsVideoFullscreenProperty = IsVideoFullscreenPropertyKey.BindableProperty;
+
+    public bool IsVideoFullscreen => (bool)GetValue(IsVideoFullscreenProperty);
+
+    public event EventHandler<bool> VideoPlayingFullscreen;
+
+    internal void SetIsVideoFullscreen(bool isVideoFullscreen)
+    {
+        SetValue(IsVideoFullscreenPropertyKey, isVideoFullscreen);
+        VideoPlayingFullscreen?.Invoke(this, isVideoFullscreen);
+    }
+
+
     public event EventHandler<WebNavigatingEventArgs> Navigating;
     public event EventHandler<WebNavigatedEventArgs> Navigated;
 
