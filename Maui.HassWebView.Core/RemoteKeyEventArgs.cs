@@ -11,8 +11,10 @@ public class RemoteKeyEventArgs : EventArgs
     public string KeyName { get; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether the event was handled.
-    /// Setting this to false will pass the event to the underlying system for processing.
+    /// Gets or sets a value indicating whether the event should be marked as handled.
+    /// Set this to false in a KeyDown event handler to prevent the KeyService
+    /// from processing it and to allow the system to handle it instead.
+    /// The default is true.
     /// </summary>
     public bool Handled { get; set; } = true;
 

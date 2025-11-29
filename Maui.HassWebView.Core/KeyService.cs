@@ -5,6 +5,9 @@ namespace Maui.HassWebView.Core;
 
 public class KeyService
 {
+    // --- NEW: A synchronous event fired immediately on key press ---
+    public event Action<RemoteKeyEventArgs> KeyDown;
+
     public event Action<RemoteKeyEventArgs> SingleClick;
     public event Action<RemoteKeyEventArgs> DoubleClick;
     public event Action<RemoteKeyEventArgs> LongClick;
@@ -18,8 +21,6 @@ public class KeyService
     private string _lastKey;
     private int _pressCount = 0;
     private bool _longPressHasFired = false;
-
-    // --- REPEAT ACTION ---
     private Timer _repeatingActionTimer;
     private Action _repeatingAction;
 
@@ -29,11 +30,9 @@ public class KeyService
         _doubleClickTimeout = doubleClickTimeout;
     }
 
-    // --- ADDED: Public method to start the repeating action ---
     public void StartRepeatingAction(Action action, int interval = 100)
     {
         StopRepeatingAction();
-        
         _repeatingAction = action;
         _repeatingActionTimer = new Timer(RepeatingActionCallback, null, 0, interval);
     }
@@ -51,9 +50,24 @@ public class KeyService
         _repeatingAction = null;
     }
 
-    public void OnPressed(string keyName)
+    // --- MODIFIED: OnPressed now returns a boolean and fires the KeyDown event first ---
+    public bool OnPressed(string keyName)
     {
-        if (_longPressHasFired) return;
+        // 1. Create args and immediately fire the synchronous KeyDown event.
+        var args = new RemoteKeyEventArgs(keyName);
+        KeyDown?.Invoke(args);
+
+        // 2. Check if the user has decided to let the system handle it.
+        if (!args.Handled)
+        {
+            // If Handled is false, we stop all further processing in this service...
+            ResetDoubleClickState(); 
+            // ...and tell the platform layer (e.g., RemoteControlExtensions) not to intercept the event.
+            return false; 
+        }
+
+        // 3. If Handled is true (default), proceed with gesture detection.
+        if (_longPressHasFired) return true;
 
         if (_lastKey != keyName)
         {
@@ -71,6 +85,9 @@ public class KeyService
         {
             _longPressTimer = new Timer(LongPressTimerCallback, keyName, _longPressTimeout, Timeout.Infinite);
         }
+        
+        // Tell the platform layer to intercept the event because we are handling it.
+        return true;
     }
 
     public void OnReleased()
@@ -106,9 +123,10 @@ public class KeyService
     private void LongPressTimerCallback(object state)
     { 
         Debug.WriteLine("LongClick detected");
+        if (_longPressHasFired) return;
         _longPressHasFired = true;
         LongClick?.Invoke(new RemoteKeyEventArgs((string)state));
-        ResetDoubleClickState();
+        // We don't ResetDoubleClickState here anymore to allow KeyUp to know about the state.
     }
 
     private void DoubleClickTimerCallback(object state)
@@ -121,7 +139,10 @@ public class KeyService
     private void ResetDoubleClickState()
     {
         _pressCount = 0;
-        _doubleClickTimer?.Change(Timeout.Infinite, Timeout.Infinite);
-        _longPressTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+        _lastKey = null;
+        _doubleClickTimer?.Dispose();
+        _doubleClickTimer = null;
+        _longPressTimer?.Dispose();
+        _longPressTimer = null;
     }
 }

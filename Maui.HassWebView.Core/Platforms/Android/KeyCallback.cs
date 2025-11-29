@@ -1,3 +1,4 @@
+
 using AndroidNative = Android;
 
 namespace Maui.HassWebView.Core.Platforms.Android
@@ -23,21 +24,55 @@ namespace Maui.HassWebView.Core.Platforms.Android
                 return _originalCallback?.DispatchKeyEvent(e) ?? false;
             }
 
-            // Directly pass the key event to the KeyService
-            if (e.Action == AndroidNative.Views.KeyEventActions.Down)
+            // Convert Android KeyCode to our cross-platform key name string
+            string keyName = GetKeyName(e.KeyCode);
+
+            if (keyName != null)
             {
-                var keyName = e.KeyCode.ToString();
-                _keyService.OnPressed(keyName);
-                return true; // We've handled the event.
-            }
-            else if (e.Action == AndroidNative.Views.KeyEventActions.Up)
-            { 
-                _keyService.OnReleased();
-                return true; // We've handled the event.
+                if (e.Action == AndroidNative.Views.KeyEventActions.Down)
+                {
+                    // --- THE NEW, CORRECT LOGIC ---
+                    // 1. Call OnPressed and check its boolean result.
+                    bool shouldBeHandled = _keyService.OnPressed(keyName);
+                    
+                    // 2. If KeyService says it will handle it, we return true to intercept.
+                    if (shouldBeHandled)
+                    {
+                        return true; 
+                    }
+                }
+                else if (e.Action == AndroidNative.Views.KeyEventActions.Up)
+                {
+                    _keyService.OnReleased();
+                    // We return true to signify we've "seen" the KeyUp, preventing duplicate processing.
+                    return true;
+                }
             }
 
-            // For any other action, let the original callback handle it.
+            // 3. If not handled by our service (i.e., shouldBeHandled was false),
+            //    we pass the event to the original system callback.
             return _originalCallback?.DispatchKeyEvent(e) ?? false;
+        }
+
+        /// <summary>
+        /// Maps Android Keycode to the cross-platform key name string.
+        /// </summary>
+        private string GetKeyName(AndroidNative.Views.Keycode keyCode)
+        {
+            return keyCode switch
+            {
+                AndroidNative.Views.Keycode.DpadUp => "DpadUp",
+                AndroidNative.Views.Keycode.DpadDown => "DpadDown",
+                AndroidNative.Views.Keycode.DpadLeft => "DpadLeft",
+                AndroidNative.Views.Keycode.DpadRight => "DpadRight",
+                AndroidNative.Views.Keycode.DpadCenter => "DpadCenter",
+                AndroidNative.Views.Keycode.Enter => "Enter",
+                AndroidNative.Views.Keycode.Back => "Back",
+                AndroidNative.Views.Keycode.Escape => "Escape",
+                AndroidNative.Views.Keycode.VolumeUp => "VolumeUp",
+                AndroidNative.Views.Keycode.VolumeDown => "VolumeDown",
+                _ => keyCode.ToString(), // Return the string representation for unmapped keys
+            };
         }
 
         #region Boilerplate: Delegate all other ICallback methods to the original
