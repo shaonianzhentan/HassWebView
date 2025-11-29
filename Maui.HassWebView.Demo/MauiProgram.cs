@@ -21,7 +21,7 @@ namespace Maui.HassWebView.Demo
                 // You can control whether a key is handled by the system 
                 // within the event handlers (e.g., OnSingleClick) in MainPage.xaml.cs
                 // by setting e.Handled = false.
-                .UseRemoteControl(downInterval: 50);
+                .UseRemoteControl();
 
 #if DEBUG
     		builder.Logging.AddDebug();

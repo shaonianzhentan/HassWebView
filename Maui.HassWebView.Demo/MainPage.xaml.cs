@@ -51,7 +51,7 @@ namespace Maui.HassWebView.Demo
             _keyService.DoubleClick -= OnDoubleClick;
             _keyService.LongClick -= OnLongClick;
             wv.Navigating -= Wv_Navigating;
-            wv.Navigated -= wv_Navigated;
+            wv.Navigated -= Wv_Navigated;
         }
 
         // Parameter type updated to RemoteKeyEventArgs
