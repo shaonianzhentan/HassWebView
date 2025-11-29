@@ -16,7 +16,7 @@ namespace Maui.HassWebView.Core
         }
 
         // 获取光标当前位置（相对于 AbsoluteLayout）
-        private double X
+        public double X
         {
             get => AbsoluteLayout.GetLayoutBounds(_cursor).X;
             set
@@ -27,7 +27,7 @@ namespace Maui.HassWebView.Core
             }
         }
 
-        private double Y
+        public double Y
         {
             get => AbsoluteLayout.GetLayoutBounds(_cursor).Y;
             set

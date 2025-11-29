@@ -83,10 +83,13 @@ namespace Maui.HassWebView.Demo
                 switch (keyName)
                 {
                     // You can handle multiple key names in one case for mapping
+                    case "A":
+                        wv.Source = "https://www.baidu.com";
+                        break;
                     case "Enter":
                     case "DpadCenter":
                         Debug.WriteLine("Action: OK/Enter was pressed.");
-                        // e.g., wv.EvaluateJavaScriptAsync("document.activeElement.click();");
+                        wv.SimulateTouch((int)cursorControl.X, (int)cursorControl.Y);
                         break;
 
                     case "Escape":

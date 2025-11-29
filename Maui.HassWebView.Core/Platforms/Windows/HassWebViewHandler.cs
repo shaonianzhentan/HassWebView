@@ -62,20 +62,35 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             if (handler.PlatformView is not WebView wv) return;
 
             var script = $@"
-                var el = document.elementFromPoint({request.X}, {request.Y});
-                if (el) {{
-                    const touchStartEvent = new Event('touchstart', {{ 'bubbles': true, 'cancelable': true }});
-                    el.dispatchEvent(touchStartEvent);
-                    
-                    const touchEndEvent = new Event('touchend', {{ 'bubbles': true, 'cancelable': true }});
-                    el.dispatchEvent(touchEndEvent);
+(function(){{
+    var vw = {wv.ActualWidth};
+    var vh = {wv.ActualHeight};
+    var cw = document.documentElement.clientWidth;
+    var ch = document.documentElement.clientHeight;
 
-                    const clickEvent = new MouseEvent('click', {{ 'bubbles': true, 'cancelable': true, 'view': window }});
-                    el.dispatchEvent(clickEvent);
-                }}";
+    var x = {request.X} * (cw / vw);
+    var y = {request.Y} * (ch / vh);
+
+    var el = document.elementFromPoint(x, y);
+    if (el) {{
+        el.scrollIntoView({{block:'center', inline:'center'}});
+        if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {{
+            el.focus();
+        }} else {{
+            const ts = new Event('touchstart', {{bubbles:true,cancelable:true}});
+            el.dispatchEvent(ts);
+            const te = new Event('touchend', {{bubbles:true,cancelable:true}});
+            el.dispatchEvent(te);
+            const click = new MouseEvent('click', {{bubbles:true,cancelable:true,view:window}});
+            el.dispatchEvent(click);
+        }}
+    }}
+}})();";
 
             await wv.ExecuteScriptAsync(script);
+
         }
+
     };
 
     public HassWebViewHandler() : base(Mapper, CommandMapper)
@@ -92,7 +107,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     protected override async void ConnectHandler(WebView platformView)
     {
         base.ConnectHandler(platformView);
-        //await platformView.EnsureCoreWebView2Async();
+        await platformView.EnsureCoreWebView2Async();
 
         var url = (VirtualView.Source as UrlWebViewSource)?.Url;
         if (!string.IsNullOrEmpty(url))
