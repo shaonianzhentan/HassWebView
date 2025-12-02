@@ -1,4 +1,4 @@
-namespace HassWebView.Core;
+namespace HassWebView.Core.Events;
 
 /// <summary>
 /// Provides data for the remote control key events.

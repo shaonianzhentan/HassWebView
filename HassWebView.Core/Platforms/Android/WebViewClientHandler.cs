@@ -1,6 +1,7 @@
 using Android.Graphics;
 using Com.Tencent.Smtt.Export.External.Interfaces;
 using Com.Tencent.Smtt.Sdk;
+using HassWebView.Core.Events;
 
 namespace HassWebView.Core.Platforms.Android;
 public class WebViewClientHandler : WebViewClient
@@ -25,6 +26,17 @@ public class WebViewClientHandler : WebViewClient
 
         view.LoadUrl(url);
         return true;
+    }
+
+    public override WebResourceResponse ShouldInterceptRequest(WebView view, IWebResourceRequest request)
+    {
+        var url = request.Url.ToString();
+        var resourceLoadingArgs = new ResourceLoadingEventArgs(url);
+        if (_webView.SendResourceLoading(resourceLoadingArgs))
+        {
+            return new WebResourceResponse(null, null, null);
+        }
+        return base.ShouldInterceptRequest(view, request);
     }
 
     public override void OnPageFinished(global::Com.Tencent.Smtt.Sdk.WebView view, string url)

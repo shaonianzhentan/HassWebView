@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading.Tasks;
+using HassWebView.Core.Events;
 
 namespace HassWebView.Core;
 
@@ -56,6 +58,7 @@ public class HassWebView : WebView
 
     public event EventHandler<WebNavigatingEventArgs> Navigating;
     public event EventHandler<WebNavigatedEventArgs> Navigated;
+    public event EventHandler<ResourceLoadingEventArgs> ResourceLoading;
 
     internal void SendNavigating(WebNavigatingEventArgs args)
     {
@@ -65,6 +68,12 @@ public class HassWebView : WebView
     internal void SendNavigated(WebNavigatedEventArgs args)
     {
         Navigated?.Invoke(this, args);
+    }
+
+    internal bool SendResourceLoading(ResourceLoadingEventArgs args)
+    {
+        ResourceLoading?.Invoke(this, args);
+        return args.Cancel;
     }
 
     public new Task<string> EvaluateJavaScriptAsync(string script)

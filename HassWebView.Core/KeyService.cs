@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.Maui.ApplicationModel;
+using HassWebView.Core.Events;
 
 namespace HassWebView.Core;
 

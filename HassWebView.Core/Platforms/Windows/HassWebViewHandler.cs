@@ -1,3 +1,4 @@
+using HassWebView.Core.Events;
 using Microsoft.Maui.Handlers;
 using Microsoft.Web.WebView2.Core;
 using System;
@@ -174,6 +175,16 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             core.Settings.AreDefaultContextMenusEnabled = true;
             core.NavigationStarting += Core_NavigationStarting;
             core.NavigationCompleted += Core_NavigationCompleted;
+            core.WebResourceRequested += Core_WebResourceRequested;
+        }
+    }
+
+    private void Core_WebResourceRequested(CoreWebView2 sender, CoreWebView2WebResourceRequestedEventArgs args)
+    {
+        var mauiArgs = new ResourceLoadingEventArgs(args.Request.Uri);
+        if (VirtualView.SendResourceLoading(mauiArgs))
+        {
+            args.Response = sender.Environment.CreateWebResourceResponse(null, 403, "Forbidden", "");
         }
     }
 
@@ -199,6 +210,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         {
             platformView.CoreWebView2.NavigationStarting -= Core_NavigationStarting;
             platformView.CoreWebView2.NavigationCompleted -= Core_NavigationCompleted;
+            platformView.CoreWebView2.WebResourceRequested -= Core_WebResourceRequested;
 
             if (VirtualView?.JsBridges != null)
             {

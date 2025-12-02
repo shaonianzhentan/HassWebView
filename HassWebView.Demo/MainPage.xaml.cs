@@ -3,6 +3,7 @@ using HassWebView.Core;
 using System.Diagnostics;
 using System;
 using System.Threading.Tasks;
+using HassWebView.Core.Events;
 
 namespace HassWebView.Demo
 {
