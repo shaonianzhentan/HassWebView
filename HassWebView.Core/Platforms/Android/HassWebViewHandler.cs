@@ -1,12 +1,13 @@
+using Android.Content;
 using Android.OS;
-using Com.Tencent.Smtt.Sdk;
-using Microsoft.Maui.Handlers;
-using System.Collections.Generic;
-using Java.Lang;
-using HassWebView.Core.Platforms.Android.TencentX5;
-using System.Threading.Tasks;
 using Android.Views;
+using Com.Tencent.Smtt.Sdk;
+using HassWebView.Core.Platforms.Android.TencentX5;
+using Java.Lang;
+using Microsoft.Maui.Handlers;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace HassWebView.Core.Platforms.Android;
 
@@ -29,9 +30,9 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         },
         [nameof(HassWebView.UserAgent)] = (handler, view) =>
         {
-            if (handler.PlatformView is WebView wv)
+            if (handler.PlatformView is WebView wv && !string.IsNullOrEmpty(view.UserAgent))
             {
-                webView.Settings.UserAgentString = view.UserAgent;
+                wv.Settings.UserAgentString = view.UserAgent;
             }
         }
     };
@@ -161,7 +162,6 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         webView.Settings.SetAllowUniversalAccessFromFileURLs(true);
         webView.Settings.BlockNetworkImage = false;
         webView.Settings.LoadsImagesAutomatically = true;
-        webView.getSettingsExtension().setContentCacheEnable(true); // 升网页前进后退的打开性能 
         webView.Settings.SavePassword = true;
         webView.Settings.SaveFormData = true;
         webView.Settings.MediaPlaybackRequiresUserGesture = false;
@@ -169,6 +169,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         webView.Settings.UseWideViewPort = true;
         webView.Settings.SetSupportZoom(true);
         webView.Settings.UserAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36";
+
         webView.Focusable = true;
         webView.FocusableInTouchMode = true;
         webView.Clickable = true;
@@ -183,12 +184,18 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             Bundle data = new Bundle();
             data.PutBoolean("standardFullScreen", false);
             data.PutBoolean("supportLiteWnd", false);
-            data.PutInt("DefaultVideoScreen", 2);
+            data.PutInt("DefaultVideoScreen", 1);
             x5object.InvokeMiscMethod("setVideoParams", data);
 
-            string[] tags = { "video" };
-            webView.X5WebViewExtension.RegisterEmbeddedWidget(tags, new WidgetClientFactory(context));
+            var sharedPrefs = webView.Context.GetSharedPreferences("tbs_public_settings", FileCreationMode.Private);
+            using var editor = sharedPrefs.Edit();
+            // 强制开启 EMBEDDED 云控开关
+            editor.PutInt("MTT_CORE_EMBEDDED_WIDGET_ENABLE", 1);
+            editor.Apply(); // 异步提交（或用 Commit() 同步提交）
 
+            string[] tags = { "video" };
+            webView.X5WebViewExtension.RegisterEmbeddedWidget(tags, new WidgetClientFactory(webView));
+            webView.SettingsExtension.SetContentCacheEnable(true);
         }
         else
         {

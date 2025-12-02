@@ -1,5 +1,6 @@
 using HassWebView.Core.Events;
 using Microsoft.Maui.Handlers;
+using Microsoft.Maui.Platform;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.Threading.Tasks;
@@ -25,9 +26,9 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         },
         [nameof(HassWebView.UserAgent)] = (handler, view) =>
         {
-            if (handler.PlatformView is WebView wv)
+            if (handler.PlatformView is WebView wv && !string.IsNullOrEmpty(view.UserAgent))
             {
-                webView.UserAgent = view.UserAgent;
+                wv.CoreWebView2.Settings.UserAgent = view.UserAgent;
             }
         }
     };

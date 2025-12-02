@@ -3,7 +3,10 @@ using Android.Media;
 using Android.Text;
 using Android.Util;
 using Android.Views;
+using Com.Tencent.Smtt.Export.External.Embeddedwidget.Interfaces;
 using Com.Tencent.Smtt.Sdk;
+using AndroidNative = Android;
+
 
 namespace HassWebView.Core.Platforms.Android.TencentX5;
 
@@ -11,25 +14,15 @@ public class VideoWidget : Java.Lang.Object, IEmbeddedWidgetClient
 {
     private const string TAG = "VideoWidget";
 
-    private readonly string _tagName;
-    private readonly IDictionary<string, string> _attributes;
     private readonly IEmbeddedWidget _widget;
 
     private MediaPlayer _player;
     private string _videoSrc;
 
-    public VideoWidget(string tagName,
-                       IDictionary<string, string> attributes,
-                       IEmbeddedWidget widget)
+    public VideoWidget(string tagName, string src, IEmbeddedWidget widget)
     {
-        _tagName = tagName;
-        _attributes = attributes;
+        _videoSrc = src;
         _widget = widget;
-
-        if (_attributes.ContainsKey("src"))
-        {
-            _videoSrc = _attributes["src"];
-        }
     }
 
     public void OnSurfaceCreated(Surface surface)
@@ -68,7 +61,7 @@ public class VideoWidget : Java.Lang.Object, IEmbeddedWidgetClient
         return true;
     }
 
-    public void OnRectChanged(Rect rect)
+    public void OnRectChanged(AndroidNative.Graphics.Rect rect)
     {
         Log.Info(TAG, "OnRectChanged: " + rect);
     }

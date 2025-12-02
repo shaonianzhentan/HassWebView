@@ -4,6 +4,10 @@ using Com.Tencent.Smtt.Sdk;
 using HassWebView.Core.Events;
 
 namespace HassWebView.Core.Platforms.Android;
+
+
+using WebView = Com.Tencent.Smtt.Sdk.WebView;
+
 public class WebViewClientHandler : WebViewClient
 {
     private readonly HassWebView _webView;
@@ -13,7 +17,7 @@ public class WebViewClientHandler : WebViewClient
         _webView = webView;
     }
 
-    public override bool ShouldOverrideUrlLoading(global::Com.Tencent.Smtt.Sdk.WebView view, IWebResourceRequest request)
+    public override bool ShouldOverrideUrlLoading(WebView view, IWebResourceRequest request)
     {
         var url = request.Url.ToString();
         var args = new WebNavigatingEventArgs(WebNavigationEvent.NewPage, new UrlWebViewSource{ Url = url }, url);
@@ -43,7 +47,5 @@ public class WebViewClientHandler : WebViewClient
     {
         base.OnPageFinished(view, url);
         _webView.SendNavigated(new WebNavigatedEventArgs(WebNavigationEvent.NewPage, new UrlWebViewSource { Url = url }, url, WebNavigationResult.Success));
-        _webView.CanGoBack = view.CanGoBack();
-        _webView.CanGoForward = view.CanGoForward();
     }
 }

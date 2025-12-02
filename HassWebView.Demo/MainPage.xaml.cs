@@ -26,10 +26,16 @@ namespace HassWebView.Demo
 
             wv.Navigating += Wv_Navigating;
             wv.Navigated += Wv_Navigated;
+            wv.ResourceLoading += Wv_ResourceLoading;
             Loaded += MainPage_Loaded;
             cursorControl = new CursorControl(cursor, root, wv);
 
             _httpServer = new HttpServer(8080);
+        }
+
+        private void Wv_ResourceLoading(object? sender, ResourceLoadingEventArgs e)
+        {
+            Debug.WriteLine($"ResourceLoading: {e.Url}");
         }
 
         private void Wv_Navigating(object sender, WebNavigatingEventArgs e)
@@ -102,6 +108,9 @@ namespace HassWebView.Demo
             });
 
             await _httpServer.StartAsync();
+
+            wv.Source = $"http://{HttpServer.GetLocalIPv4Address()}:8080/";
+            Debug.WriteLine(wv.Source);
         }
 
         protected override void OnAppearing()
@@ -111,7 +120,17 @@ namespace HassWebView.Demo
             _keyService.SingleClick += OnSingleClick;
             _keyService.DoubleClick += OnDoubleClick;
             _keyService.LongClick += OnLongClick;
+            _keyService.KeyDown += _keyService_KeyDown;
             _keyService.KeyUp += OnKeyUp;
+        }
+
+        private void _keyService_KeyDown(RemoteKeyEventArgs e)
+        {
+            if (e.KeyName == "VolumeUp" || e.KeyName == "VolumeDown")
+            {
+                e.Handled = false;
+                return;
+            }
         }
 
         protected override void OnDisappearing()
@@ -173,6 +192,14 @@ namespace HassWebView.Demo
                             cursorControl.VideoSeek(5);
                         else
                             cursorControl.MoveRightBy();
+                        break;
+                    case "A":
+                        wv.UserAgent = "Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/UQ1A.240105.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/120.0.6099.210 Mobile Safari/537.36";
+                        wv.Source = "https://www.baidu.com";
+                        break;
+                    case "B":
+                        wv.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36";
+                        wv.Source = "https://www.baidu.com";
                         break;
                 }
             });

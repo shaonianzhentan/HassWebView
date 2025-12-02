@@ -13,8 +13,7 @@ namespace HassWebView.Core
             if (view != null)
             {
                 inputMethodManager.ShowSoftInput(view, ShowFlags.Implicit);
-                var inputConnection = inputMethodManager.GetInputConnectionForView(view) ??
-                                      view.OnCreateInputConnection(new EditorInfo());
+                var inputConnection = view.OnCreateInputConnection(new EditorInfo());
                 inputConnection?.CommitText(text, 1);
             }
         }

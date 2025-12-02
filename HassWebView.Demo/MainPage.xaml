@@ -7,7 +7,7 @@
 
         <hass:HassWebView 
                 x:Name="wv"
-                Source="http://debugx5.qq.com"
+                Source="https://youtube.com"
             
             AbsoluteLayout.LayoutFlags="All"
             AbsoluteLayout.LayoutBounds="0,0,1,1"/>

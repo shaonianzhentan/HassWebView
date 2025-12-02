@@ -94,7 +94,7 @@ namespace HassWebView.Core
         public HttpServer(int port)
         {
             if (!HttpListener.IsSupported) throw new NotSupportedException("HttpListener is not supported.");
-            _listener.Prefixes.Add($"http://+:{port}/");
+            _listener.Prefixes.Add($"http://{GetLocalIPv4Address()}:{port}/");
         }
 
         public void AddRoute(string method, string path, Func<Request, Response, Task> handler)
