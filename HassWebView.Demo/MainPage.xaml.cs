@@ -1,23 +1,33 @@
+
 using HassWebView.Core;
 using System.Diagnostics;
 using System;
+using System.Threading.Tasks;
 
 namespace HassWebView.Demo
 {
+    public class EchoData
+    {
+        public string Message { get; set; }
+    }
+
     public partial class MainPage : ContentPage
     {
         private readonly KeyService _keyService;
-        CursorControl cursorControl;
+        private readonly HttpServer _httpServer;
+        private CursorControl cursorControl;
 
         public MainPage(KeyService keyService)
         {
             InitializeComponent();
-            _keyService = keyService; // Store the injected service
+            _keyService = keyService;
 
             wv.Navigating += Wv_Navigating;
             wv.Navigated += Wv_Navigated;
             Loaded += MainPage_Loaded;
             cursorControl = new CursorControl(cursor, root, wv);
+
+            _httpServer = new HttpServer(8080);
         }
 
         private void Wv_Navigating(object sender, WebNavigatingEventArgs e)
@@ -48,7 +58,33 @@ namespace HassWebView.Demo
 
         private void MainPage_Loaded(object? sender, EventArgs e)
         {
+            Task.Run(() => StartHttpServer());
+        }
 
+        private async Task StartHttpServer()
+        {
+            _httpServer.Get("/api/info", async (HttpServer.Request req, HttpServer.Response res) =>
+            {
+                var name = req.Query["name"] ?? "World";
+                var data = new { Message = $"Hello, {name}!", LocalIP = HttpServer.GetLocalIPv4Address(), CurrentTime = DateTime.Now };
+                await res.Json(data);
+            });
+
+            _httpServer.Post("/api/echo", async (HttpServer.Request req, HttpServer.Response res) =>
+            {
+                var receivedData = await req.JsonAsync<EchoData>();
+                var responseData = new { ReceivedMessage = receivedData.Message, Timestamp = DateTime.Now };
+                await res.Json(responseData);
+            });
+
+            _httpServer.Put("/api/data", async (HttpServer.Request req, HttpServer.Response res) =>
+            {
+                var rawBody = await req.BodyAsync();
+                Debug.WriteLine($"Raw data received via PUT: {rawBody}");
+                await res.Json(new { Status = "Success", Message = "Data received" });
+            });
+
+            await _httpServer.StartAsync();
         }
 
         protected override void OnAppearing()
@@ -58,7 +94,7 @@ namespace HassWebView.Demo
             _keyService.SingleClick += OnSingleClick;
             _keyService.DoubleClick += OnDoubleClick;
             _keyService.LongClick += OnLongClick;
-            _keyService.KeyUp += OnKeyUp; // <-- SUBSCRIBED to KeyUp event
+            _keyService.KeyUp += OnKeyUp;
         }
 
         protected override void OnDisappearing()
@@ -68,43 +104,34 @@ namespace HassWebView.Demo
             _keyService.SingleClick -= OnSingleClick;
             _keyService.DoubleClick -= OnDoubleClick;
             _keyService.LongClick -= OnLongClick;
-            _keyService.KeyUp -= OnKeyUp; // <-- UNSUBSCRIBED from KeyUp event
+            _keyService.KeyUp -= OnKeyUp;
             wv.Navigating -= Wv_Navigating;
             wv.Navigated -= Wv_Navigated;
+            _httpServer.Stop();
         }
 
         private void OnSingleClick(RemoteKeyEventArgs e)
         {
-
-            MainThread.BeginInvokeOnMainThread(async () =>
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-
                 switch (e.KeyName)
                 {
-                    // OK / Enter Key
                     case "Enter":
                     case "DpadCenter":
                         if (wv.IsVideoFullscreen)
-                        {
                             cursorControl.VideoPlayPause();
-                        }
                         else
-                        {
-                                cursorControl.Click();
-                        }
+                            cursorControl.Click();
                         break;
 
-                    // Back / Escape Key
                     case "Escape":
                     case "Back":
-                        
-                            if (wv.IsVideoFullscreen)
-                                wv.ExitFullscreen();
-                            else if (wv.CanGoBack)
-                                wv.GoBack();
+                        if (wv.IsVideoFullscreen)
+                            wv.ExitFullscreen();
+                        else if (wv.CanGoBack)
+                            wv.GoBack();
                         break;
 
-                    // Directional Keys (Up, Down, Left, Right)
                     case "Up":
                     case "DpadUp":
                         cursorControl.MoveUpBy();
@@ -117,41 +144,34 @@ namespace HassWebView.Demo
 
                     case "Left":
                     case "DpadLeft":
-                        
-                            if (wv.IsVideoFullscreen)
-                                cursorControl.VideoSeek(-5);
-                            else
-                                cursorControl.MoveLeftBy();
+                        if (wv.IsVideoFullscreen)
+                            cursorControl.VideoSeek(-5);
+                        else
+                            cursorControl.MoveLeftBy();
                         break;
 
                     case "Right":
                     case "DpadRight":
-                        
-                            if (wv.IsVideoFullscreen)
-                                cursorControl.VideoSeek(5);
-                            else
-                                cursorControl.MoveRightBy();
+                        if (wv.IsVideoFullscreen)
+                            cursorControl.VideoSeek(5);
+                        else
+                            cursorControl.MoveRightBy();
                         break;
-
                 }
             });
         }
 
         private void OnDoubleClick(RemoteKeyEventArgs e)
         {
-
             MainThread.BeginInvokeOnMainThread(async () =>
             {
                 switch (e.KeyName)
                 {
-                    // OK / Enter Key
                     case "Enter":
                     case "DpadCenter":
-
                         await cursorControl.DoubleClick();
                         break;
 
-                    // Directional Keys (Up, Down, Left, Right)
                     case "Up":
                     case "DpadUp":
                         cursorControl.SlideUp();
@@ -164,7 +184,8 @@ namespace HassWebView.Demo
 
                     case "Left":
                     case "DpadLeft":
-                        cursorControl.SlideLeft();                        break;
+                        cursorControl.SlideLeft();
+                        break;
 
                     case "Right":
                     case "DpadRight":
@@ -174,7 +195,6 @@ namespace HassWebView.Demo
             });
         }
 
-        // --- MODIFIED: OnLongClick now starts a repeating action ---
         private void OnLongClick(RemoteKeyEventArgs e)
         {
             if (e.KeyName == "VolumeUp" || e.KeyName == "VolumeDown")
@@ -184,9 +204,7 @@ namespace HassWebView.Demo
             }
 
             Debug.WriteLine($"--- OnLongClick: {e.KeyName} ---");
-
-            // The interval for repeating the action, in milliseconds.
-            int repeatInterval = 100; 
+            int repeatInterval = 100;
 
             switch (e.KeyName)
             {
@@ -200,19 +218,17 @@ namespace HassWebView.Demo
                     break;
                 case "Left":
                 case "DpadLeft":
-                    if (wv.IsVideoFullscreen) {
+                    if (wv.IsVideoFullscreen)
                         cursorControl.VideoSeek(-15);
-                    } else {
+                    else
                         _keyService.StartRepeatingAction(() => cursorControl.MoveLeftBy(), repeatInterval);
-                    }
                     break;
                 case "Right":
                 case "DpadRight":
-                     if (wv.IsVideoFullscreen) {
+                    if (wv.IsVideoFullscreen)
                         cursorControl.VideoSeek(15);
-                    } else {
+                    else
                         _keyService.StartRepeatingAction(() => cursorControl.MoveRightBy(), repeatInterval);
-                    }
                     break;
             }
         }
@@ -220,7 +236,6 @@ namespace HassWebView.Demo
         private void OnKeyUp(RemoteKeyEventArgs e)
         {
             Debug.WriteLine($"--- OnKeyUp: {e.KeyName} ---");
-            // The KeyService automatically stops the repeating action on KeyUp.
         }
     }
 }
