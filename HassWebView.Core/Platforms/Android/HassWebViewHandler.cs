@@ -161,7 +161,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         webView.Settings.SetAllowUniversalAccessFromFileURLs(true);
         webView.Settings.BlockNetworkImage = false;
         webView.Settings.LoadsImagesAutomatically = true;
-
+        webView.getSettingsExtension().setContentCacheEnable(true); // 升网页前进后退的打开性能 
         webView.Settings.SavePassword = true;
         webView.Settings.SaveFormData = true;
         webView.Settings.MediaPlaybackRequiresUserGesture = false;
@@ -178,13 +178,17 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
 
         var x5object = webView.X5WebViewExtension;
         if (x5object != null)
-        {
+        { 
             Console.WriteLine("X5WebViewExtension对象不为null，此为x5webview");
             Bundle data = new Bundle();
             data.PutBoolean("standardFullScreen", false);
             data.PutBoolean("supportLiteWnd", false);
             data.PutInt("DefaultVideoScreen", 2);
             x5object.InvokeMiscMethod("setVideoParams", data);
+
+            string[] tags = { "video" };
+            webView.X5WebViewExtension.RegisterEmbeddedWidget(tags, new WidgetClientFactory(context));
+
         }
         else
         {
