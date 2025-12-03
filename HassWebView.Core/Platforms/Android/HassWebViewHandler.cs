@@ -80,8 +80,8 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             platformView.GetLocationOnScreen(location);
 
             var density = platformView.Resources.DisplayMetrics.Density;
-            float x = (float)request.X * density;
-            float y = (float)request.Y * density;
+            float x = request.X * density;
+            float y = request.Y * density;
 
             Console.WriteLine($"Cursor = {request.X}, {request.Y}");
             Console.WriteLine($"Device density = {density}");
@@ -107,10 +107,10 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             if (handler.PlatformView is not WebView platformView) return;
 
             var density = platformView.Resources.DisplayMetrics.Density;
-            float x1 = (float)request.X1 * density;
-            float y1 = (float)request.Y1 * density;
-            float x2 = (float)request.X2 * density;
-            float y2 = (float)request.Y2 * density;
+            float x1 = request.X1 * density;
+            float y1 = request.Y1 * density;
+            float x2 = request.X2 * density;
+            float y2 = request.Y2 * density;
             int duration = request.Duration;
 
             var downTime = SystemClock.UptimeMillis();
@@ -168,8 +168,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         webView.Settings.LoadWithOverviewMode = true;
         webView.Settings.UseWideViewPort = true;
         webView.Settings.SetSupportZoom(true);
-        webView.Settings.UserAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36";
-
+        
         webView.Focusable = true;
         webView.FocusableInTouchMode = true;
         webView.Clickable = true;
@@ -179,7 +178,9 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
 
         var x5object = webView.X5WebViewExtension;
         if (x5object != null)
-        { 
+        {
+            webView.SettingsExtension.SetContentCacheEnable(true);
+
             Console.WriteLine("X5WebViewExtension对象不为null，此为x5webview");
             Bundle data = new Bundle();
             data.PutBoolean("standardFullScreen", false);
@@ -193,9 +194,8 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             editor.PutInt("MTT_CORE_EMBEDDED_WIDGET_ENABLE", 1);
             editor.Apply(); // 异步提交（或用 Commit() 同步提交）
 
-            string[] tags = { "video" };
-            webView.X5WebViewExtension.RegisterEmbeddedWidget(tags, new WidgetClientFactory(webView));
-            webView.SettingsExtension.SetContentCacheEnable(true);
+            //string[] tags = { "video" };
+            //webView.X5WebViewExtension.RegisterEmbeddedWidget(tags, new WidgetClientFactory(webView));
         }
         else
         {

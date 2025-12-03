@@ -8,9 +8,9 @@
         <hass:HassWebView 
                 x:Name="wv"
                 Source="https://youtube.com"
-            
-            AbsoluteLayout.LayoutFlags="All"
-            AbsoluteLayout.LayoutBounds="0,0,1,1"/>
+                UserAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
+                AbsoluteLayout.LayoutFlags="All"
+                AbsoluteLayout.LayoutBounds="0,0,1,1"/>
 
         <!-- 光标元素（可见鼠标） -->
         <Frame x:Name="cursor"
