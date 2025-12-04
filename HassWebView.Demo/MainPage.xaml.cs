@@ -44,16 +44,84 @@ namespace HassWebView.Demo
                  urlString.Contains(".m3u8", StringComparison.OrdinalIgnoreCase)))
             {
                 Debug.WriteLine($"Video resource detected: {urlString}. Preparing to inject script and allowing request to continue.");
-                
+
                 // The request is NOT cancelled, as requested.
 
                 // I am ready to add the JavaScript execution here. Please provide the script.
                 // For example:
-                // MainThread.BeginInvokeOnMainThread(() =>
-                // {
-                //     var script = $"console.log('Video detected: {urlString}');";
-                //     wv.EvaluateJavaScriptAsync(script);
-                // });
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    var script = $"console.log('Video detected: {urlString}');";
+                    wv.EvaluateJavaScriptAsync(@"(function(){
+function createLeftFloatDivByUrl(url, displayText) {
+    // 1. URL转义生成合法DOM ID（避免特殊字符报错）
+    const safeId = 'float-' + encodeURIComponent(url).replace(/[^a-zA-Z0-9_-]/g, '_');
+    
+    // 2. 判重：已存在则直接返回
+    if (document.getElementById(safeId)) {
+        console.log(`URL【${url}】的悬浮项已存在，无需重复添加`);
+        return;
+    }
+
+    // 3. 创建/获取左侧100%高度容器（单例），宽度设为30%
+    let container = document.getElementById('left-float-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'left-float-container';
+        Object.assign(container.style, {
+            position: 'fixed',
+            left: '0',
+            top: '0',
+            height: '100%',
+            width: '30%', // 宽度调整为30%（适配不同屏幕）
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            padding: '10px 0',
+            boxSizing: 'border-box',
+            zIndex: 9999
+        });
+        document.body.appendChild(container);
+    }
+
+    // 4. 创建单个悬浮项（黑色半透明背景 + 白色文字 + 5px内边距 + 强制换行）
+    const floatItem = document.createElement('div');
+    floatItem.id = safeId;
+    floatItem.dataset.url = url; // 存储原始URL
+    floatItem.textContent = displayText || url; // 优先显示自定义文本
+
+    // 最终样式配置
+    Object.assign(floatItem.style, {
+        width: '100%', // 继承容器30%宽度，自身占满容器
+        padding: '5px', // 上下左右均为5px
+        backgroundColor: 'rgba(0, 0, 0, 0.7)', // 黑色半透明背景
+        color: '#ffffff', // 白色字体
+        border: '1px solid #ccc',
+        boxSizing: 'border-box',
+        // 强制换行核心样式
+        wordBreak: 'break-all',
+        wordWrap: 'break-word'
+    });
+
+    // 5. 点击事件：调用视频播放器桥接方法
+    floatItem.addEventListener('click', () => {
+        if (window.HassJsBridge && typeof window.HassJsBridge.OpenVideoPlayer === 'function') {
+            window.HassJsBridge.OpenVideoPlayer(url);
+            console.log(`调用视频播放器：${url}`);
+        } else {
+            console.error('HassJsBridge 未定义或 OpenVideoPlayer 方法不存在');
+        }
+    });
+
+    // 6. 添加到容器
+    container.appendChild(floatItem);
+    console.log(`URL【${url}】的悬浮项已添加`);
+    return floatItem;
+}
+                        
+                        createLeftFloatDivByUrl('" + urlString + @"');
+                        })();");
+                });
             }
         }
 
@@ -219,6 +287,14 @@ namespace HassWebView.Demo
                     case "B":
                         wv.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36";
                         wv.Source = "https://www.baidu.com";
+                        break;
+                    case "M":
+                        wv.EvaluateJavaScriptAsync(@"(()=>{
+var div = document.getElementById('left-float-container')
+if(div){
+    div.style.display = div.style.display == 'block' ? 'none' : 'block'; 
+}
+})();");
                         break;
                 }
             });

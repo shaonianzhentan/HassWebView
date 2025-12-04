@@ -1,4 +1,4 @@
-using HassWebView.Core.Events;
+﻿using HassWebView.Core.Events;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;
 using Microsoft.Web.WebView2.Core;
@@ -28,7 +28,19 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         {
             if (handler.PlatformView is WebView wv && !string.IsNullOrEmpty(view.UserAgent))
             {
-                wv.CoreWebView2.Settings.UserAgent = view.UserAgent;
+                if (wv.CoreWebView2 != null)
+                {
+                    wv.CoreWebView2.Settings.UserAgent = view.UserAgent;
+                }
+                else
+                {
+                    // 延迟到初始化再设置
+                    wv.CoreWebView2Initialized += (s, e) =>
+                    {
+                        if (wv.CoreWebView2 != null)
+                            wv.CoreWebView2.Settings.UserAgent = view.UserAgent;
+                    };
+                }
             }
         }
     };
@@ -145,6 +157,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     protected override WebView CreatePlatformView()
     {
         var wv = new WebView();
+        wv.CoreWebView2Initialized += CoreWebView2Initialized;
         return wv;
     }
 
@@ -157,7 +170,6 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         if (!string.IsNullOrEmpty(url))
             platformView.Source = new Uri(url);
 
-        platformView.CoreWebView2Initialized += CoreWebView2Initialized;
     }
 
     private void CoreWebView2Initialized(WebView sender, Microsoft.UI.Xaml.Controls.CoreWebView2InitializedEventArgs args)
@@ -176,6 +188,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             core.Settings.AreDefaultContextMenusEnabled = true;
             core.NavigationStarting += Core_NavigationStarting;
             core.NavigationCompleted += Core_NavigationCompleted;
+
             core.WebResourceRequested += Core_WebResourceRequested;
         }
     }

@@ -9,12 +9,16 @@ using Microsoft.Maui.ApplicationModel;
 
 #if WINDOWS
 using System;
+using System.Runtime.InteropServices;
 #endif
 
 namespace HassWebView.Core
 {
 #if ANDROID
     public class HassJsBridge : Java.Lang.Object
+#elif WINDOWS
+    [ComVisible(true)]
+    public class HassJsBridge
 #else
     public class HassJsBridge
 #endif
