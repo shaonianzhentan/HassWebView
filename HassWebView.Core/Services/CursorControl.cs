@@ -1,7 +1,7 @@
 using Microsoft.Maui.Controls;
 using System.Threading.Tasks;
 
-namespace HassWebView.Core
+namespace HassWebView.Core.Services
 {
     public class CursorControl
     {

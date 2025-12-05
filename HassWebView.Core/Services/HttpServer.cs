@@ -10,7 +10,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Collections.Specialized;
 
-namespace HassWebView.Core
+namespace HassWebView.Core.Services
 {
     public class HttpServer : IDisposable
     {

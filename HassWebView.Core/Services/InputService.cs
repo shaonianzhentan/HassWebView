@@ -1,4 +1,4 @@
-namespace HassWebView.Core
+namespace HassWebView.Core.Services
 {
     public static class InputService
     {

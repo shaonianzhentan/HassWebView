@@ -2,7 +2,7 @@ using System.Diagnostics;
 using Microsoft.Maui.ApplicationModel;
 using HassWebView.Core.Events;
 
-namespace HassWebView.Core;
+namespace HassWebView.Core.Services;
 
 public class KeyService
 {

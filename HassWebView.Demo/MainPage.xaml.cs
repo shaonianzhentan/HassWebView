@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using HassWebView.Core.Events;
+using HassWebView.Core.Services;
 
 namespace HassWebView.Demo
 {
@@ -54,16 +55,16 @@ namespace HassWebView.Demo
                     var script = $"console.log('Video detected: {urlString}');";
                     wv.EvaluateJavaScriptAsync(@"(function(){
 function createLeftFloatDivByUrl(url, displayText) {
-    // 1. URL×ªÒåÉú³ÉºÏ·¨DOM ID£¨±ÜÃâÌØÊâ×Ö·û±¨´í£©
+    // 1. URL×ªÉºÏ·DOM IDÖ·
     const safeId = 'float-' + encodeURIComponent(url).replace(/[^a-zA-Z0-9_-]/g, '_');
     
-    // 2. ÅÐÖØ£ºÒÑ´æÔÚÔòÖ±½Ó·µ»Ø
+    // 2. Ø£Ñ´Ö±Ó·
     if (document.getElementById(safeId)) {
-        console.log(`URL¡¾${url}¡¿µÄÐü¸¡ÏîÒÑ´æÔÚ£¬ÎÞÐèÖØ¸´Ìí¼Ó`);
+        console.log(`URL${url}Ñ´Ú£Ø¸`);
         return;
     }
 
-    // 3. ´´½¨/»ñÈ¡×ó²à100%¸ß¶ÈÈÝÆ÷£¨µ¥Àý£©£¬¿í¶ÈÉèÎª30%
+    // 3. /È¡100%ß¶Îª30%
     let container = document.getElementById('left-float-container');
     if (!container) {
         container = document.createElement('div');
@@ -73,7 +74,7 @@ function createLeftFloatDivByUrl(url, displayText) {
             left: '0',
             top: '0',
             height: '100%',
-            width: '30%', // ¿í¶Èµ÷ÕûÎª30%£¨ÊÊÅä²»Í¬ÆÁÄ»£©
+            width: '30%', // ÈµÎª30%ä²»Í¬Ä»
             display: 'flex',
             flexDirection: 'column',
             gap: '8px',
@@ -84,38 +85,38 @@ function createLeftFloatDivByUrl(url, displayText) {
         document.body.appendChild(container);
     }
 
-    // 4. ´´½¨µ¥¸öÐü¸¡Ïî£¨ºÚÉ«°ëÍ¸Ã÷±³¾° + °×É«ÎÄ×Ö + 5pxÄÚ±ß¾à + Ç¿ÖÆ»»ÐÐ£©
+    // 4. î£¨É«Í¸ + É« + 5pxÚ±ß¾ + Ç¿Æ»Ð£
     const floatItem = document.createElement('div');
     floatItem.id = safeId;
-    floatItem.dataset.url = url; // ´æ´¢Ô­Ê¼URL
-    floatItem.textContent = displayText || url; // ÓÅÏÈÏÔÊ¾×Ô¶¨ÒåÎÄ±¾
+    floatItem.dataset.url = url; // æ´¢Ô­Ê¼URL
+    floatItem.textContent = displayText || url; // Ê¾Ô¶Ä±
 
-    // ×îÖÕÑùÊ½ÅäÖÃ
+    // Ê½
     Object.assign(floatItem.style, {
-        width: '100%', // ¼Ì³ÐÈÝÆ÷30%¿í¶È£¬×ÔÉíÕ¼ÂúÈÝÆ÷
-        padding: '5px', // ÉÏÏÂ×óÓÒ¾ùÎª5px
-        backgroundColor: 'rgba(0, 0, 0, 0.7)', // ºÚÉ«°ëÍ¸Ã÷±³¾°
-        color: '#ffffff', // °×É«×ÖÌå
+        width: '100%', // Ì³30%È£Õ¼
+        padding: '5px', // Ò¾Îª5px
+        backgroundColor: 'rgba(0, 0, 0, 0.7)', // É«Í¸
+        color: '#ffffff', // É«
         border: '1px solid #ccc',
         boxSizing: 'border-box',
-        // Ç¿ÖÆ»»ÐÐºËÐÄÑùÊ½
+        // Ç¿Æ»ÐºÊ½
         wordBreak: 'break-all',
         wordWrap: 'break-word'
     });
 
-    // 5. µã»÷ÊÂ¼þ£ºµ÷ÓÃÊÓÆµ²¥·ÅÆ÷ÇÅ½Ó·½·¨
+    // 5. Â¼ÆµÅ½Ó·
     floatItem.addEventListener('click', () => {
         if (window.HassJsBridge && typeof window.HassJsBridge.OpenVideoPlayer === 'function') {
             window.HassJsBridge.OpenVideoPlayer(url);
-            console.log(`µ÷ÓÃÊÓÆµ²¥·ÅÆ÷£º${url}`);
+            console.log(`Æµ${url}`);
         } else {
-            console.error('HassJsBridge Î´¶¨Òå»ò OpenVideoPlayer ·½·¨²»´æÔÚ');
+            console.error('HassJsBridge Î´ OpenVideoPlayer ');
         }
     });
 
-    // 6. Ìí¼Óµ½ÈÝÆ÷
+    // 6. Óµ
     container.appendChild(floatItem);
-    console.log(`URL¡¾${url}¡¿µÄÐü¸¡ÏîÒÑÌí¼Ó`);
+    console.log(`URL${url}`);
     return floatItem;
 }
                         
