@@ -11,7 +11,7 @@ namespace HassWebView.Core.Services
             {
                 inputMethodManager.ShowSoftInput(view, Android.Views.InputMethods.ShowFlags.Implicit);
                 var inputConnection = view.OnCreateInputConnection(new Android.Views.InputMethods.EditorInfo());
-                inputConnection?.CommitText(text, 1);
+                inputConnection?.CommitText(new Java.Lang.String(text), 1);
             }
 #endif
         }

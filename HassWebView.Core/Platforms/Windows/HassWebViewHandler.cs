@@ -1,9 +1,12 @@
 using HassWebView.Core.Events;
+using HassWebView.Core.Models;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;
 using Microsoft.Web.WebView2.Core;
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace HassWebView.Core.Platforms.Windows;
@@ -16,32 +19,26 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     {
         [nameof(HassWebView.Source)] = (handler, view) =>
         {
+            if (handler.PlatformView is not WebView wv) return;
+
             var url = (view.Source as UrlWebViewSource)?.Url;
-            if (!string.IsNullOrEmpty(url))
+
+            // 在 CoreWebView2 初始化后才可以设置 Source
+            if (!string.IsNullOrEmpty(url) && wv.CoreWebView2 != null)
             {
-                if (handler.PlatformView is WebView wv)
-                {
-                    wv.Source = new Uri(url);
-                }
+                wv.Source = new Uri(url);
             }
         },
+
         [nameof(HassWebView.UserAgent)] = (handler, view) =>
         {
-            if (handler.PlatformView is WebView wv && !string.IsNullOrEmpty(view.UserAgent))
+            if (handler.PlatformView is not WebView wv) return;
+            if (string.IsNullOrEmpty(view.UserAgent)) return;
+
+            // CoreWebView2 尚未初始化，先缓存，等 ConnectHandler 设置
+            if (wv.CoreWebView2 != null)
             {
-                if (wv.CoreWebView2 != null)
-                {
-                    wv.CoreWebView2.Settings.UserAgent = view.UserAgent;
-                }
-                else
-                {
-                    // 延迟到初始化再设置
-                    wv.CoreWebView2Initialized += (s, e) =>
-                    {
-                        if (wv.CoreWebView2 != null)
-                            wv.CoreWebView2.Settings.UserAgent = view.UserAgent;
-                    };
-                }
+                wv.CoreWebView2.Settings.UserAgent = view.UserAgent;
             }
         }
     };
@@ -51,33 +48,32 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         [nameof(HassWebView.GoBack)] = (handler, view, args) =>
         {
             if (handler.PlatformView is WebView wv && wv.CanGoBack)
-            {
                 wv.GoBack();
-            }
         },
+
         [nameof(HassWebView.GoForward)] = (handler, view, args) =>
         {
             if (handler.PlatformView is WebView wv && wv.CanGoForward)
-            {
                 wv.GoForward();
-            }
         },
+
         [nameof(HassWebView.EvaluateJavaScriptAsync)] = async (handler, _, args) =>
         {
             if (args is not HassWebView.EvaluateJavaScriptAsyncRequest request) return;
+            if (handler.PlatformView is not WebView wv) return;
+
             try
             {
-                if (handler.PlatformView is WebView wv)
-                {
-                    var result = await wv.ExecuteScriptAsync(request.Script);
-                    request.TaskCompletionSource.SetResult(result);
-                }
+                var result = await wv.ExecuteScriptAsync(request.Script);
+                request.TaskCompletionSource.SetResult(result);
             }
             catch (Exception ex)
             {
                 request.TaskCompletionSource.SetException(ex);
             }
         },
+
+        // 保留你的触摸模拟逻辑
         [nameof(HassWebView.SimulateTouch)] = async (handler, _, args) =>
         {
             if (args is not HassWebView.SimulateTouchRequest request) return;
@@ -85,10 +81,8 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
 
             var script = $@"
 (function(){{
-    var vw = {wv.ActualWidth};
-    var vh = {wv.ActualHeight};
-    var cw = document.documentElement.clientWidth;
-    var ch = document.documentElement.clientHeight;
+    var vw = {wv.ActualWidth}; var vh = {wv.ActualHeight};
+    var cw = document.documentElement.clientWidth; var ch = document.documentElement.clientHeight;
 
     var x = {request.X} * (cw / vw);
     var y = {request.Y} * (ch / vh);
@@ -96,102 +90,77 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     var el = document.elementFromPoint(x, y);
     if (el) {{
         el.scrollIntoView({{block:'center', inline:'center'}});
-        if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {{
-            el.focus();
-        }} else {{
-            const ts = new Event('touchstart', {{bubbles:true,cancelable:true}});
-            el.dispatchEvent(ts);
-            const te = new Event('touchend', {{bubbles:true,cancelable:true}});
-            el.dispatchEvent(te);
-            const click = new MouseEvent('click', {{bubbles:true,cancelable:true,view:window}});
-            el.dispatchEvent(click);
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.focus();
+        else {{
+            el.dispatchEvent(new Event('touchstart', {{bubbles:true,cancelable:true}}));
+            el.dispatchEvent(new Event('touchend', {{bubbles:true,cancelable:true}}));
+            el.dispatchEvent(new MouseEvent('click', {{bubbles:true,cancelable:true,view:window}}));
         }}
     }}
 }})();";
 
             await wv.ExecuteScriptAsync(script);
-
-        },
-        [nameof(HassWebView.SimulateTouchSlide)] = async (handler, _, args) =>
-        {
-            if (args is not HassWebView.SimulateTouchSlideRequest request) return;
-            if (handler.PlatformView is not WebView wv) return;
-
-            var script = $@"
-(function(){{
-    var vw = {wv.ActualWidth};
-    var vh = {wv.ActualHeight};
-    var cw = document.documentElement.clientWidth;
-    var ch = document.documentElement.clientHeight;
-
-    var x1 = {request.X1} * (cw / vw);
-    var y1 = {request.Y1} * (ch / vh);
-    var x2 = {request.X2} * (cw / vw);
-    var y2 = {request.Y2} * (ch / vh);
-
-    var el = document.elementFromPoint(x1, y1);
-    if (el) {{
-        const down = new Touch({{ identifier: Date.now(), target: el, clientX: x1, clientY: y1, pageX: x1, pageY: y1, screenX: x1, screenY: y1 }});
-        const touchstart = new TouchEvent('touchstart', {{ bubbles: true, cancelable: true, composed: true, detail: 1, view: window, touches: [down], targetTouches: [down], changedTouches: [down] }});
-        el.dispatchEvent(touchstart);
-
-        const move = new Touch({{ identifier: Date.now(), target: el, clientX: x2, clientY: y2, pageX: x2, pageY: y2, screenX: x2, screenY: y2 }});
-        const touchmove = new TouchEvent('touchmove', {{ bubbles: true, cancelable: true, composed: true, detail: 1, view: window, touches: [move], targetTouches: [move], changedTouches: [move] }});
-        el.dispatchEvent(touchmove);
-
-        const up = new Touch({{ identifier: Date.now(), target: el, clientX: x2, clientY: y2, pageX: x2, pageY: y2, screenX: x2, screenY: y2 }});
-        const touchend = new TouchEvent('touchend', {{ bubbles: true, cancelable: true, composed: true, detail: 1, view: window, touches: [], targetTouches: [], changedTouches: [up] }});
-        el.dispatchEvent(touchend);
-    }}
-}})();";
-
-            await wv.ExecuteScriptAsync(script);
         }
-
     };
 
-    public HassWebViewHandler() : base(Mapper, CommandMapper)
-    {
-
-    }
+    public HassWebViewHandler() : base(Mapper, CommandMapper) { }
 
     protected override WebView CreatePlatformView()
     {
         var wv = new WebView();
-        wv.CoreWebView2Initialized += CoreWebView2Initialized;
         return wv;
     }
+
 
     protected override async void ConnectHandler(WebView platformView)
     {
         base.ConnectHandler(platformView);
+        platformView.WebMessageReceived += PlatformView_WebMessageReceived;
+        platformView.CoreWebView2Initialized += PlatformView_CoreWebView2Initialized;
         await platformView.EnsureCoreWebView2Async();
-
-        var url = (VirtualView.Source as UrlWebViewSource)?.Url;
-        if (!string.IsNullOrEmpty(url))
-            platformView.Source = new Uri(url);
 
     }
 
-    private void CoreWebView2Initialized(WebView sender, Microsoft.UI.Xaml.Controls.CoreWebView2InitializedEventArgs args)
+    private void PlatformView_WebMessageReceived(WebView sender, CoreWebView2WebMessageReceivedEventArgs args)
+    {
+        // 处理来自 JavaScript 的消息
+        var jsMethod = JsonSerializer.Deserialize<JsMethod>(args.WebMessageAsJson);
+        if (jsMethod != null)
+        {
+            // 触发事件
+        }
+    }
+
+    private async void PlatformView_CoreWebView2Initialized(WebView sender, Microsoft.UI.Xaml.Controls.CoreWebView2InitializedEventArgs args)
     {
         var core = sender.CoreWebView2;
-        if (core != null)
+        if (!string.IsNullOrEmpty(VirtualView.UserAgent))
         {
-            core.SetVirtualHostNameToFolderMapping("appassets.web", "assets", CoreWebView2HostResourceAccessKind.DenyCors);
-            if (VirtualView?.JsBridges != null)
-            {
-                foreach (var bridge in VirtualView.JsBridges)
-                {
-                    core.AddHostObjectToScript(bridge.Key, new DispatchWrapper(bridge.Value));
-                }
-            }
-
-            core.Settings.AreDefaultContextMenusEnabled = true;
-            core.NavigationStarting += Core_NavigationStarting;
-            core.NavigationCompleted += Core_NavigationCompleted;
-            core.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All);
-            core.WebResourceRequested += Core_WebResourceRequested;
+            core.Settings.UserAgent = VirtualView.UserAgent;
+        }
+        core.Settings.IsWebMessageEnabled = true;
+        core.Settings.AreDefaultContextMenusEnabled = true;
+        core.NavigationStarting += Core_NavigationStarting;
+        core.NavigationCompleted += Core_NavigationCompleted;
+        core.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All);
+        core.WebResourceRequested += Core_WebResourceRequested;
+        await core.AddScriptToExecuteOnDocumentCreatedAsync(@"
+window.HassJsBridge = new Proxy({}, {
+    get(target, propKey) {
+        return (...args) => {
+            window.chrome.webview.postMessage({
+                name: propKey,
+                arguments: args
+            });
+        };
+    }
+});
+");
+        // 设置初始 URL
+        var url = (VirtualView.Source as UrlWebViewSource)?.Url;
+        if (!string.IsNullOrEmpty(url))
+        {
+            sender.Source = new Uri(url);
         }
     }
 
@@ -213,15 +182,18 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
 
     private void Core_NavigationCompleted(CoreWebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
     {
-        var state = args.IsSuccess ? WebNavigationResult.Success : WebNavigationResult.Failure;
-        var mauiArgs = new WebNavigatedEventArgs(WebNavigationEvent.NewPage, VirtualView.Source, sender.Source, state);
+        var result = args.IsSuccess ? WebNavigationResult.Success : WebNavigationResult.Failure;
+        var mauiArgs = new WebNavigatedEventArgs(WebNavigationEvent.NewPage, VirtualView.Source, sender.Source, result);
         VirtualView.SendNavigated(mauiArgs);
+
         VirtualView.CanGoBack = sender.CanGoBack;
         VirtualView.CanGoForward = sender.CanGoForward;
     }
 
     protected override void DisconnectHandler(WebView platformView)
     {
+        platformView.WebMessageReceived -= PlatformView_WebMessageReceived;
+        platformView.CoreWebView2Initialized -= PlatformView_CoreWebView2Initialized;
         if (platformView.CoreWebView2 != null)
         {
             platformView.CoreWebView2.NavigationStarting -= Core_NavigationStarting;
@@ -236,11 +208,11 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
                     {
                         platformView.CoreWebView2.RemoveHostObjectFromScript(bridge.Key);
                     }
-                    catch { /* ignore */ }
+                    catch { }
                 }
             }
         }
-        platformView.CoreWebView2Initialized -= CoreWebView2Initialized;
+
         base.DisconnectHandler(platformView);
     }
 }

@@ -12,7 +12,9 @@ public class HassWebView : WebView
     {
         JsBridges = new Dictionary<string, object>
         {
-            { HassJsBridge.BridgeName, new HassJsBridge() }
+#if ANDROID
+            { Platforms.Android.HassJsBridge.BridgeName, new Platforms.Android.HassJsBridge() }
+#endif
         };
     }
 

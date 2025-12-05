@@ -16,7 +16,7 @@ namespace HassWebView.Core.Services
             container = document.createElement('div');
             container.id = 'video-panel-container';
             Object.assign(container.style, {{
-                position: 'fixed', left: '0', top: '10%', height: '80%', width: '30%', minWidth: '200px',
+                position: 'fixed', left: '0', top: '5%', height: '90%', width: '30%', minWidth: '200px',
                 display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px',
                 backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '0 10px 10px 0',
                 boxSizing: 'border-box', zIndex: '9999', overflowY: 'auto'
