@@ -17,6 +17,7 @@ namespace HassWebView.Core
 #if ANDROID
     public class HassJsBridge : Java.Lang.Object
 #elif WINDOWS
+    [ClassInterface(ClassInterfaceType.AutoDual)]
     [ComVisible(true)]
     public class HassJsBridge
 #else
@@ -40,7 +41,6 @@ namespace HassWebView.Core
             {
                 var intent = new Intent(Intent.ActionView);
                 intent.SetDataAndType(global::Android.Net.Uri.Parse(url), "video/*");
-                intent.AddFlags(ActivityFlags.NewTask);
                 Platform.CurrentActivity?.StartActivity(intent);
             }
             catch (Exception ex)

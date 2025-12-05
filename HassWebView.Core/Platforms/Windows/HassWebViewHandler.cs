@@ -1,8 +1,9 @@
-﻿using HassWebView.Core.Events;
+using HassWebView.Core.Events;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;
 using Microsoft.Web.WebView2.Core;
 using System;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace HassWebView.Core.Platforms.Windows;
@@ -177,18 +178,19 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         var core = sender.CoreWebView2;
         if (core != null)
         {
+            core.SetVirtualHostNameToFolderMapping("appassets.web", "assets", CoreWebView2HostResourceAccessKind.DenyCors);
             if (VirtualView?.JsBridges != null)
             {
                 foreach (var bridge in VirtualView.JsBridges)
                 {
-                    core.AddHostObjectToScript(bridge.Key, bridge.Value);
+                    core.AddHostObjectToScript(bridge.Key, new DispatchWrapper(bridge.Value));
                 }
             }
 
             core.Settings.AreDefaultContextMenusEnabled = true;
             core.NavigationStarting += Core_NavigationStarting;
             core.NavigationCompleted += Core_NavigationCompleted;
-
+            core.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All);
             core.WebResourceRequested += Core_WebResourceRequested;
         }
     }
