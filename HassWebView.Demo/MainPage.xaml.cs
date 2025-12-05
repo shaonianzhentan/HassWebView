@@ -39,89 +39,16 @@ namespace HassWebView.Demo
             Debug.WriteLine($"ResourceLoading: {e.Url}");
             var urlString = e.Url.ToString();
 
-            // Corrected logic: check for http(s) and contains .mp4 or .m3u8
             if (urlString.StartsWith("http", StringComparison.OrdinalIgnoreCase) &&
                 (urlString.Contains(".mp4", StringComparison.OrdinalIgnoreCase) || 
                  urlString.Contains(".m3u8", StringComparison.OrdinalIgnoreCase)))
             {
-                Debug.WriteLine($"Video resource detected: {urlString}. Preparing to inject script and allowing request to continue.");
+                Debug.WriteLine($"Video resource detected: {urlString}. Adding to video panel.");
 
-                // The request is NOT cancelled, as requested.
-
-                // I am ready to add the JavaScript execution here. Please provide the script.
-                // For example:
-                MainThread.BeginInvokeOnMainThread(() =>
+                // Use the static VideoService to add the video link
+                MainThread.BeginInvokeOnMainThread(async () =>
                 {
-                    var script = $"console.log('Video detected: {urlString}');";
-                    wv.EvaluateJavaScriptAsync(@"(function(){
-function createLeftFloatDivByUrl(url, displayText) {
-    // 1. URLתɺϷDOM IDַ
-    const safeId = 'float-' + encodeURIComponent(url).replace(/[^a-zA-Z0-9_-]/g, '_');
-    
-    // 2. أѴֱӷ
-    if (document.getElementById(safeId)) {
-        console.log(`URL${url}Ѵڣظ`);
-        return;
-    }
-
-    // 3. /ȡ100%߶Ϊ30%
-    let container = document.getElementById('left-float-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'left-float-container';
-        Object.assign(container.style, {
-            position: 'fixed',
-            left: '0',
-            top: '0',
-            height: '100%',
-            width: '30%', // ȵΪ30%䲻ͬĻ
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-            padding: '10px 0',
-            boxSizing: 'border-box',
-            zIndex: 9999
-        });
-        document.body.appendChild(container);
-    }
-
-    // 4. ɫ͸ + ɫ + 5pxڱ߾ + ǿƻУ
-    const floatItem = document.createElement('div');
-    floatItem.id = safeId;
-    floatItem.dataset.url = url; // 洢ԭʼURL
-    floatItem.textContent = displayText || url; // ʾԶı
-
-    // ʽ
-    Object.assign(floatItem.style, {
-        width: '100%', // ̳30%ȣռ
-        padding: '5px', // ҾΪ5px
-        backgroundColor: 'rgba(0, 0, 0, 0.7)', // ɫ͸
-        color: '#ffffff', // ɫ
-        border: '1px solid #ccc',
-        boxSizing: 'border-box',
-        // ǿƻкʽ
-        wordBreak: 'break-all',
-        wordWrap: 'break-word'
-    });
-
-    // 5. ¼ƵŽӷ
-    floatItem.addEventListener('click', () => {
-        if (window.HassJsBridge && typeof window.HassJsBridge.OpenVideoPlayer === 'function') {
-            window.HassJsBridge.OpenVideoPlayer(url);
-            console.log(`Ƶ${url}`);
-        } else {
-            console.error('HassJsBridge δ OpenVideoPlayer ');
-        }
-    });
-
-    // 6. ӵ
-    container.appendChild(floatItem);
-    console.log(`URL${url}`);
-    return floatItem;
-}
-                        
-                        createLeftFloatDivByUrl('" + urlString + @"');
-                        })();");
+                    await VideoService.AddVideo(wv, urlString);
                 });
             }
         }
@@ -236,14 +163,14 @@ function createLeftFloatDivByUrl(url, displayText) {
 
         private void OnSingleClick(RemoteKeyEventArgs e)
         {
-            MainThread.BeginInvokeOnMainThread(() =>
+            MainThread.BeginInvokeOnMainThread(async () =>
             {
                 switch (e.KeyName)
                 {
                     case "Enter":
                     case "DpadCenter":
                         if (wv.IsVideoFullscreen)
-                            cursorControl.VideoPlayPause();
+                           await VideoService.TogglePlayPause(wv);
                         else
                             cursorControl.Click();
                         break;
@@ -269,7 +196,7 @@ function createLeftFloatDivByUrl(url, displayText) {
                     case "Left":
                     case "DpadLeft":
                         if (wv.IsVideoFullscreen)
-                            cursorControl.VideoSeek(-5);
+                            VideoService.VideoSeek(wv,-5);
                         else
                             cursorControl.MoveLeftBy();
                         break;
@@ -277,7 +204,7 @@ function createLeftFloatDivByUrl(url, displayText) {
                     case "Right":
                     case "DpadRight":
                         if (wv.IsVideoFullscreen)
-                            cursorControl.VideoSeek(5);
+                            VideoService.VideoSeek(wv,5);
                         else
                             cursorControl.MoveRightBy();
                         break;
@@ -290,12 +217,7 @@ function createLeftFloatDivByUrl(url, displayText) {
                         wv.Source = "https://www.baidu.com";
                         break;
                     case "M":
-                        wv.EvaluateJavaScriptAsync(@"(()=>{
-var div = document.getElementById('left-float-container')
-if(div){
-    div.style.display = div.style.display == 'block' ? 'none' : 'block'; 
-}
-})();");
+                        await VideoService.ToggleVideoPanel(wv);
                         break;
                 }
             });
@@ -359,14 +281,14 @@ if(div){
                 case "Left":
                 case "DpadLeft":
                     if (wv.IsVideoFullscreen)
-                        cursorControl.VideoSeek(-15);
+                        VideoService.VideoSeek(wv,-15);
                     else
                         _keyService.StartRepeatingAction(() => cursorControl.MoveLeftBy(), repeatInterval);
                     break;
                 case "Right":
                 case "DpadRight":
                     if (wv.IsVideoFullscreen)
-                        cursorControl.VideoSeek(15);
+                        VideoService.VideoSeek(wv,15);
                     else
                         _keyService.StartRepeatingAction(() => cursorControl.MoveRightBy(), repeatInterval);
                     break;
