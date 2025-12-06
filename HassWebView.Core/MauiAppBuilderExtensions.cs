@@ -111,20 +111,31 @@ public static class MauiAppBuilderExtensions
             {
                 android.OnCreate((activity, bundle) =>
                 {
-                    var keyService = (activity.Application as MauiApplication)?.Services.GetService<KeyService>();
+                    var keyService = MauiApplication.Current.Services.GetService<KeyService>();
                     if (keyService == null)
                     {
-                        Debug.WriteLine("KeyService not found in UseRemoteControl. Make sure it's registered in MauiProgram.cs.");
+                        Debug.WriteLine("[Critical Error] KeyService not found in DI container.");
                         return;
                     }
 
                     var window = activity.Window;
                     var originalCallback = window.Callback;
-                    // Avoid re-wrapping if the activity is recreated
                     if (originalCallback is not Platforms.Android.KeyCallback)
                     {
-                         window.Callback = new Platforms.Android.KeyCallback(originalCallback, keyService);
+                        window.Callback = new Platforms.Android.KeyCallback(originalCallback, keyService);
                     }
+                });
+
+                android.OnResume(activity =>
+                {
+                    var keyService = MauiApplication.Current.Services.GetService<KeyService>();
+                    keyService?.Enable();
+                });
+
+                android.OnPause(activity =>
+                {
+                    var keyService = MauiApplication.Current.Services.GetService<KeyService>();
+                    keyService?.Disable();
                 });
             });
 #endif
@@ -135,6 +146,9 @@ public static class MauiAppBuilderExtensions
         {
             var keyService = handler.MauiContext?.Services.GetService<KeyService>();
             if (keyService == null) return;
+
+            keyService.Enable(); // For Windows, we enable it for the lifetime of the window.
+
             if (handler.PlatformView.Content is not UIElement ui) return;
             
             ui.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler((s, e) =>

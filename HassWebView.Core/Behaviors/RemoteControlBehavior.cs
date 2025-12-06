@@ -1,5 +1,6 @@
 using HassWebView.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
 
 namespace HassWebView.Core.Behaviors;
 
@@ -16,20 +17,26 @@ public class RemoteControlBehavior : Behavior<Page>
 
         if (page is not IKeyHandler keyHandler)
         {
+            Debug.WriteLine("[RemoteControlBehavior] Attached page does not implement IKeyHandler.");
             return;
         }
-
         _keyHandler = keyHandler;
+
         page.HandlerChanged += OnHandlerChanged;
 
-        // Attempt registration immediately in case the handler is already available.
-        TryRegister();
+        // In case the handler is already available when this behavior is attached.
+        TryInitializeAndRegister();
     }
 
     protected override void OnDetachingFrom(Page page)
     {
         page.HandlerChanged -= OnHandlerChanged;
-        TryUnregister();
+
+        if (_keyService != null)
+        {
+            // Unregister the handler to prevent memory leaks and dangling references.
+            _keyService.Unregister();
+        }
 
         _associatedPage = null;
         _keyHandler = null;
@@ -40,12 +47,12 @@ public class RemoteControlBehavior : Behavior<Page>
 
     private void OnHandlerChanged(object sender, EventArgs e)
     {
-        TryRegister();
+        TryInitializeAndRegister();
     }
 
-    private void TryRegister()
+    private void TryInitializeAndRegister()
     {
-        // Do not proceed if the handler is not yet available, or if registration has already occurred.
+        // We only proceed if the handler is set but our keyService hasn't been acquired yet.
         if (_associatedPage?.Handler == null || _keyService != null)
         {
             return;
@@ -56,17 +63,14 @@ public class RemoteControlBehavior : Behavior<Page>
 #endif
 
         if (keyService != null)
-        {
+        {    
+            Debug.WriteLine("[RemoteControlBehavior] KeyService acquired. Registering handler.");
             _keyService = keyService;
             _keyService.Register(_keyHandler);
         }
-    }
-
-    private void TryUnregister()
-    {
-        if (_keyService != null)
+        else
         {
-            _keyService.Unregister();
+            Debug.WriteLine("[RemoteControlBehavior] Could not acquire KeyService from DI container.");
         }
     }
 }

@@ -7,6 +7,7 @@ namespace HassWebView.Core.Services;
 public class KeyService
 {
     private IKeyHandler _currentHandler;
+    private bool _isEnabled = false; // Disabled by default
 
     private readonly int _longPressTimeout;
     private readonly int _doubleClickTimeout;
@@ -25,13 +26,27 @@ public class KeyService
         _doubleClickTimeout = doubleClickTimeout;
     }
 
+    public void Enable() 
+    {
+        Debug.WriteLine("[KeyService] Enabled");
+        _isEnabled = true; 
+    }
+
+    public void Disable() 
+    {
+        Debug.WriteLine("[KeyService] Disabled");
+        _isEnabled = false; 
+    }
+
     public void Register(IKeyHandler handler)
     {
+        Debug.WriteLine($"[KeyService] Registering handler: {handler.GetType().Name}");
         _currentHandler = handler;
     }
 
     public void Unregister()
     {
+        Debug.WriteLine("[KeyService] Unregistering handler.");
         _currentHandler = null;
         ResetDoubleClickState();
         StopRepeatingAction();
@@ -39,7 +54,7 @@ public class KeyService
 
     public void StartRepeatingAction(Action action, int interval = 100)
     {
-        if (_currentHandler == null) return;
+        if (!_isEnabled || _currentHandler == null) return;
         StopRepeatingAction();
         _repeatingAction = action;
         _repeatingActionTimer = new Timer(RepeatingActionCallback, null, 0, interval);
@@ -60,7 +75,10 @@ public class KeyService
 
     public bool OnPressed(string keyName)
     {
-        if (_currentHandler == null) return false;
+        if (!_isEnabled || _currentHandler == null)
+        {
+            return false;
+        }
 
         var args = new RemoteKeyEventArgs(keyName);
         bool handled = _currentHandler.OnKeyDown(this, args);
@@ -95,7 +113,10 @@ public class KeyService
 
     public bool OnReleased()
     {
-        if (_currentHandler == null) return false;
+        if (!_isEnabled || _currentHandler == null)
+        {
+             return false;
+        }
 
         if (_lastKey == null && !_longPressHasFired)
         {
@@ -131,13 +152,14 @@ public class KeyService
 
     private void LongPressTimerCallback(object state)
     {
-        if (_longPressHasFired) return;
+        if (!_isEnabled || _longPressHasFired) return;
         _longPressHasFired = true;
         _currentHandler?.OnLongClick(this, new RemoteKeyEventArgs((string)state));
     }
 
     private void DoubleClickTimerCallback(object state)
     {
+        if (!_isEnabled) return;
         _currentHandler?.OnSingleClick(this, new RemoteKeyEventArgs((string)state));
         ResetDoubleClickState();
     }
