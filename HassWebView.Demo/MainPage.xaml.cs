@@ -5,10 +5,10 @@ using System.IO;
 using System.Threading.Tasks;
 using HassWebView.Core.Events;
 using HassWebView.Core.Services;
+using HassWebView.Core.Behaviors;
 
 namespace HassWebView.Demo
 {
-    // This class was part of your original file and is needed by the HttpServer
     public class EchoData
     {
         public string Message { get; set; }
@@ -22,6 +22,9 @@ namespace HassWebView.Demo
         public MainPage()
         {
             InitializeComponent();
+
+            // Add the behavior programmatically
+            this.Behaviors.Add(new RemoteControlBehavior());
 
             // Your original event subscriptions
             wv.Navigating += Wv_Navigating;
