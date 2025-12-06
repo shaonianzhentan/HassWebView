@@ -24,11 +24,6 @@ namespace HassWebView.Core;
 
 public static class MauiAppBuilderExtensions
 {
-    /// <summary>
-    /// 使用 HassWebView 控件
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <returns></returns>
     public static MauiAppBuilder UseHassWebView(this MauiAppBuilder builder)
     {
         builder.ConfigureMauiHandlers(handlers =>
@@ -41,62 +36,44 @@ public static class MauiAppBuilderExtensions
         });
 
         builder.ConfigureLifecycleEvents(events =>
-            {
+        {
 #if ANDROID
-                events.AddAndroid(android =>
+            events.AddAndroid(android =>
+            {
+                android.OnApplicationCreate(app =>
                 {
-                    android.OnApplicationCreate(app =>
+                    QbSdk.InitTbsSettings(new Dictionary<string, Java.Lang.Object>
                     {
-                        QbSdk.InitTbsSettings(new Dictionary<string, Java.Lang.Object>
-                        {
-                            { TbsCoreSettings.TbsSettingsUseSpeedyClassloader, true },
-                            { TbsCoreSettings.TbsSettingsUseDexloaderService, true }
-                        });
-                    });
-
-                    android.OnCreate((activity, bundle) =>
-                    {
-
-                        QbSdk.DownloadWithoutWifi = true;
-
-                        var tbsListener = new TencentTbsListener();
-                        tbsListener.DownloadProgress += (s, e) =>
-                        {
-                            Console.WriteLine($"DownloadProgress {e}");
-                        };
-                        tbsListener.DownloadFinished += (s, e) =>
-                        {
-                            Console.WriteLine($"DownloadFinished {e}");
-                        };
-                        tbsListener.InstallFinished += (s, e) =>
-                        {
-                            Console.WriteLine($"InstallFinished {e}");
-                        };
-
-                        var preInitCallback = new PreInitCallback();
-                        preInitCallback.CoreInitFinished += (s, e) =>
-                        {
-                            Console.WriteLine($"CoreInitFinished {e}");
-                        };
-                        preInitCallback.ViewInitFinished += (s, e) =>
-                        {
-                            Console.WriteLine($"ViewInitFinished {e}");
-                        };
-                        QbSdk.SetTbsListener(tbsListener);
-
-                        Console.WriteLine("InitX5Environment");
-                        QbSdk.InitX5Environment(activity, preInitCallback);
+                        { TbsCoreSettings.TbsSettingsUseSpeedyClassloader, true },
+                        { TbsCoreSettings.TbsSettingsUseDexloaderService, true }
                     });
                 });
-#endif
+
+                android.OnCreate((activity, bundle) =>
+                {
+                    QbSdk.DownloadWithoutWifi = true;
+                    var tbsListener = new TencentTbsListener();
+                    tbsListener.DownloadProgress += (s, e) => Console.WriteLine($"DownloadProgress {e}");
+                    tbsListener.DownloadFinished += (s, e) => Console.WriteLine($"DownloadFinished {e}");
+                    tbsListener.InstallFinished += (s, e) => Console.WriteLine($"InstallFinished {e}");
+
+                    var preInitCallback = new PreInitCallback();
+                    preInitCallback.CoreInitFinished += (s, e) => Console.WriteLine($"CoreInitFinished {e}");
+                    preInitCallback.ViewInitFinished += (s, e) => Console.WriteLine($"ViewInitFinished {e}");
+                    QbSdk.SetTbsListener(tbsListener);
+
+                    Console.WriteLine("InitX5Environment");
+                    QbSdk.InitX5Environment(activity, preInitCallback);
+                });
             });
+#endif
+        });
 
         return builder;
     }
 
     public static MauiAppBuilder UseImmersiveMode(this MauiAppBuilder builder)
     {
-
 #if ANDROID
         builder.ConfigureLifecycleEvents(events =>
         {
@@ -105,17 +82,13 @@ public static class MauiAppBuilderExtensions
                 android.OnCreate((activity, bundle) =>
                 {
                     var window = activity.Window;
-
                     WindowCompat.SetDecorFitsSystemWindows(window, false);
-
                     var controller = WindowCompat.GetInsetsController(window, window.DecorView);
                     if (controller != null)
                     {
                         controller.Hide(WindowInsetsCompat.Type.StatusBars());
                         controller.Hide(WindowInsetsCompat.Type.NavigationBars());
-
-                        controller.SystemBarsBehavior =
-                            WindowInsetsControllerCompat.BehaviorShowTransientBarsBySwipe;
+                        controller.SystemBarsBehavior = WindowInsetsControllerCompat.BehaviorShowTransientBarsBySwipe;
                     }
                 });
             });
@@ -141,39 +114,40 @@ public static class MauiAppBuilderExtensions
                     var keyService = (activity.Application as MauiApplication)?.Services.GetService<KeyService>();
                     if (keyService == null)
                     {
-                        Debug.WriteLine("KeyService not found. Make sure it's registered.");
+                        Debug.WriteLine("KeyService not found in UseRemoteControl. Make sure it's registered in MauiProgram.cs.");
                         return;
                     }
 
                     var window = activity.Window;
                     var originalCallback = window.Callback;
-                    window.Callback = new Platforms.Android.KeyCallback(originalCallback, keyService);
+                    // Avoid re-wrapping if the activity is recreated
+                    if (originalCallback is not Platforms.Android.KeyCallback)
+                    {
+                         window.Callback = new Platforms.Android.KeyCallback(originalCallback, keyService);
+                    }
                 });
             });
 #endif
         });
 
 #if WINDOWS
-            WindowHandler.Mapper.AppendToMapping("RemoteControl", (handler, view) =>
+        WindowHandler.Mapper.AppendToMapping("RemoteControl", (handler, view) =>
+        {
+            var keyService = handler.MauiContext?.Services.GetService<KeyService>();
+            if (keyService == null) return;
+            if (handler.PlatformView.Content is not UIElement ui) return;
+            
+            ui.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler((s, e) =>
             {
-                var keyService = handler.MauiContext?.Services.GetService<KeyService>();
-                if (keyService == null) return;
-                if (handler.PlatformView.Content is not UIElement ui) return;
-                
-                ui.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler((s, e) =>
-                {
-                    bool shouldBeHandled = keyService.OnPressed(e.Key.ToString());
-                    
-                    e.Handled = shouldBeHandled;
+                bool shouldBeHandled = keyService.OnPressed(e.Key.ToString());
+                e.Handled = shouldBeHandled;
+            }), true);
 
-                }), true);
-
-                ui.AddHandler(UIElement.KeyUpEvent, new KeyEventHandler((s, e) =>
-                {
-                    keyService.OnReleased();
-                    
-                }), true);
-            });
+            ui.AddHandler(UIElement.KeyUpEvent, new KeyEventHandler((s, e) =>
+            {
+                keyService.OnReleased();
+            }), true);
+        });
 #endif
 
         return builder;
