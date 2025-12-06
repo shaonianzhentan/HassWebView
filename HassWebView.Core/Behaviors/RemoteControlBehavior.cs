@@ -58,9 +58,8 @@ public class RemoteControlBehavior : Behavior<Page>
             return;
         }
 
-#if ANDROID || WINDOWS
         var keyService = _associatedPage.Handler.MauiContext?.Services.GetService<KeyService>();
-#endif
+
 
         if (keyService != null)
         {    
