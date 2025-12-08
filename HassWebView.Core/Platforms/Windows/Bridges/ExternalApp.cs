@@ -7,14 +7,14 @@ namespace HassWebView.Core.Bridges
     public partial class ExternalApp
     {
         // This partial method provides the Windows-specific implementation.
-        public partial void getExternalAuth(string message)
+        public void getExternalAuth(string message)
         {
             _authAction?.Invoke("getExternalAuth", message);
             Console.WriteLine($"HassJsBridge.getExternalAuth called on Windows with message: {message}");
         }
 
         // This partial method also provides the Windows-specific implementation.
-        public partial void revokeExternalAuth(string message)
+        public void revokeExternalAuth(string message)
         {
             _authAction?.Invoke("revokeExternalAuth", message);
             Console.WriteLine($"HassJsBridge.revokeExternalAuth called on Windows with message: {message}");

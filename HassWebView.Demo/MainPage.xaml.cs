@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using HassWebView.Core.Events;
 using HassWebView.Core.Services;
 using HassWebView.Core.Behaviors;
-using HassWebView.Demo.Bridges;
+using HassWebView.Core.Bridges;
 
 namespace HassWebView.Demo
 {

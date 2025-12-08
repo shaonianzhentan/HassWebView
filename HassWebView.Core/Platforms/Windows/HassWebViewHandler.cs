@@ -2,6 +2,7 @@ using HassWebView.Core.Bridges;
 using HassWebView.Core.Events;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.Threading.Tasks;

@@ -14,11 +14,5 @@ namespace HassWebView.Core.Bridges
             _authAction = authAction;
         }
 
-        // These are the method signatures. The implementations are provided
-        // in the platform-specific partial class files.
-        // Note: They have no body and are marked as partial.
-        public partial void getExternalAuth(string message);
-
-        public partial void revokeExternalAuth(string message);
     }
 }

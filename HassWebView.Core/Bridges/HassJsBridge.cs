@@ -8,7 +8,5 @@ namespace HassWebView.Core.Bridges
     {
         // A parameterless constructor is required for a clean, decoupled design.
         public HassJsBridge() { }
-
-        public partial void OpenVideoPlayer(string url, string headers);
     }
 }
