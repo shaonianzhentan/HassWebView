@@ -61,7 +61,7 @@ namespace HassWebView.Core.Services
             return webView.EvaluateJavaScriptAsync(script);
         }
 
-        public static Task HtmlWebView(HassWebView webView, string videoUrl){
+        public static void HtmlWebView(HassWebView webView, string videoUrl){
             // 使用 CSS 实现视频全屏铺满
             string htmlContent = $@"
                 <html>
@@ -76,7 +76,7 @@ namespace HassWebView.Core.Services
                     </style>
                 </head>
                 <body>
-                    <video controls autoplay src='{videoUrl}' type='video/mp4'></video>
+                    <video controls autoplay src='{videoUrl}'></video>
                 </body>
                 </html>";
 
@@ -92,7 +92,10 @@ namespace HassWebView.Core.Services
 
             // 3. 将 Source 赋值给你的 WebView 控件
             // 假设你的 WebView 控件名为 'videoWebView'
-            webView.Source = htmlSource;
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                webView.Source = htmlSource;
+            });
         }
 
         public static void VideoSeek(HassWebView webView, int sencond)

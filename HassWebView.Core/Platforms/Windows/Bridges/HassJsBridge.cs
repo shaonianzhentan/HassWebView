@@ -1,3 +1,4 @@
+using HassWebView.Core.Services;
 using System;
 
 namespace HassWebView.Core.Bridges

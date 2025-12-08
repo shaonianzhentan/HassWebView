@@ -8,6 +8,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Storage.Streams;
 
 namespace HassWebView.Core.Platforms.Windows;
 
@@ -187,8 +188,18 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     {
         if (!string.IsNullOrEmpty(_pendingBaseUrl) && args.Request.Uri == _pendingBaseUrl)
         {
+            var htmlBytes = Encoding.UTF8.GetBytes(_pendingHtml);
+            var memoryStream = new MemoryStream(htmlBytes);
+            var randomAccessStream = new InMemoryRandomAccessStream();
+            using (var dataWriter = new DataWriter(randomAccessStream))
+            {
+                dataWriter.WriteBytes(htmlBytes);
+                dataWriter.StoreAsync().GetAwaiter().GetResult();
+                randomAccessStream.Seek(0);
+            }
+
             var response = sender.Environment.CreateWebResourceResponse(
-                new MemoryStream(Encoding.UTF8.GetBytes(_pendingHtml)),
+                randomAccessStream,
                 200, "OK", "Content-Type: text/html; charset=utf-8");
             args.Response = response;
             _pendingHtml = null;

@@ -1,8 +1,4 @@
-using HassWebView.Core;
 using System.Diagnostics;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using HassWebView.Core.Events;
 using HassWebView.Core.Services;
 using HassWebView.Core.Behaviors;
@@ -57,9 +53,7 @@ namespace HassWebView.Demo
             Debug.WriteLine($"ResourceLoading: {e.Url}");
             var urlString = e.Url.ToString();
             // 如果当前是视频页面，则阻止拦截
-            if (wv.Source is UrlWebViewSource source && source.Url.StartsWith("http", StringComparison.OrdinalIgnoreCase) &&
-                (source.Url.Contains(".mp4", StringComparison.OrdinalIgnoreCase) || 
-                 source.Url.Contains(".m3u8", StringComparison.OrdinalIgnoreCase)))
+            if (wv.Source is HtmlWebViewSource)
             {
                 return;
             }
@@ -184,7 +178,7 @@ namespace HassWebView.Demo
                 {
                     case "Enter":
                     case "DpadCenter":
-                        if (wv.IsVideoFullscreen)
+                        if (wv.Source is HtmlWebViewSource)
                            await VideoService.TogglePlayPause(wv);
                         else
                             _cursorControl.Click();
@@ -210,7 +204,7 @@ namespace HassWebView.Demo
 
                     case "Left":
                     case "DpadLeft":
-                        if (wv.IsVideoFullscreen)
+                        if (wv.Source is HtmlWebViewSource)
                             VideoService.VideoSeek(wv,-5);
                         else
                             _cursorControl.MoveLeftBy();
@@ -218,7 +212,7 @@ namespace HassWebView.Demo
 
                     case "Right":
                     case "DpadRight":
-                        if (wv.IsVideoFullscreen)
+                        if (wv.Source is HtmlWebViewSource)
                             VideoService.VideoSeek(wv,5);
                         else
                             _cursorControl.MoveRightBy();
