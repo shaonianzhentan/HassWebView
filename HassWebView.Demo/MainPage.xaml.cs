@@ -56,8 +56,10 @@ namespace HassWebView.Demo
         {
             Debug.WriteLine($"ResourceLoading: {e.Url}");
             var urlString = e.Url.ToString();
-
-            if (wv.Source is UrlWebViewSource source && source.Url == urlString)
+            // 如果当前是视频页面，则阻止拦截
+            if (wv.Source is UrlWebViewSource source && source.Url.StartsWith("http", StringComparison.OrdinalIgnoreCase) &&
+                (source.Url.Contains(".mp4", StringComparison.OrdinalIgnoreCase) || 
+                 source.Url.Contains(".m3u8", StringComparison.OrdinalIgnoreCase)))
             {
                 return;
             }
