@@ -6,10 +6,11 @@ namespace HassWebView.Core.Bridges
     // The class and its platform-specific methods are marked as partial.
     public partial class HassJsBridge
     {
-        HassWebView wv;
+        private readonly Action<string, string> _action;
+
         // A parameterless constructor is required for a clean, decoupled design.
-        public HassJsBridge(HassWebView wv) { 
-            this.wv = wv;
+        public HassJsBridge(Action<string, string> action) {
+            _action = action;
         }
     }
 }

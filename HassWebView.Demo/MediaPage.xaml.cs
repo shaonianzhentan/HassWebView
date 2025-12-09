@@ -4,23 +4,43 @@ using HassWebView.Core.Services;
 
 namespace HassWebView.Demo;
 
-public partial class MediaPage : ContentPage, IQueryAttributable, IKeyHandler
+public partial class MediaPage : ContentPage, IKeyHandler
 {
-	public MediaPage()
+	public MediaPage(string url)
 	{
 		InitializeComponent();
-	}
+        LoadUrl(url);
+    }
 
-	public void ApplyQueryAttributes(IDictionary<string, object> query)
-	{
-		if (query.ContainsKey("url"))
-		{
-			string? url = query["url"]?.ToString();
-			if (string.IsNullOrEmpty(url)) return;
+    void LoadUrl(string videoUrl){
+        string htmlContent = $@"
+                <html>
+                <head>
+                    <style>
+                        body {{ margin: 0; padding: 0; background-color: black; }}
+                        video {{
+                            width: 100vw;
+                            height: 100vh;
+                            object-fit: contain; /* 保持比例，覆盖整个视口，可以改为 'cover' 如果想裁剪 */
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <video controls autoplay src='{videoUrl}'></video>
+                </body>
+                </html>";
 
-            VideoService.HtmlWebView(wv, System.Web.HttpUtility.UrlDecode(url));
-		}
-	}
+            // 2. 创建 HtmlWebViewSource
+            var htmlSource = new HtmlWebViewSource
+            {
+                Html = htmlContent,
+                
+                // BaseUrl 可以是 null 或 videoUrl 的域名，
+                // 如果视频链接是绝对路径，这个属性影响不大，但最好设置以满足同源策略。
+                BaseUrl = videoUrl.Contains("http") ? new Uri(videoUrl).GetLeftPart(UriPartial.Authority) : null
+            };
+            wv.Source = htmlSource;
+    }
 
     public void OnDoubleClick(KeyService sender, RemoteKeyEventArgs args)
     {

@@ -33,6 +33,15 @@ namespace HassWebView.Demo
                         break;
                 }
             }));
+            wv.JsBridges.Add("HassJsBridge", new HassJsBridge(async (type, msg) =>
+            {
+                switch (type)
+                {
+                    case "OpenVideoPlayer":
+                        await Navigation.PushAsync(new MediaPage(msg));
+                        break;
+                }
+            }));
 
             // Add the behavior programmatically
             this.Behaviors.Add(new RemoteControlBehavior());

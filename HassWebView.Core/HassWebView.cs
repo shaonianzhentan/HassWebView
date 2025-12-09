@@ -11,8 +11,6 @@ public class HassWebView : WebView
 {
     public HassWebView()
     {
-        // Automatically register the built-in HassJsBridge
-        JsBridges.Add("HassJsBridge", new HassJsBridge(this));
     }
 
     public static readonly BindableProperty JsBridgesProperty =

@@ -12,11 +12,7 @@ namespace HassWebView.Core.Bridges
         [Export("OpenVideoPlayer")]
         public void OpenVideoPlayer(string url)
         {
-            // VideoService.HtmlWebView(wv, url);
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                Shell.Current.GoToAsync($"MediaPage?url={System.Web.HttpUtility.UrlEncode(url)}");
-            });
+            _action?.Invoke("OpenVideoPlayer", url);
         }
     }
 }
