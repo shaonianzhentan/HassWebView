@@ -11,9 +11,4 @@
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
 
-    <ShellContent
-        Title="Media"
-        ContentTemplate="{DataTemplate local:MediaPage}"
-        Route="MediaPage" />
-
 </Shell>

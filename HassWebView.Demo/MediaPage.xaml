@@ -3,9 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="HassWebView.Demo.MediaPage"
              xmlns:hass="clr-namespace:HassWebView.Core;assembly=HassWebView.Core"
-             Shell.NavBarIsVisible="False"
              Title="MediaPage">
-    <Grid>
-        <hass:HassWebView x:Name="wv" WidthRequest="500" HeightRequest="500"/>
-    </Grid>
+    <hass:HassWebView x:Name="wv" />
 </ContentPage>
