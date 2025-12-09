@@ -38,7 +38,9 @@ namespace HassWebView.Demo
                 switch (type)
                 {
                     case "OpenVideoPlayer":
-                        await Navigation.PushAsync(new MediaPage(msg));
+                        MainThread.BeginInvokeOnMainThread(async () => {
+                            await Navigation.PushAsync(new MediaPage(msg));
+                        });
                         break;
                 }
             }));

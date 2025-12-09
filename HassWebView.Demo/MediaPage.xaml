@@ -5,5 +5,7 @@
              xmlns:hass="clr-namespace:HassWebView.Core;assembly=HassWebView.Core"
              Shell.NavBarIsVisible="False"
              Title="MediaPage">
-    <hass:HassWebView x:Name="wv"/>
+    <Grid>
+        <hass:HassWebView x:Name="wv" WidthRequest="500" HeightRequest="500"/>
+    </Grid>
 </ContentPage>

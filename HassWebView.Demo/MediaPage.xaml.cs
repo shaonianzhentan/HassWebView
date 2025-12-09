@@ -11,7 +11,9 @@ public partial class MediaPage : ContentPage, IKeyHandler
 	{
 		InitializeComponent();
         this.Behaviors.Add(new RemoteControlBehavior());
-        LoadUrl(url);
+        Loaded += (_, _)=> {
+            LoadUrl(url);
+        };
     }
 
     void LoadUrl(string videoUrl){
