@@ -189,9 +189,6 @@ namespace HassWebView.Demo
                 {
                     case "Enter":
                     case "DpadCenter":
-                        if (wv.Source is HtmlWebViewSource)
-                           await VideoService.TogglePlayPause(wv);
-                        else
                             _cursorControl.Click();
                         break;
 
@@ -215,17 +212,11 @@ namespace HassWebView.Demo
 
                     case "Left":
                     case "DpadLeft":
-                        if (wv.Source is HtmlWebViewSource)
-                            VideoService.VideoSeek(wv,-5);
-                        else
                             _cursorControl.MoveLeftBy();
                         break;
 
                     case "Right":
                     case "DpadRight":
-                        if (wv.Source is HtmlWebViewSource)
-                            VideoService.VideoSeek(wv,5);
-                        else
                             _cursorControl.MoveRightBy();
                         break;
                     case "A":
@@ -294,16 +285,10 @@ namespace HassWebView.Demo
                     break;
                 case "Left":
                 case "DpadLeft":
-                    if (wv.IsVideoFullscreen)
-                        VideoService.VideoSeek(wv,-15);
-                    else
                         sender.StartRepeatingAction(() => _cursorControl.MoveLeftBy(), repeatInterval);
                     break;
                 case "Right":
                 case "DpadRight":
-                    if (wv.IsVideoFullscreen)
-                        VideoService.VideoSeek(wv,15);
-                    else
                         sender.StartRepeatingAction(() => _cursorControl.MoveRightBy(), repeatInterval);
                     break;
             }

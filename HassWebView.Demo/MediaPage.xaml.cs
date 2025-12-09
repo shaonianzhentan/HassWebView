@@ -44,6 +44,29 @@ public partial class MediaPage : ContentPage, IKeyHandler
             wv.Source = htmlSource;
     }
 
+    void VideoSeek(int sencond)
+    {
+        wv.EvaluateJavaScriptAsync($@"(function() {{
+                var video = document.querySelector('video');
+                if (video) video.currentTime += {sencond};
+            }})()");
+    }
+
+    void PlayPause()
+    {
+        // JS Fallback for embedded videos in a webpage
+        wv.EvaluateJavaScriptAsync(@"(function() {
+                var video = document.querySelector('video');
+                if (video) {
+                    if (video.paused) {
+                        video.play();
+                    } else {
+                        video.pause();
+                    }
+                }
+            })()");
+    }
+
     public bool OnKeyDown(KeyService sender, RemoteKeyEventArgs args)
     {
         if (args.KeyName == "VolumeUp" || args.KeyName == "VolumeDown")
@@ -66,7 +89,7 @@ public partial class MediaPage : ContentPage, IKeyHandler
             {
                 case "Enter":
                 case "DpadCenter":
-                    await VideoService.TogglePlayPause(wv);
+                    PlayPause();
                     break;
 
                 case "Escape":
@@ -76,12 +99,12 @@ public partial class MediaPage : ContentPage, IKeyHandler
 
                 case "Left":
                 case "DpadLeft":
-                    VideoService.VideoSeek(wv, -5); 
+                    VideoSeek(-5); 
                     break;
 
                 case "Right":
                 case "DpadRight":
-                    VideoService.VideoSeek(wv, 5); 
+                    VideoSeek(5); 
                     break;
             }
         });
@@ -92,7 +115,6 @@ public partial class MediaPage : ContentPage, IKeyHandler
         // No action 
     }
 
-
     public void OnLongClick(KeyService sender, RemoteKeyEventArgs e)
     {
         int repeatInterval = 100;
@@ -100,11 +122,11 @@ public partial class MediaPage : ContentPage, IKeyHandler
         {
             case "Left":
             case "DpadLeft":
-                sender.StartRepeatingAction(() => VideoService.VideoSeek(wv, -15), repeatInterval);
+                sender.StartRepeatingAction(() => VideoSeek(-15), repeatInterval);
                 break;
             case "Right":
             case "DpadRight":
-                sender.StartRepeatingAction(() => VideoService.VideoSeek(wv, 15), repeatInterval);
+                sender.StartRepeatingAction(() => VideoSeek(15), repeatInterval);
                 break;
         }
     }

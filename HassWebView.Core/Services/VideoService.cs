@@ -60,29 +60,5 @@ namespace HassWebView.Core.Services
             var script = "(function() { var div = document.getElementById('video-panel-container'); if (div) { div.style.display = div.style.display === 'none' ? 'flex' : 'none'; } })();";
             return webView.EvaluateJavaScriptAsync(script);
         }
-
-        public static void VideoSeek(HassWebView webView, int sencond)
-        {
-            // JS Fallback for embedded videos in a webpage
-            webView.EvaluateJavaScriptAsync($@"(function() {{
-                    var video = document.querySelector('video');
-                    if (video) video.currentTime += {sencond};
-                }})()");
-        }
-
-        public static async Task TogglePlayPause(HassWebView webView)
-        {
-            // JS Fallback for embedded videos in a webpage
-            await webView.EvaluateJavaScriptAsync(@"(function() {
-                    var video = document.querySelector('video');
-                    if (video) {
-                        if (video.paused) {
-                            video.play();
-                        } else {
-                            video.pause();
-                        }
-                    }
-                })()");
-        }
     }
 }
