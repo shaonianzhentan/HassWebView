@@ -71,7 +71,7 @@ public partial class MediaPage : ContentPage, IKeyHandler
 
                 case "Escape":
                 case "Back":
-                    await Shell.Current.GoToAsync("..");
+                    await Navigation.PopAsync();
                     break;
 
                 case "Left":
