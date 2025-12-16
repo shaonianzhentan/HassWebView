@@ -41,7 +41,7 @@ namespace HassWebView.Demo
                     case "OpenVideoPlayer":
                         await MainThread.InvokeOnMainThreadAsync(async () =>
                         {
-                            await Shell.Current.GoToAsync($"{nameof(MediaPage)}?Url={Uri.EscapeDataString(msg)}");
+                            await Shell.Current.GoToAsync($"//{nameof(MainPage)}/{nameof(MediaPage)}?Url={Uri.EscapeDataString(msg)}");
                         });
                         break;
                 }
@@ -53,14 +53,18 @@ namespace HassWebView.Demo
             wv.ResourceLoading += Wv_ResourceLoading;
             Loaded += MainPage_Loaded;
 
+            _cursorControl = new CursorControl(cursor, root, wv);
+            _httpServer = new HttpServer(8080);
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
             // Subscribe to KeyService events
             _keyService.KeyDown += OnKeyDown;
             _keyService.SingleClick += OnSingleClick;
             _keyService.DoubleClick += OnDoubleClick;
             _keyService.LongClick += OnLongClick;
-
-            _cursorControl = new CursorControl(cursor, root, wv);
-            _httpServer = new HttpServer(8080);
         }
 
         private void Wv_ResourceLoading(object? sender, ResourceLoadingEventArgs e)
@@ -150,7 +154,6 @@ namespace HassWebView.Demo
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-            _httpServer.Stop();
             // Unsubscribe from KeyService events to prevent memory leaks
             _keyService.KeyDown -= OnKeyDown;
             _keyService.SingleClick -= OnSingleClick;
