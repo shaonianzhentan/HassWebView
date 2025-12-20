@@ -1,4 +1,5 @@
 using Android.Webkit;
+using Java.Interop;
 
 namespace HassWebView.Core.Bridges
 {
@@ -7,6 +8,7 @@ namespace HassWebView.Core.Bridges
     {
         // 实现分部方法，添加 [JavascriptInterface] 特性供 JS 调用
         [JavascriptInterface]
+        [Export("getExternalAuth")]
         public void getExternalAuth(string message)
         {
             _authAction?.Invoke("getExternalAuth", message);
@@ -14,6 +16,7 @@ namespace HassWebView.Core.Bridges
         }
 
         [JavascriptInterface]
+        [Export("revokeExternalAuth")]
         public void revokeExternalAuth(string message)
         {
             _authAction?.Invoke("revokeExternalAuth", message);

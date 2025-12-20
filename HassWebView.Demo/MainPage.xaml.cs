@@ -1,7 +1,8 @@
-using System.Diagnostics;
+using HassWebView.Core.Bridges;
 using HassWebView.Core.Events;
 using HassWebView.Core.Services;
-using HassWebView.Core.Bridges;
+using System.Diagnostics;
+using System.Web;
 
 namespace HassWebView.Demo
 {
@@ -54,7 +55,7 @@ namespace HassWebView.Demo
             Loaded += MainPage_Loaded;
 
             _cursorControl = new CursorControl(cursor, root, wv);
-            _httpServer = new HttpServer(8080);
+            _httpServer = new HttpServer();
         }
 
         protected override void OnAppearing()
@@ -129,21 +130,28 @@ namespace HassWebView.Demo
                 }
             });
 
-            _httpServer.Get("/api/info", async (req, res) =>
+
+            _httpServer.Post("/link", async (req, res) =>
             {
-                var name = req.Query["name"] ?? "World";
-                var data = new { Message = $"Hello, {name}!", LocalIP = HttpServer.GetLocalIPv4Address(), CurrentTime = DateTime.Now };
-                await res.Json(data);
+                var query = HttpUtility.ParseQueryString(await req.BodyAsync());
+                if (query != null)
+                {
+                    var url = query.Get("url");
+                    if (string.IsNullOrEmpty(url))
+                    {
+                        await res.Text("参数缺失url");
+                        return;
+                    }
+                    MainThread.BeginInvokeOnMainThread(() => wv.Source = url);
+                    await res.Text("发送成功");
+                }
+                else
+                {
+                    await res.Text("参数缺失");
+                }
             });
 
-            _httpServer.Post("/api/echo", async (req, res) =>
-            {
-                var receivedData = await req.JsonAsync<EchoData>();
-                var responseData = new { ReceivedMessage = receivedData.Message, Timestamp = DateTime.Now };
-                await res.Json(responseData);
-            });
-
-            await _httpServer.StartAsync();
+            await _httpServer.StartAsync("*", 8124);
 
             MainThread.BeginInvokeOnMainThread(() => {
                 wv.Source = $"http://{HttpServer.GetLocalIPv4Address()}:8080/";

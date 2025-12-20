@@ -91,10 +91,8 @@ namespace HassWebView.Core.Services
         private readonly Dictionary<string, Dictionary<string, Func<Request, Response, Task>>> _routes =
             new Dictionary<string, Dictionary<string, Func<Request, Response, Task>>>();
 
-        public HttpServer(int port)
+        public HttpServer()
         {
-            if (!HttpListener.IsSupported) throw new NotSupportedException("HttpListener is not supported.");
-            _listener.Prefixes.Add($"http://{GetLocalIPv4Address()}:{port}/");
         }
 
         public void AddRoute(string method, string path, Func<Request, Response, Task> handler)
@@ -112,8 +110,11 @@ namespace HassWebView.Core.Services
         public void Put(string path, Func<Request, Response, Task> handler) => AddRoute("PUT", path, handler);
         public void Delete(string path, Func<Request, Response, Task> handler) => AddRoute("DELETE", path, handler);
 
-        public async Task StartAsync()
+        public async Task StartAsync(string ip, int port)
         {
+            if (!HttpListener.IsSupported) throw new NotSupportedException("HttpListener is not supported.");
+            _listener.Prefixes.Add($"http://{ip}:{port}/");
+
             _listener.Start();
             Console.WriteLine($"Listening on {_listener.Prefixes.First()}...");
             try

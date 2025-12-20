@@ -14,7 +14,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<PackageVersion>0.0.3</PackageVersion>
+		<PackageVersion>0.0.7</PackageVersion>
 		<Authors>Monkey • D • Code</Authors>
 		<Description>适配 Home Assistant 的 WebView 控件，并提供遥控器支持。</Description>
 		<Copyright>Copyright (c) 2025 Monkey • D • Code</Copyright>

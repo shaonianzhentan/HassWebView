@@ -1,25 +1,38 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
-    <title>HassWebView Demo</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>家庭助理TV</title>
     <style>
-        h1 { color: #0078d4; }
-        ul { list-style-type: none; padding: 0; }
-        li { background-color: #fff; margin: 10px 0; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        code { background-color: #e1e1e1; padding: 3px 5px; border-radius: 4px; }
-        a { color: #0078d4; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        body {
+            text-align: center;
+        }
+
+        h3 {
+            margin: 50px;
+        }
+
+        div {
+            margin: 20px;
+        }
+
+        .button {
+            width: 255px;
+        }
     </style>
 </head>
 <body>
-    <h1>Welcome to HassWebView's Internal Web Server!</h1>
-    <p>This page is being served directly from the .NET MAUI application.</p>
-    <p>You can use this to create custom UI, remote control interfaces, or expose APIs to your web view content.</p>
-    <h3>Available API Endpoints:</h3>
-    <ul>
-        <li><code>GET /api/info</code>: Returns system information. Try <a href="/api/info?name=Developer">/api/info?name=Developer</a>.</li>
-        <li><code>POST /api/echo</code>: Echoes back the JSON message you send.</li>
-        <li><code>PUT /api/data</code>: Accepts raw data via PUT request.</li>
-    </ul>
+    <h3>
+        家庭助理TV
+    </h3>
+    <form action="link" method="post">
+        <div>
+            <input type="url" name="url" required placeholder="https://home-assistant.io" />
+        </div>
+        <div>
+            <input class="button" type="submit" value="提交" />
+        </div>
+    </form>
 </body>
 </html>
