@@ -2,10 +2,8 @@ using Android.Graphics;
 using Com.Tencent.Smtt.Export.External.Interfaces;
 using Com.Tencent.Smtt.Sdk;
 using HassWebView.Core.Events;
-using Java.Net;
 
 namespace HassWebView.Core.Platforms.Android;
-
 
 using WebView = Com.Tencent.Smtt.Sdk.WebView;
 
@@ -58,5 +56,10 @@ public class WebViewClientHandler : WebViewClient
         base.DoUpdateVisitedHistory(view, url, isReload);
         _webView.CanGoBack = view.CanGoBack();
         _webView.CanGoForward = view.CanGoForward();
+    }
+
+    public override void OnReceivedSslError(WebView p0, ISslErrorHandler p1, ISslError p2)
+    {
+        p1.Proceed();
     }
 }
