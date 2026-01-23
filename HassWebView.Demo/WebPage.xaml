@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:HassWebView.Core;assembly=HassWebView.Core"
+             x:Class="HassWebView.Demo.WebPage"
+             Shell.NavBarIsVisible="False">
+
+    <!-- 
+        The control now has an x:Name="authView" so we can reference it
+        from the code-behind to set its SourceUrl property.
+    -->
+    <core:HassAuthenticatedView x:Name="authView"
+                                core:RemoteControlBehavior.IsEnabled="True" />
+
+</ContentPage>

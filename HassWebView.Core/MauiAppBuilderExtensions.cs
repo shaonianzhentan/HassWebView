@@ -26,6 +26,9 @@ public static class MauiAppBuilderExtensions
 {
     public static MauiAppBuilder UseHassWebView(this MauiAppBuilder builder)
     {
+        // Register the core authentication service.
+        builder.Services.AddSingleton<IHassAuthService, HassAuthService>();
+
         builder.ConfigureMauiHandlers(handlers =>
         {
 #if ANDROID
@@ -102,6 +105,7 @@ public static class MauiAppBuilderExtensions
         int longPressTimeout = 750,
         int doubleClickTimeout = 150)
     {
+        // This already correctly registers the KeyService, so no changes needed here.
         builder.Services.AddSingleton(new KeyService(longPressTimeout, doubleClickTimeout));
 
         builder.ConfigureLifecycleEvents(events =>
