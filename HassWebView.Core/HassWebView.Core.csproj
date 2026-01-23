@@ -35,4 +35,8 @@
 	  </PackageReference>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <PackageReference Include="HassApi" Version="0.0.1" />
+	</ItemGroup>
+
 </Project>

@@ -1,6 +1,8 @@
 # HassWebView
 适配 Home Assistant 的 MAUI WebView 控件
 
+[![NuGet Version](https://img.shields.io/nuget/v/HassWebView.Core.svg?style=flat-square&logo=nuget)](https://www.nuget.org/packages/HassWebView.Core)
+
 
 MauiProgram.cs
 ```cs
