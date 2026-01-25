@@ -1,5 +1,3 @@
-using System;
-
 namespace HassWebView.Core.Bridges
 {
     // This is the Windows-specific implementation of the ExternalApp partial class.
@@ -18,6 +16,11 @@ namespace HassWebView.Core.Bridges
         {
             _authAction?.Invoke("revokeExternalAuth", message);
             Console.WriteLine($"HassJsBridge.revokeExternalAuth called on Windows with message: {message}");
+        }
+
+        public void OpenVideoPlayer(string url)
+        {
+            _authAction?.Invoke("OpenVideoPlayer", url);
         }
     }
 }

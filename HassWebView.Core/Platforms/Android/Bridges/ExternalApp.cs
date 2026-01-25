@@ -22,5 +22,12 @@ namespace HassWebView.Core.Bridges
             _authAction?.Invoke("revokeExternalAuth", message);
             Console.WriteLine($"HassJsBridge.revokeExternalAuth called on Android with message: {message}");
         }
+
+        [JavascriptInterface]
+        [Export("OpenVideoPlayer")]
+        public void OpenVideoPlayer(string url)
+        {
+            _authAction?.Invoke("OpenVideoPlayer", url);
+        }
     }
 }

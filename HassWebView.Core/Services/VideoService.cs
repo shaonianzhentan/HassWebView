@@ -38,7 +38,7 @@ namespace HassWebView.Core.Services
 
             item.addEventListener('click', () => {{
                 //window.location.href = videoUrl;
-                window.HassJsBridge.OpenVideoPlayer(videoUrl)
+                window.externalApp.OpenVideoPlayer(videoUrl)
             }});
         }}
 
