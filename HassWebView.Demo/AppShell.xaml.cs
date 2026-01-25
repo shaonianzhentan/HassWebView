@@ -1,3 +1,5 @@
+using HassWebView.Core.Views;
+
 namespace HassWebView.Demo
 {
     public partial class AppShell : Shell
@@ -6,8 +8,8 @@ namespace HassWebView.Demo
         {
             InitializeComponent();
 
-            Routing.RegisterRoute(nameof(MediaPage), typeof(MediaPage));
-            Routing.RegisterRoute(nameof(WebPage), typeof(WebPage));
+            Routing.RegisterRoute(nameof(HassMediaPage), typeof(HassMediaPage));
+            Routing.RegisterRoute(nameof(HassAuthPage), typeof(HassAuthPage));
         }
     }
 }

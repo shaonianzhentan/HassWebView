@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.LifecycleEvents;
 using System.Diagnostics;
 using HassWebView.Core.Services;
+using HassWebView.Core.Interfaces;
+
 
 #if ANDROID
 using Com.Tencent.Smtt.Export.External;

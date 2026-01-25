@@ -28,7 +28,7 @@ namespace HassWebView.Core
         public HassWebView()
         {
             // The JS bridge for Home Assistant communication is now built-in.
-            JsBridges.Add("externalApp", new ExternalAppBridge((type, msg) =>
+            JsBridges.Add("externalApp", new ExternalApp((type, msg) =>
             {
                 switch (type)
                 {
@@ -44,20 +44,6 @@ namespace HassWebView.Core
             }));
         }
 
-        /// <summary>
-        /// Called by the host page to send a new access token to the web content.
-        /// </summary>
-        /// <param name="accessToken">The new access token.</param>
-        /// <param name="expiresIn">The token's lifespan in seconds.</param>
-        public void SendAuthTokenToWebView(string accessToken, int expiresIn)
-        {
-            var js = $"window.externalAuthSetToken(true, {{ access_token: '{accessToken}', expires_in: {expiresIn} }});";
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                EvaluateJavaScriptAsync(js);
-            });
-        }
-
         // --- The rest of your original code remains untouched --- 
 
         public static readonly BindableProperty JsBridgesProperty =
@@ -70,19 +56,19 @@ namespace HassWebView.Core
             set => SetValue(JsBridgesProperty, value);
         }
 
-        public static readonly BindableProperty CanGoBackProperty =
+        public new static readonly BindableProperty CanGoBackProperty =
             BindableProperty.Create(nameof(CanGoBack), typeof(bool), typeof(HassWebView), false);
 
-        public bool CanGoBack
+        public new bool CanGoBack
         {
             get => (bool)GetValue(CanGoBackProperty);
             internal set => SetValue(CanGoBackProperty, value);
         }
 
-        public static readonly BindableProperty CanGoForwardProperty =
+        public new static readonly BindableProperty CanGoForwardProperty =
             BindableProperty.Create(nameof(CanGoForward), typeof(bool), typeof(HassWebView), false);
 
-        public bool CanGoForward
+        public new bool CanGoForward
         {
             get => (bool)GetValue(CanGoForwardProperty);
             internal set => SetValue(CanGoForwardProperty, value);

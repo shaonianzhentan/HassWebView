@@ -3,7 +3,7 @@ using System;
 using System.Threading.Tasks;
 using HassApi.Models;
 
-namespace HassWebView.Core.Services
+namespace HassWebView.Core.Interfaces
 {
     public interface IHassAuthService
     {
@@ -17,7 +17,7 @@ namespace HassWebView.Core.Services
         /// <param name="deviceId">The unique ID of the device.</param>
         /// <param name="pushUrl">The push notification URL for the device.</param>
         /// <returns>A redirect URI string for the success case, or null on failure.</returns>
-        Task<string?> ProcessAuthorizationCallbackAsync(Uri callbackUri, string hassUrl, string clientId, string deviceId, string pushUrl);
+        Task<string> ProcessAuthorizationCallbackAsync(Uri callbackUri, string hassUrl, string clientId, string deviceId, string pushUrl);
 
         /// <summary>
         /// Checks if a valid authorization exists, attempts to refresh the access token,
@@ -32,7 +32,7 @@ namespace HassWebView.Core.Services
         /// Refreshes the access token using the stored refresh token. This method is concurrency-safe.
         /// </summary>
         /// <returns>A TokenResult containing the new access token and its expiry, or null on failure.</returns>
-        Task<TokenResult?> RefreshAccessTokenAsync();
+        Task<AuthorizationResult?> RefreshAccessTokenAsync();
 
         /// <summary>
         /// Clears all stored authentication tokens and related data.

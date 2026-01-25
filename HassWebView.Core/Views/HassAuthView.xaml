@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:HassWebView.Core"
+             Shell.NavBarIsVisible="False"
+             x:Class="HassWebView.Core.Views.HassAuthView">
+    <AbsoluteLayout x:Name="root">
+
+        <core:HassWebView 
+            x:Name="wv"
+            UserAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
+            AbsoluteLayout.LayoutFlags="All"
+            AbsoluteLayout.LayoutBounds="0,0,1,1"/>
+
+        <!-- 光标元素（可见鼠标） -->
+        <Frame x:Name="cursor"
+             BackgroundColor="{StaticResource Primary}"
+             BorderColor="{StaticResource PrimaryDark}"
+             CornerRadius="10"
+             WidthRequest="20"
+             HeightRequest="20"
+             IsVisible="True"
+             AbsoluteLayout.LayoutFlags="None"
+             AbsoluteLayout.LayoutBounds="100,100,20,20"
+             Opacity="0.9"/>
+    </AbsoluteLayout>
+    
+</ContentView>

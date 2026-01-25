@@ -30,8 +30,8 @@ namespace HassWebView.Demo
 
             // Register pages for dependency injection
             builder.Services.AddTransient<MainPage>();
-            builder.Services.AddTransient<MediaPage>();
-            builder.Services.AddTransient<WebPage>();
+            //builder.Services.AddTransient<MediaPage>();
+            //builder.Services.AddTransient<WebPage>();
 
             return builder.Build();
         }

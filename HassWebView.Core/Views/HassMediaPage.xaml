@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="HassWebView.Demo.MediaPage"
-             xmlns:hass="clr-namespace:HassWebView.Core;assembly=HassWebView.Core"
-             Shell.NavBarIsVisible="False"
+             x:Class="HassWebView.Core.Views.HassMediaPage"
+             xmlns:core="clr-namespace:HassWebView.Core.Views"
              Title="MediaPage">
-    <hass:HassWebView x:Name="wv" />
+    <core:HassMediaView x:Name="wv" />
 </ContentPage>

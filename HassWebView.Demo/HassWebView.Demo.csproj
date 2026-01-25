@@ -67,10 +67,4 @@
 	  <ProjectReference Include="..\HassWebView.Core\HassWebView.Core.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <MauiXaml Update="MediaPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	</ItemGroup>
-
 </Project>

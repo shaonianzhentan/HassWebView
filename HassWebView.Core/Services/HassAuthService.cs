@@ -1,6 +1,7 @@
 
 using HassApi;
 using HassApi.Models;
+using HassWebView.Core.Interfaces;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Storage;
 using System.Diagnostics;
@@ -15,7 +16,7 @@ namespace HassWebView.Core.Services
         // Concurrency-safe mechanism for token refreshing
         private static readonly SemaphoreSlim _refreshSemaphore = new SemaphoreSlim(1, 1);
 
-        public async Task<string?> ProcessAuthorizationCallbackAsync(Uri callbackUri, string hassUrl, string clientId, string deviceId, string pushUrl)
+        public async Task<string> ProcessAuthorizationCallbackAsync(Uri callbackUri, string hassUrl, string clientId, string deviceId, string pushUrl)
         {
             var hassAuth = new HassAuth(hassUrl, clientId);
             if (!callbackUri.AbsoluteUri.StartsWith(hassAuth.RedirectUri))
@@ -27,11 +28,11 @@ namespace HassWebView.Core.Services
             var code = query["code"];
             if (string.IsNullOrEmpty(code))
             {
-                return null;
+                return string.Empty;
             }
 
             var tokenResult = await hassAuth.GetRefreshTokenAsync(code);
-            if (tokenResult == null) return null;
+            if (tokenResult == null) return string.Empty;
 
             await StoreTokensAsync(tokenResult.AccessToken, tokenResult.RefreshToken, tokenResult.ExpiresIn.ToString());
             await SecureStorage.SetAsync("HassUrl", hassUrl);
@@ -57,7 +58,7 @@ namespace HassWebView.Core.Services
             if (registrationResult?.WebhookId == null) return null;
             
             await SecureStorage.SetAsync("WebhookId", registrationResult.WebhookId);
-            return Uri.EscapeDataString(hassAuth.RedirectUri);
+            return hassAuth.RedirectUri;
         }
 
         public async Task<string?> CheckAndRefreshAuthorizationAsync(string deviceId, string pushUrl)
@@ -91,7 +92,7 @@ namespace HassWebView.Core.Services
             return Uri.EscapeDataString(hassAuth.RedirectUri);
         }
 
-        public async Task<TokenResult?> RefreshAccessTokenAsync()
+        public async Task<AuthorizationResult> RefreshAccessTokenAsync()
         {
             await _refreshSemaphore.WaitAsync();
             try

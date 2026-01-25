@@ -1,70 +1,39 @@
 using HassWebView.Core.Events;
 using HassWebView.Core.Services;
+using Microsoft.Extensions.Hosting;
 using System.Diagnostics;
 
-namespace HassWebView.Demo;
+namespace HassWebView.Core.Views;
 
-[QueryProperty(nameof(Url), "Url")]
-public partial class MediaPage : ContentPage
+public partial class HassMediaView : ContentView
 {
     private readonly KeyService _keyService;
-    public string Url { get; set; }
 
-	public MediaPage(KeyService keyService)
+    public HassMediaView()
 	{
 		InitializeComponent();
-        _keyService = keyService;
-        /*
-        wv.Navigated += (s, e) =>
-        {
-            Debug.WriteLine($"WebView navigated to: {e.Url}");
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                wv.EvaluateJavaScriptAsync($@"
-var meta = document.createElement('meta');
-meta.name = 'viewport';
-meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-document.getElementsByTagName('head')[0].appendChild(meta);
 
-document.documentElement.style.height = '{Height}px';
-document.body.style.height = '{Height}px';
-document.body.style.margin = '0';
-document.body.style.backgroundColor = 'black';
+        _keyService = IPlatformApplication.Current.Services.GetRequiredService<KeyService>();
 
-document.body.innerHTML = `<video controls autoplay src='{Url}' style='width: 100%; height: 100%; object-fit: contain; position:fixed; top:0; left:0; background:black;'></video>`
-                ");
-            });
-        };
-        */
+        this.Loaded += HassMediaView_Loaded;
+        this.Unloaded += HassMediaView_Unloaded;
     }
 
-    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    private void HassMediaView_Loaded(object sender, EventArgs e)
     {
-        base.OnNavigatedTo(args);
-        var uri = new Uri(Url);
-        //wv.Source = $"{uri.Scheme}://{uri.Host}/";
-        LoadUrl(Url); 
-    }
-
-    protected override void OnAppearing()
-    {
-        base.OnAppearing();
         _keyService.KeyDown += OnKeyDown;
         _keyService.SingleClick += OnSingleClick;
-        _keyService.DoubleClick += OnDoubleClick;
         _keyService.LongClick += OnLongClick;
     }
 
-    protected override void OnDisappearing()
+    private void HassMediaView_Unloaded(object sender, EventArgs e)
     {
-        base.OnDisappearing();
         _keyService.KeyDown -= OnKeyDown;
         _keyService.SingleClick -= OnSingleClick;
-        _keyService.DoubleClick -= OnDoubleClick;
         _keyService.LongClick -= OnLongClick;
     }
 
-    void LoadUrl(string videoUrl)
+    public void LoadUrl(string videoUrl, string baseUrl)
     {
         if (string.IsNullOrEmpty(videoUrl)) return;
         Debug.WriteLine($"Loading video URL: {videoUrl}");
@@ -84,9 +53,13 @@ document.body.innerHTML = `<video controls autoplay src='{Url}' style='width: 10
                 </html>";
 
         var uri = new Uri(videoUrl);
+        if (string.IsNullOrEmpty(baseUrl))
+        {
+            baseUrl = $"{uri.Scheme}://{uri.Host}/";
+        }
         var htmlSource = new HtmlWebViewSource
         {
-            BaseUrl = $"{uri.Scheme}://{uri.Host}/",
+            BaseUrl =baseUrl,
             Html = htmlContent
         };
         Debug.WriteLine("Setting WebView source with HTML content.");
@@ -119,9 +92,9 @@ document.body.innerHTML = `<video controls autoplay src='{Url}' style='width: 10
     {
         if (args.KeyName == "VolumeUp" || args.KeyName == "VolumeDown")
         {
-            return false; // Let the system handle volume keys
+            return false;
         }
-        return true; // We will handle all other keys
+        return true;
     }
 
     public void OnSingleClick(object sender, RemoteKeyEventArgs e)
@@ -142,20 +115,15 @@ document.body.innerHTML = `<video controls autoplay src='{Url}' style='width: 10
 
                 case "Left":
                 case "DpadLeft":
-                    VideoSeek(-5); 
+                    VideoSeek(-5);
                     break;
 
                 case "Right":
                 case "DpadRight":
-                    VideoSeek(5); 
+                    VideoSeek(5);
                     break;
             }
         });
-    }
-    
-    public void OnDoubleClick(object sender, RemoteKeyEventArgs args)
-    {
-        // No action 
     }
 
     public void OnLongClick(object sender, RemoteKeyEventArgs e)
@@ -173,4 +141,6 @@ document.body.innerHTML = `<video controls autoplay src='{Url}' style='width: 10
                 break;
         }
     }
+
+
 }
