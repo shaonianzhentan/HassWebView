@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>连接到 Home Assistant</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            padding: 40px;
+            border-radius: 12px;
+            background-color: #2a2a2a;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 0.5em;
+        }
+        p {
+            font-size: 1.2em;
+            color: #bbbbbb;
+            margin-bottom: 2em;
+        }
+        input[type="url"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: #fff;
+            box-sizing: border-box; /* Important for padding */
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.4em;
+            border: none;
+            border-radius: 8px;
+            background-color: #03a9f4; /* Home Assistant Blue */
+            color: white;
+            cursor: pointer;
+            margin-top: 1.5em;
+            transition: background-color 0.3s;
+        }
+        button:hover, button:focus {
+            background-color: #0288d1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>设置您的 Home Assistant</h1>
+        <p>请输入您的 Home Assistant 实例的地址 (例如 http://homeassistant.local:8123)</p>
+        <form id="hass-url-form">
+            <input type="url" id="hass-url-input" placeholder="https://your-home-assistant-url" required>
+            <button type="submit">连接</button>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('hass-url-form');
+        const input = document.getElementById('hass-url-input');
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault(); // Stop the default form submission
+            const url = input.value;
+            if (url) {
+                // Use the correct camelCase externalApp object
+                if (window.externalApp && typeof window.externalApp.submitUrl === 'function') {
+                    window.externalApp.submitUrl(url);
+                } else {
+                    console.error("The 'externalApp.submitUrl' function is not available.");
+                }
+            }
+        });
+    </script>
+</body>
+</html>
