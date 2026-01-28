@@ -1,4 +1,3 @@
-
 using System;
 using System.Threading.Tasks;
 using HassApi.Models;
@@ -8,34 +7,41 @@ namespace HassWebView.Core.Interfaces
     public interface IHassAuthService
     {
         /// <summary>
-        /// Processes the OAuth2 callback from Home Assistant, exchanges the authorization code for tokens,
-        /// and registers the mobile app.
+        /// Processes the OAuth2 callback, exchanges the code for tokens, and registers the app.
+        /// All successful authentication data is stored securely.
         /// </summary>
-        /// <param name="callbackUri">The full callback URI containing the 'code' query parameter.</param>
-        /// <param name="hassUrl">The base URL of the Home Assistant instance.</param>
-        /// <param name="clientId">The Client ID for the OAuth2 application.</param>
-        /// <param name="deviceId">The unique ID of the device.</param>
-        /// <param name="pushUrl">The push notification URL for the device.</param>
-        /// <returns>A redirect URI string for the success case, or null on failure.</returns>
         Task<string> ProcessAuthorizationCallbackAsync(Uri callbackUri, string hassUrl, string clientId, string deviceId, string pushUrl);
 
         /// <summary>
-        /// Checks if a valid authorization exists, attempts to refresh the access token,
-        /// and updates the mobile app registration.
+        /// Checks if a valid authorization exists and attempts to refresh the access token.
         /// </summary>
-        /// <param name="deviceId">The unique ID of the device.</param>
-        /// <param name="pushUrl">The push notification URL for the device.</param>
-        /// <returns>The redirect URI on success, otherwise null.</returns>
         Task<string?> CheckAndRefreshAuthorizationAsync(string deviceId, string pushUrl);
 
         /// <summary>
-        /// Refreshes the access token using the stored refresh token. This method is concurrency-safe.
+        /// Refreshes the access token using the securely stored refresh token.
         /// </summary>
-        /// <returns>A TokenResult containing the new access token and its expiry, or null on failure.</returns>
         Task<AuthorizationResult?> RefreshAccessTokenAsync();
 
         /// <summary>
-        /// Clears all stored authentication tokens and related data.
+        /// Retrieves the stored Home Assistant URL.
+        /// </summary>
+        /// <returns>The URL, or null if not found.</returns>
+        Task<string?> GetHassUrlAsync();
+
+        /// <summary>
+        /// Retrieves the stored Client ID.
+        /// </summary>
+        /// <returns>The Client ID, or null if not found.</returns>
+        Task<string?> GetClientIdAsync();
+
+        /// <summary>
+        /// Retrieves the stored Webhook ID.
+        /// </summary>
+        /// <returns>The Webhook ID, or null if not found.</returns>
+        Task<string?> GetWebhookIdAsync();
+
+        /// <summary>
+        /// Clears all stored authentication data.
         /// </summary>
         void Logout();
     }

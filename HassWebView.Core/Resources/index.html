@@ -76,12 +76,8 @@
             event.preventDefault(); // Stop the default form submission
             const url = input.value;
             if (url) {
-                // Use the correct camelCase externalApp object
-                if (window.externalApp && typeof window.externalApp.submitUrl === 'function') {
-                    window.externalApp.submitUrl(url);
-                } else {
-                    console.error("The 'externalApp.submitUrl' function is not available.");
-                }
+                // New logic: Navigate to a specific URL pattern that the app can intercept
+                window.location.href = `index.html?url=${encodeURIComponent(url)}`;
             }
         });
     </script>
