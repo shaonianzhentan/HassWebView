@@ -2,6 +2,7 @@ using HassApi;
 using HassWebView.Core.Interfaces;
 using HassWebView.Core.Services;
 using Microsoft.Maui.Controls;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace HassWebView.Core.Views;
@@ -22,6 +23,7 @@ public partial class HassPage : ContentPage
     private readonly IHassAuthService _authService;
     private readonly KeyService _keyService;
     private readonly HttpClient _httpClient = new();
+    private readonly CursorControl _cursorControl;
 
     public HassPage()
     {
@@ -30,7 +32,11 @@ public partial class HassPage : ContentPage
         _authService = IPlatformApplication.Current.Services.GetRequiredService<IHassAuthService>();
         _keyService = IPlatformApplication.Current.Services.GetRequiredService<KeyService>();
 
-        cursor.IsVisible = _keyService != null;
+        if (_keyService != null)
+        {
+            cursor.IsVisible = true;
+            _cursorControl = new CursorControl(cursor, root, wv);
+        }
 
         wv.Navigating += OnWebViewNavigating;
         wv.AuthTokenRequested += OnWebViewAuthTokenRequested;
@@ -54,6 +60,18 @@ public partial class HassPage : ContentPage
         {
             LoadUrlInputView();
         }
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        SetupKeyServiceListeners(true);
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        SetupKeyServiceListeners(false);
     }
 
     private async void OnUrlSubmitted(object sender, string urlFromJs)
@@ -80,7 +98,7 @@ public partial class HassPage : ContentPage
             var redirectUrl = await _authService.ProcessAuthorizationCallbackAsync(new Uri(e.Url), this.Url, this.ClientId, this.DeviceId, this.PushUrl);
             if (!string.IsNullOrEmpty(redirectUrl))
             {
-                e.Cancel = true; 
+                e.Cancel = true;
                 var navigationUrl = $"//{nameof(HassPage)}?url={Uri.EscapeDataString(redirectUrl)}";
                 await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync(navigationUrl));
             }
@@ -106,7 +124,6 @@ public partial class HassPage : ContentPage
     private void LoadUrlInputView()
     {
         var assembly = typeof(HassPage).GetTypeInfo().Assembly;
-        // The resource name is your assembly name (HassWebView.Core) plus the folder structure and file name.
         string resourceName = "HassWebView.Core.Resources.index.html";
         string htmlContent;
 
@@ -114,7 +131,6 @@ public partial class HassPage : ContentPage
         {
             if (stream == null)
             {
-                // Handle the error, maybe display an alert or log it
                 wv.Source = new HtmlWebViewSource { Html = "<h1>Error: Embedded resource not found.</h1>" };
                 return;
             }
@@ -156,4 +172,152 @@ public partial class HassPage : ContentPage
             return false;
         }
     }
+
+    #region KeyService Handlers
+
+    private void SetupKeyServiceListeners(bool subscribe)
+    {
+        if (_keyService is null) return;
+
+        if (subscribe)
+        {
+            _keyService.SingleClick += OnSingleClick;
+            _keyService.DoubleClick += OnDoubleClick;
+            _keyService.LongClick += OnLongClick;
+            _keyService.KeyDown += OnFilterKeyDown;
+        }
+        else
+        {
+            _keyService.SingleClick -= OnSingleClick;
+            _keyService.DoubleClick -= OnDoubleClick;
+            _keyService.LongClick -= OnLongClick;
+            _keyService.KeyDown -= OnFilterKeyDown;
+        }
+    }
+
+    private bool OnFilterKeyDown(object sender, RemoteKeyEventArgs e)
+    {
+        // Prevent volume keys from being processed by this page
+        if (e.KeyName == "VolumeUp" || e.KeyName == "VolumeDown")
+        {
+            return false;
+        }
+        return true;
+    }
+
+    private void OnSingleClick(object sender, RemoteKeyEventArgs e)
+    {
+        Debug.WriteLine($"OnSingleClick = {e.KeyName}");
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            switch (e.KeyName)
+            {
+                case "Enter":
+                case "DpadCenter":
+                    _cursorControl.Click();
+                    break;
+                case "Escape":
+                case "Back":
+                    if (wv.CanGoBack)
+                    {
+                        wv.GoBack();
+                    }
+                    break;
+                case "Up":
+                case "DpadUp":
+                    _cursorControl.MoveUpBy();
+                    break;
+                case "Down":
+                case "DpadDown":
+                    _cursorControl.MoveDownBy();
+                    break;
+                case "Left":
+                case "DpadLeft":
+                    _cursorControl.MoveLeftBy();
+                    break;
+                case "Right":
+                case "DpadRight":
+                    _cursorControl.MoveRightBy();
+                    break;
+                case "Menu":
+                    // VideoService.ToggleVideoPanel(wv); // Assuming VideoService exists
+                    break;
+            }
+        });
+    }
+
+    private void OnDoubleClick(object sender, RemoteKeyEventArgs e)
+    {
+        Debug.WriteLine($"OnDoubleClick = {e.KeyName}");
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            if (_cursorControl is null) return;
+            switch (e.KeyName)
+            {
+                case "Enter":
+                case "DpadCenter":
+                    _cursorControl.DoubleClick();
+                    break;
+                case "Up":
+                case "DpadUp":
+                    _cursorControl.SlideUp();
+                    break;
+                case "Down":
+                case "DpadDown":
+                    _cursorControl.SlideDown();
+                    break;
+                case "Left":
+                case "DpadLeft":
+                    _cursorControl.SlideLeft();
+                    break;
+                case "Right":
+                case "DpadRight":
+                    _cursorControl.SlideRight();
+                    break;
+            }
+        });
+    }
+
+    private void OnLongClick(object sender, RemoteKeyEventArgs e)
+    {
+        Debug.WriteLine($"OnLongClick = {e.KeyName}");
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            if (_cursorControl is null) return;
+            var repeatInterval = 100;
+            switch (e.KeyName)
+            {
+                case "Up":
+                case "DpadUp":
+                    _keyService.StartRepeatingAction(() => _cursorControl.MoveUpBy(), repeatInterval);
+                    break;
+                case "Down":
+                case "DpadDown":
+                    _keyService.StartRepeatingAction(() => _cursorControl.MoveDownBy(), repeatInterval);
+                    break;
+                case "Left":
+                case "DpadLeft":
+                    _keyService.StartRepeatingAction(() => _cursorControl.MoveLeftBy(), repeatInterval);
+                    break;
+                case "Right":
+                case "DpadRight":
+                    _keyService.StartRepeatingAction(() => _cursorControl.MoveRightBy(), repeatInterval);
+                    break;
+                case "Escape":
+                case "Back":
+                    // Optimized: Use existing properties instead of re-reading from SecureStorage
+                    if (!string.IsNullOrEmpty(this.Url) && !string.IsNullOrEmpty(this.ClientId))
+                    {
+                        HassAuth hassAuth = new HassAuth(this.Url, this.ClientId);
+                        wv.Source = hassAuth.RedirectUri;
+                    }
+                    break;
+            }
+        });
+    }
+
+    #endregion
 }

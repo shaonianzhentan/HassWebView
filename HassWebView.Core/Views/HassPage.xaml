@@ -19,7 +19,7 @@
              CornerRadius="10"
              WidthRequest="20"
              HeightRequest="20"
-             IsVisible="True"
+             IsVisible="False"
              AbsoluteLayout.LayoutFlags="None"
              AbsoluteLayout.LayoutBounds="100,100,20,20"
              Opacity="0.9"/>
