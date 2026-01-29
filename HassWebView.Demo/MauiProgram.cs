@@ -16,7 +16,27 @@ namespace HassWebView.Demo
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 })
                 // This extension method now handles registering IHassAuthService.
-                .UseHassWebView()
+                .UseHassWebView(options =>
+                {
+                    // 配置设置页面的导航
+                    options.ShowSettingsScreen = () =>
+                    {
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            // Shell.Current.GoToAsync("///MySettingsPage");
+                        });
+                    };
+
+                    // 配置视频播放的导航
+                    options.PlayVideo = (url) =>
+                    {
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            // 用户在这里决定导航到哪个页面，例如 HassMediaPage
+                            Shell.Current.GoToAsync($"{nameof(HassMediaPage)}?Url={Uri.EscapeDataString(url)}");
+                        });
+                    };
+                })
                 // This is for Android fullscreen.
                 .UseImmersiveMode()
                 // This extension method now handles registering KeyService and platform-specific key listeners.

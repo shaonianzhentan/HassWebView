@@ -6,6 +6,5 @@ namespace HassWebView.Core.Configuration
     {
         public Action ShowSettingsScreen { get; set; }
         public Action<string> PlayVideo { get; set; }
-        public Action<string> OpenMediaPlayer { get; set; }
     }
 }

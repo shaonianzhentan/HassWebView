@@ -197,10 +197,7 @@ public partial class HassPage : ContentPage
             else if (type == "video/open")
             {
                 var videoUrl = msg?["data"]?.GetValue<string>();
-                if (!string.IsNullOrEmpty(videoUrl))
-                {
-                    _options.OpenMediaPlayer?.Invoke(videoUrl);
-                }
+                
             }
         }
         catch (JsonException ex)
