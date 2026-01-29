@@ -17,10 +17,10 @@ namespace HassWebView.Core.Bridges
             _authAction?.Invoke("revokeExternalAuth", message);
             Console.WriteLine($"HassJsBridge.revokeExternalAuth called on Windows with message: {message}");
         }
-
-        public void OpenVideoPlayer(string url)
+        
+        public void externalBus(string message)
         {
-            _authAction?.Invoke("OpenVideoPlayer", url);
+            _authAction?.Invoke("externalBus", message);
         }
     }
 }

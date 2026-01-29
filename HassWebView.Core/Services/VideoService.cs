@@ -38,7 +38,10 @@ namespace HassWebView.Core.Services
 
             item.addEventListener('click', () => {{
                 //window.location.href = videoUrl;
-                window.externalApp.OpenVideoPlayer(videoUrl)
+                window.externalApp.externalBus(JSON.stringify({{
+                    type: 'video/play',
+                    data: videoUrl
+                }}))
             }});
         }}
 

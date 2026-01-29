@@ -1,10 +1,13 @@
 using HassApi;
+using HassWebView.Core.Configuration;
 using HassWebView.Core.Interfaces;
 using HassWebView.Core.Services;
 using Microsoft.Maui.Controls;
 using System.Diagnostics;
 using System.Net;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Web;
 
 namespace HassWebView.Core.Views;
@@ -24,6 +27,7 @@ public partial class HassPage : ContentPage
 
     private readonly IHassAuthService _authService;
     private readonly KeyService _keyService;
+    private readonly HassWebViewOptions _options;
     private readonly HttpClient _httpClient = new();
     private readonly CursorControl _cursorControl;
     private bool _isInitialized = false; // The flag to ensure one-time initialization
@@ -33,7 +37,8 @@ public partial class HassPage : ContentPage
         InitializeComponent();
 
         _authService = IPlatformApplication.Current.Services.GetRequiredService<IHassAuthService>();
-        _keyService = IPlatformApplication.Current.Services.GetRequiredService<KeyService>();
+        _keyService = IPlatformApplication.Current.Services.GetService<KeyService>();
+        _options = IPlatformApplication.Current.Services.GetRequiredService<HassWebViewOptions>();
 
         if (_keyService != null)
         {
@@ -44,6 +49,7 @@ public partial class HassPage : ContentPage
         wv.Navigating += OnWebViewNavigating;
         wv.AuthTokenRequested += OnWebViewAuthTokenRequested;
         wv.LogoutRequested += OnWebViewLogoutRequested;
+        wv.ExternalBusMessageReceived += OnExternalBusMessageReceived;
     }
 
     protected override async void OnNavigatedTo(NavigatedToEventArgs args)
@@ -144,6 +150,53 @@ public partial class HassPage : ContentPage
         }
     }
 
+    private async void OnExternalBusMessageReceived(object? sender, string message)
+    {
+        if (string.IsNullOrEmpty(message))
+        {
+            return;
+        }
+
+        try
+        {
+            var msg = JsonNode.Parse(message);
+            var type = msg?["type"]?.GetValue<string>();
+            if (type == "config/get")
+            {
+                var id = msg["id"]?.GetValue<int>();
+
+                var response = new
+                {
+                    id,
+                    type = "result",
+                    success = true,
+                    result = new
+                    {
+                        hasSettingsScreen = true,
+                        canWriteTag = false
+                    }
+                };
+
+                var responseJson = JsonSerializer.Serialize(response);
+                var js = $"window.externalBus({responseJson});";
+
+                await MainThread.InvokeOnMainThreadAsync(() => wv.EvaluateJavaScriptAsync(js));
+            }
+            else if (type == "config_screen/show")
+            {
+                _options.ShowSettingsScreen?.Invoke();
+            }
+            else if (type == "video/play")
+            {
+                
+            }
+        }
+        catch (JsonException ex)
+        {
+            Debug.WriteLine($"[ExternalBus] Error parsing JSON: {ex.Message}");
+        }
+    }
+
     private void LoadEmbeddedHtml(string resourceName)
     {
         var assembly = GetType().GetTypeInfo().Assembly;
@@ -179,7 +232,7 @@ public partial class HassPage : ContentPage
             return false;
         }
     }
-    
+
     protected override void OnAppearing()
     {
         base.OnAppearing();

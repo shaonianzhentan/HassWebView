@@ -4,7 +4,7 @@ using Microsoft.Maui.LifecycleEvents;
 using System.Diagnostics;
 using HassWebView.Core.Services;
 using HassWebView.Core.Interfaces;
-
+using HassWebView.Core.Configuration;
 
 #if ANDROID
 using Com.Tencent.Smtt.Export.External;
@@ -26,8 +26,12 @@ namespace HassWebView.Core;
 
 public static class MauiAppBuilderExtensions
 {
-    public static MauiAppBuilder UseHassWebView(this MauiAppBuilder builder)
+    public static MauiAppBuilder UseHassWebView(this MauiAppBuilder builder, Action<HassWebViewOptions> setupAction = null)
     {
+        var options = new HassWebViewOptions();
+        setupAction?.Invoke(options);
+        builder.Services.AddSingleton(options);
+
         // Register the core authentication service.
         builder.Services.AddSingleton<IHassAuthService, HassAuthService>();
 

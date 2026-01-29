@@ -23,6 +23,11 @@ namespace HassWebView.Core
         /// Raised when the web content requests to log out.
         /// </summary>
         public event EventHandler LogoutRequested;
+
+        /// <summary>
+        /// Raised when the web content sends a message via the external bus.
+        /// </summary>
+        public event EventHandler<string> ExternalBusMessageReceived;
         #endregion
 
         public HassWebView()
@@ -39,6 +44,10 @@ namespace HassWebView.Core
                     case "revokeExternalAuth":
                         // The web page wants to log out. Raise the event.
                         LogoutRequested?.Invoke(this, EventArgs.Empty);
+                        break;
+                    case "externalBus":
+                        // Pass the message to the host page
+                        ExternalBusMessageReceived?.Invoke(this, msg as string);
                         break;
                 }
             }));

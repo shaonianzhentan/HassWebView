@@ -3,10 +3,10 @@ using Java.Interop;
 
 namespace HassWebView.Core.Bridges
 {
-    // Android ÌØ¶¨ÊµÏÖ²¿·Ö£º¼Ì³Ð Java.Lang.Object ÒÔ¼æÈÝ AddJavascriptInterface
+    // Android ï¿½Ø¶ï¿½Êµï¿½Ö²ï¿½ï¿½Ö£ï¿½ï¿½Ì³ï¿½ Java.Lang.Object ï¿½Ô¼ï¿½ï¿½ï¿½ AddJavascriptInterface
     public partial class ExternalApp : Java.Lang.Object
     {
-        // ÊµÏÖ·Ö²¿·½·¨£¬Ìí¼Ó [JavascriptInterface] ÌØÐÔ¹© JS µ÷ÓÃ
+        // Êµï¿½Ö·Ö²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ [JavascriptInterface] ï¿½ï¿½ï¿½Ô¹ï¿½ JS ï¿½ï¿½ï¿½ï¿½
         [JavascriptInterface]
         [Export("getExternalAuth")]
         public void getExternalAuth(string message)
@@ -24,10 +24,10 @@ namespace HassWebView.Core.Bridges
         }
 
         [JavascriptInterface]
-        [Export("OpenVideoPlayer")]
-        public void OpenVideoPlayer(string url)
+        [Export("externalBus")]
+        public void externalBus(string message)
         {
-            _authAction?.Invoke("OpenVideoPlayer", url);
+            _authAction?.Invoke("externalBus", message);
         }
     }
 }
