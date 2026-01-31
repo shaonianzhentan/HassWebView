@@ -1,4 +1,5 @@
 using HassWebView.Core;
+using HassWebView.Core.Views;
 using Microsoft.Extensions.Logging;
 
 namespace HassWebView.Demo
@@ -50,8 +51,8 @@ namespace HassWebView.Demo
 
             // Register pages for dependency injection
             builder.Services.AddTransient<MainPage>();
-            //builder.Services.AddTransient<MediaPage>();
-            //builder.Services.AddTransient<WebPage>();
+            builder.Services.AddTransient<HassPage>();
+            builder.Services.AddTransient<HassMediaPage>();
 
             return builder.Build();
         }

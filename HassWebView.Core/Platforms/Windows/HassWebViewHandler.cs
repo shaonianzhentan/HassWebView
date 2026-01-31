@@ -243,9 +243,11 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         }
         else if (source is HtmlWebViewSource htmlSource)
         {
+            /*
             _pendingHtml = htmlSource.Html;
             _pendingBaseUrl = htmlSource.BaseUrl ?? "http://local.html";
-            PlatformView.CoreWebView2.Navigate(_pendingBaseUrl);
+            */
+            PlatformView.CoreWebView2.NavigateToString(htmlSource.Html);
         }
     }
 

@@ -1,8 +1,8 @@
-using HassApi;
 using HassWebView.Core.Configuration;
-using HassWebView.Core.Interfaces;
+using HassWebView.Core.Events;
 using HassWebView.Core.Services;
-using Microsoft.Maui.Controls;
+using HassWebView.HassApi;
+using HassWebView.HassApi.Models;
 using System.Diagnostics;
 using System.Net;
 using System.Reflection;
@@ -14,18 +14,94 @@ namespace HassWebView.Core.Views;
 
 [QueryProperty(nameof(Url), "url")]
 [QueryProperty(nameof(Mode), "mode")]
-[QueryProperty(nameof(ClientId), "clientId")]
 [QueryProperty(nameof(DeviceId), "deviceId")]
 [QueryProperty(nameof(PushUrl), "pushUrl")]
 public partial class HassPage : ContentPage
 {
     public string Url { get; set; }
     public string Mode { get; set; }
-    public string ClientId { get; set; }
-    public string DeviceId { get; set; }
-    public string PushUrl { get; set; }
 
-    private readonly IHassAuthService _authService;
+    public string DeviceId
+    {
+        get
+        {
+            return Preferences.Get("DeviceId", "");
+        }
+        set
+        {
+            if (!string.IsNullOrEmpty(value)) Preferences.Set("DeviceId", value);
+        }
+    }
+    public string PushUrl
+    {
+        get {
+            return Preferences.Get("PushUrl", "");
+        }
+        set
+        {
+            if (!string.IsNullOrEmpty(value)) Preferences.Set("PushUrl", value);
+        }
+    }
+    public string HassUrl
+    {
+        get
+        {
+            return Preferences.Get("HassUrl", "");
+        }
+        set
+        {
+            Preferences.Set("HassUrl", value);
+        }
+    }
+    public string WebhookId
+    {
+        get
+        {
+            return Preferences.Get("WebhookId", "");
+        }
+        set
+        {
+            Preferences.Set("WebhookId", value);
+        }
+    }
+    public string RefreshToken
+    {
+        get
+        {
+            return Preferences.Get("RefreshToken", "");
+        }
+        set
+        {
+            Preferences.Set("RefreshToken", value);
+        }
+    }
+    public string AccessToken
+    {
+        get
+        {
+            return Preferences.Get("AccessToken", "");
+        }
+        set
+        {
+            Preferences.Set("AccessToken", value);
+        }
+    }
+    public int ExpiresIn
+    {
+        get
+        {
+            return Preferences.Get("ExpiresIn", 0);
+        }
+        set
+        {
+            Preferences.Set("ExpiresIn", value);
+        }
+    }
+
+    
+
+
+
     private readonly KeyService _keyService;
     private readonly HassWebViewOptions _options;
     private readonly HttpClient _httpClient = new();
@@ -36,7 +112,6 @@ public partial class HassPage : ContentPage
     {
         InitializeComponent();
 
-        _authService = IPlatformApplication.Current.Services.GetRequiredService<IHassAuthService>();
         _keyService = IPlatformApplication.Current.Services.GetService<KeyService>();
         _options = IPlatformApplication.Current.Services.GetRequiredService<HassWebViewOptions>();
 
@@ -65,11 +140,6 @@ public partial class HassPage : ContentPage
             LoadEmbeddedHtml("HassWebView.Core.Resources.index.html");
             return;
         }
-        if (effectiveMode == "login" && !string.IsNullOrEmpty(Url))
-        {
-            StartAuthentication(Url, ClientId);
-            return;
-        }
         if (!string.IsNullOrEmpty(Url))
         {
             wv.Source = new UrlWebViewSource { Url = this.Url };
@@ -84,70 +154,89 @@ public partial class HassPage : ContentPage
         _isInitialized = true; // Set the flag immediately to prevent re-entry.
 
         // --- Start of one-time initialization logic ---
-        var webhookId = await _authService.GetWebhookIdAsync();
-        if (string.IsNullOrEmpty(webhookId))
+        if (string.IsNullOrEmpty(HassUrl) || string.IsNullOrEmpty(RefreshToken) || string.IsNullOrEmpty(WebhookId))
         {
-            // Not logged in, navigate to auth mode.
             await GoToAuthMode();
         }
         else
         {
-            // Already logged in, navigate to the HA instance.
-            var hassUrl = await _authService.GetHassUrlAsync();
-            var clientId = await _authService.GetClientIdAsync();
-            if (!string.IsNullOrEmpty(hassUrl) && !string.IsNullOrEmpty(clientId))
-            {
-                var hassAuth = new HassAuth(hassUrl, clientId);
-                var navigationUrl = $"//{nameof(HassPage)}?url={Uri.EscapeDataString(hassAuth.RedirectUri)}";
-                await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync(navigationUrl));
-            }
-            else
-            {
-                // Data is inconsistent, force re-authentication.
+            // 检查是否授权
+            var tokenResult = await RefreshAccessTokenAsync();
+            if (tokenResult == null) {
+
                 await GoToAuthMode();
-            }
+                return;
+                    }
+
+            var mobileApp = new MobileApp(HassUrl, WebhookId);
+            await mobileApp.UpdateRegistrationAsync(new UpdateRegistrationRequest
+            {
+                AppVersion = AppInfo.Current.VersionString,
+                DeviceName = $"{DeviceInfo.Current.Platform} {DeviceInfo.Name}",
+                Model = DeviceInfo.Current.Model,
+                Manufacturer = DeviceInfo.Current.Manufacturer,
+                OsVersion = DeviceInfo.Current.VersionString,
+                AppData = new MobileAppData(DeviceId, PushUrl)
+            });
+
+
+            var hassAuth = new HassAuth(HassUrl);
+            var navigationUrl = $"/{nameof(HassPage)}?url={Uri.EscapeDataString(hassAuth.RedirectUri)}";
+            await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync(navigationUrl));
+
         }
         // --- End of one-time initialization logic ---
     }
 
     private async void OnWebViewNavigating(object? sender, WebNavigatingEventArgs e)
     {
+        Debug.WriteLine(e.Url);
         var navigatingUrl = e.Url;
         string effectiveMode = Mode?.ToLower();
 
-        if (effectiveMode == "auth" && navigatingUrl.Contains("?url="))
-        {
-            e.Cancel = true; // Stop the navigation
-
-            var uri = new Uri(navigatingUrl);
-            var queryParams = HttpUtility.ParseQueryString(uri.Query);
-            var urlFromForm = queryParams["url"];
-
-            bool isValid = await IsHassUrlValid(urlFromForm);
-            if (isValid)
-            {
-                var navigationUrl = $"//{nameof(HassPage)}?mode=login&url={Uri.EscapeDataString(urlFromForm)}" +
-                                    $"&clientId={Uri.EscapeDataString(this.ClientId)}" +
-                                    $"&deviceId={Uri.EscapeDataString(this.DeviceId)}" +
-                                    $"&pushUrl={Uri.EscapeDataString(this.PushUrl)}";
-                await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync(navigationUrl));
-            }
-            else
-            {
-                await DisplayAlert("Validation Failed", "This does not appear to be a valid Home Assistant URL.", "OK");
-            }
-            return;
-        }
-
         if (effectiveMode == "login")
         {
-            var redirectUrl = await _authService.ProcessAuthorizationCallbackAsync(new Uri(navigatingUrl), this.Url, this.ClientId, this.DeviceId, this.PushUrl);
-            if (!string.IsNullOrEmpty(redirectUrl))
+            var uri = new Uri(navigatingUrl);
+            var query = HttpUtility.ParseQueryString(uri.Query);
+            var code = query["code"];
+            if (string.IsNullOrEmpty(code)) return;
+
+            var hassUrl = HassUrl;
+            var hassAuth = new HassAuth(hassUrl);
+            var tokenResult = await hassAuth.GetRefreshTokenAsync(code);
+            if (tokenResult == null) return;
+
+            // Store tokens and identifiers
+            Preferences.Set("AccessToken", tokenResult.AccessToken);
+            Preferences.Set("RefreshToken", tokenResult.RefreshToken);
+            Preferences.Set("ExpiresIn", tokenResult.ExpiresIn);
+
+            var deviceId = DeviceId;
+
+            var hassClient = new HassClient(hassUrl, tokenResult.AccessToken);
+            var registrationRequest = new MobileAppRegistrationRequest
             {
-                e.Cancel = true;
-                var navigationUrl = $"//{nameof(HassPage)}?url={Uri.EscapeDataString(redirectUrl)}";
-                await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync(navigationUrl));
-            }
+                AppId = AppInfo.Current.PackageName,
+                AppName = AppInfo.Current.Name,
+                AppVersion = AppInfo.Current.VersionString,
+                DeviceId = deviceId,
+                DeviceName = $"{DeviceInfo.Current.Platform} {DeviceInfo.Name}",
+                Model = DeviceInfo.Current.Model,
+                Manufacturer = DeviceInfo.Current.Manufacturer,
+                OsName = DeviceInfo.Current.Platform.ToString(),
+                OsVersion = DeviceInfo.Current.VersionString,
+                SupportsEncryption = false,
+                AppData = new MobileAppData(deviceId, PushUrl)
+            };
+
+            var registrationResult = await hassClient.RegisterMobileAppAsync(registrationRequest);
+            if (registrationResult?.WebhookId == null) return;
+
+            Preferences.Set("WebhookId", registrationResult.WebhookId);
+            var navigationUrl = $"/{nameof(HassPage)}?url={Uri.EscapeDataString(hassAuth.RedirectUri)}";
+
+            await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync(navigationUrl));
+
         }
     }
 
@@ -263,6 +352,26 @@ public partial class HassPage : ContentPage
             {
                 var videoUrl = msg?["data"]?.GetValue<string>();
                 
+            }else if(type == "auth")
+            {
+                var urlFromForm = msg?["data"]?.GetValue<string>();
+
+                bool isValid = await IsHassUrlValid(urlFromForm);
+                if (isValid)
+                {
+                    var uri = new Uri(urlFromForm);
+                    HassUrl = $"{uri.Scheme}://{uri.Authority}";
+                    HassAuth hassAuth = new HassAuth(HassUrl);
+                    await MainThread.InvokeOnMainThreadAsync(() =>
+                    {
+                        this.Mode = "login";
+                        wv.Source = hassAuth.AuthorizeUri;
+                    });
+                }
+                else
+                {
+                    await DisplayAlert("Validation Failed", "This does not appear to be a valid Home Assistant URL.", "OK");
+                }
             }
         }
         catch (JsonException ex)
@@ -321,40 +430,70 @@ public partial class HassPage : ContentPage
 
     private async void OnWebViewAuthTokenRequested(object sender, EventArgs e)
     {
-        var token = await _authService.RefreshAccessTokenAsync();
+        var token = await RefreshAccessTokenAsync();
         if (token != null)
         {
             var js = $"window.externalAuthSetToken(true, {{ access_token: '{token.AccessToken}', expires_in: {token.ExpiresIn} }});";
             await MainThread.InvokeOnMainThreadAsync(() => wv.EvaluateJavaScriptAsync(js));
         }
+        else
+        {
+            await MainThread.InvokeOnMainThreadAsync(() => wv.EvaluateJavaScriptAsync("window.externalAuthSetToken(false);"));
+            Logout();
+        }
+    }
+
+
+    public void Logout()
+    {
+        this.WebhookId = "";
+        Debug.WriteLine("Specific authentication data cleared.");
     }
 
     private async void OnWebViewLogoutRequested(object? sender, EventArgs e)
     {
-        _authService.Logout();
+        Logout();
         _isInitialized = false; // Reset the flag on logout
         await GoToAuthMode();
     }
 
     private Task GoToAuthMode()
     {
-        var navigationUrl = $"//{nameof(HassPage)}?mode=auth" +
-                            $"&clientId={Uri.EscapeDataString(this.ClientId)}" +
-                            $"&deviceId={Uri.EscapeDataString(this.DeviceId)}" +
-                            $"&pushUrl={Uri.EscapeDataString(this.PushUrl)}";
+        var navigationUrl = $"/{nameof(HassPage)}?mode=auth";
         return MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync(navigationUrl));
     }
 
-    private void StartAuthentication(string hassUrl, string clientId)
+
+
+
+    public async Task<AuthorizationResult> RefreshAccessTokenAsync()
     {
-        if (string.IsNullOrEmpty(clientId))
+        try
         {
-            DisplayAlert("Error", "Client ID is missing.", "OK");
-            return;
+            var hassUrl = HassUrl;
+            var refreshToken = RefreshToken;
+
+            if (string.IsNullOrEmpty(refreshToken) || string.IsNullOrEmpty(hassUrl))
+            {
+                return null;
+            }
+
+            var hassAuth = new HassAuth(hassUrl);
+            var result = await hassAuth.GetAccessTokenAsync(refreshToken);
+            if (result == null) return null;
+
+            AccessToken = result.AccessToken;
+            ExpiresIn = result.ExpiresIn;
+
+            return result;
         }
-        HassAuth hassAuth = new HassAuth(hassUrl, clientId);
-        wv.Source = new UrlWebViewSource { Url = hassAuth.AuthorizeUri.ToString() };
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error refreshing access token: {ex.Message}");
+            return null;
+        }
     }
+
 
     #region KeyService Handlers
 
@@ -435,11 +574,10 @@ public partial class HassPage : ContentPage
                 case "Right": case "DpadRight": _keyService.StartRepeatingAction(() => _cursorControl?.MoveRightBy(), repeatInterval); break;
                 case "Escape":
                 case "Back":
-                    var hassUrl = await _authService.GetHassUrlAsync();
-                    var clientId = await _authService.GetClientIdAsync();
-                    if (!string.IsNullOrEmpty(hassUrl) && !string.IsNullOrEmpty(clientId))
+                    var hassUrl = HassUrl;
+                    if (!string.IsNullOrEmpty(hassUrl))
                     {
-                        wv.Source = new HassAuth(hassUrl, clientId).RedirectUri;
+                        wv.Source = new HassAuth(hassUrl).RedirectUri;
                     }
                     break;
             }

@@ -17,12 +17,15 @@ namespace HassWebView.Demo
         public MainPage()
         {
             InitializeComponent();
+            Button_Clicked(null, null);
         }
 
         private void Button_Clicked(object sender, EventArgs e)
         {
-            var url = "http://192.168.0.100:8123";
-            Shell.Current.GoToAsync($"/{nameof(HassAuthPage)}?url={Uri.EscapeDataString(url)}");
+            var deviceId = "test";
+            var pushUrl = "http://localhost:8123/api/haapp";
+
+            Shell.Current.GoToAsync($"/{nameof(HassPage)}?deviceId={Uri.EscapeDataString(deviceId)}&pushUrl={Uri.EscapeDataString(pushUrl)}");
         }
     }
 }

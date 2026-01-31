@@ -43,7 +43,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="HassApi" Version="0.0.1" />
+	  <ProjectReference Include="..\HassWebView.HassApi\HassWebView.HassApi.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

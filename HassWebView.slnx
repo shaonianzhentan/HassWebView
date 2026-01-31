@@ -1,6 +1,7 @@
 <Solution>
-  <Project Path="./HassWebView.Core/HassWebView.Core.csproj" />
-  <Project Path="./HassWebView.Demo/HassWebView.Demo.csproj">
+  <Project Path="HassWebView.Core/HassWebView.Core.csproj" />
+  <Project Path="HassWebView.Demo/HassWebView.Demo.csproj">
     <Deploy Solution="Debug|*" />
   </Project>
+  <Project Path="HassWebView.HassApi/HassWebView.HassApi.csproj" Id="571bb076-d102-4909-8b0c-d68522d601b1" />
 </Solution>

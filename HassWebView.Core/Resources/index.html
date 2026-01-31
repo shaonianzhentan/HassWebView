@@ -77,7 +77,10 @@
             const url = input.value;
             if (url) {
                 // New logic: Navigate to a specific URL pattern that the app can intercept
-                window.location.href = `index.html?url=${encodeURIComponent(url)}`;
+                window.externalApp.externalBus(JSON.stringify({
+                    type: 'auth',
+                    data: url
+                }))
             }
         });
     </script>

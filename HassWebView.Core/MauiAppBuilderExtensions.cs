@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.LifecycleEvents;
 using System.Diagnostics;
 using HassWebView.Core.Services;
-using HassWebView.Core.Interfaces;
 using HassWebView.Core.Configuration;
 
 #if ANDROID
@@ -31,9 +30,6 @@ public static class MauiAppBuilderExtensions
         var options = new HassWebViewOptions();
         setupAction?.Invoke(options);
         builder.Services.AddSingleton(options);
-
-        // Register the core authentication service.
-        builder.Services.AddSingleton<IHassAuthService, HassAuthService>();
 
         builder.ConfigureMauiHandlers(handlers =>
         {
