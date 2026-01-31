@@ -53,7 +53,7 @@ namespace HassWebView.Demo
                         if (payload.Title == "url" && payload.Message.StartsWith("http"))
                         {
                             // 链接跳转
-                            MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync($"/{nameOf(HassPage)}?url={Uri.EscapeDataString(payload.Message)}"));
+                            MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync($"/{nameof(HassPage)}?url={Uri.EscapeDataString(payload.Message)}"));
                         }
                         else if (payload.Title == "input")
                         {
@@ -61,7 +61,7 @@ namespace HassWebView.Demo
                         }
                         else if (payload.Title == "video")
                         {
-                            MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync($"/{nameOf(HassMediaPage)}?url={Uri.EscapeDataString(payload.Message)}"));
+                            MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync($"/{nameof(HassMediaPage)}?url={Uri.EscapeDataString(payload.Message)}"));
                         }
                         await res.Text("", System.Net.HttpStatusCode.Created);
                     });

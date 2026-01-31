@@ -1,14 +1,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Collections.Specialized;
 
 namespace HassWebView.Core.Services
 {
@@ -92,8 +93,10 @@ namespace HassWebView.Core.Services
         private readonly Dictionary<string, Dictionary<string, Func<Request, Response, Task>>> _routes =
             new Dictionary<string, Dictionary<string, Func<Request, Response, Task>>>();
 
-        public HttpServer()
+        public HttpServer(string ip, int port)
         {
+            BaseUrl = $"http://{ip}:{port}/";
+            _listener.Prefixes.Add(BaseUrl);
         }
 
         public void AddRoute(string method, string path, Func<Request, Response, Task> handler)
@@ -111,11 +114,9 @@ namespace HassWebView.Core.Services
         public void Put(string path, Func<Request, Response, Task> handler) => AddRoute("PUT", path, handler);
         public void Delete(string path, Func<Request, Response, Task> handler) => AddRoute("DELETE", path, handler);
 
-        public async Task StartAsync(string ip, int port)
+        public async Task StartAsync()
         {
             if (!HttpListener.IsSupported) throw new NotSupportedException("HttpListener is not supported.");
-            BaseUrl = $"http://{ip}:{port}/";
-            _listener.Prefixes.Add(BaseUrl);
             _listener.Start();
             Console.WriteLine($"Listening on {_listener.Prefixes.First()}...");
             try
@@ -173,12 +174,36 @@ namespace HassWebView.Core.Services
 
         public static string GetLocalIPv4Address()
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
+            try
             {
-                if (ip.AddressFamily == AddressFamily.InterNetwork) return ip.ToString();
+                return NetworkInterface.GetAllNetworkInterfaces()
+                    // 过滤：仅限启动状态、非回环、非虚拟网卡
+                    .Where(ni => ni.OperationalStatus == OperationalStatus.Up &&
+                                 ni.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
+                                 !ni.Description.ToLower().Contains("virtual") &&
+                                 !ni.Description.ToLower().Contains("pseudo"))
+                    .SelectMany(ni => ni.GetIPProperties().UnicastAddresses)
+                    .Where(ua => ua.Address.AddressFamily == AddressFamily.InterNetwork)
+                    .Select(ua => ua.Address)
+                    .OrderByDescending(ip =>
+                    {
+                        // 计算优先级权重
+                        byte[] bytes = ip.GetAddressBytes();
+                        return bytes[0] switch
+                        {
+                            10 => 3,                                  // 10.x.x.x 权重最高
+                            172 when bytes[1] >= 16 && bytes[1] <= 31 => 2, // 172.16-31.x.x
+                            192 when bytes[1] == 168 => 1,            // 192.168.x.x
+                            _ => 0                                    // 其他（如公网IP或169.254）
+                        };
+                    })
+                    .FirstOrDefault()?.ToString() ?? string.Empty;
             }
-            throw new Exception("No network adapters with an IPv4 address in the system!");
+            catch
+            {
+                // 捕获权限或硬件异常，返回空
+                return string.Empty;
+            }
         }
     }
 }

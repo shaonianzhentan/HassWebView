@@ -117,7 +117,7 @@ public static class MauiAppBuilderExtensions
             {
                 android.OnCreate((activity, bundle) =>
                 {
-                    var keyService = MauiApplication.Current.Services.GetService<KeyService>();
+                    var keyService = IPlatformApplication.Current.Services.GetService<KeyService>();
                     if (keyService == null)
                     {
                         Debug.WriteLine("[Critical Error] KeyService not found in DI container.");
@@ -163,46 +163,50 @@ public static class MauiAppBuilderExtensions
     {
         builder.Services.AddSingleton<HttpServer>(serviceProvider =>
         {
-            var httpServer = new HttpServer();
+            var httpServer = new HttpServer(HttpServer.GetLocalIPv4Address(), port);
             setupRoutes?.Invoke(httpServer);
             return httpServer;
         });
 
         builder.ConfigureLifecycleEvents(events =>
         {
+#if WINDOWS
             events.AddWindows(w => w
                 .OnLaunched((window, args) =>
                 {
-                    var httpServer = MauiApplication.Current.Services.GetService<HttpServer>();
+                    var httpServer = IPlatformApplication.Current.Services.GetService<HttpServer>();
                     if (httpServer != null)
                     {
-                        Task.Run(() => httpServer.StartAsync(HttpServer.GetLocalIPv4Address(), port));
+                        Task.Run(() => httpServer.StartAsync());
                     }
                 })
                 .OnClosed((window, args) =>
                 {
-                    var httpServer = MauiApplication.Current.Services.GetService<HttpServer>();
+                    var httpServer = IPlatformApplication.Current.Services.GetService<HttpServer>();
                     httpServer?.Stop();
                 })
             );
+#endif
 
+#if ANDROID
             events.AddAndroid(a => a
                 .OnCreate((activity, bundle) =>
                 {
-                    var httpServer = MauiApplication.Current.Services.GetService<HttpServer>();
+                    var httpServer = IPlatformApplication.Current.Services.GetService<HttpServer>();
                     if (httpServer != null)
                     {
-                        Task.Run(() => httpServer.StartAsync(HttpServer.GetLocalIPv4Address(), port));
+                        Task.Run(() => httpServer.StartAsync());
                     }
                 })
                 .OnDestroy(activity =>
                 {
-                    var httpServer = MauiApplication.Current.Services.GetService<HttpServer>();
+                    var httpServer = IPlatformApplication.Current.Services.GetService<HttpServer>();
                     httpServer?.Stop();
                 })
             );
-        });
+#endif
 
+        });
         return builder;
     }
 }
