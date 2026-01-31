@@ -10,17 +10,18 @@ namespace HassWebView.Demo
 
     public partial class MainPage : ContentPage
     {
-        public MainPage()
+        private readonly HttpServer _httpServer;
+
+        public MainPage(HttpServer httpServer)
         {
             InitializeComponent();
+            _httpServer = httpServer;
             Button_Clicked(null, null);
         }
 
         private void Button_Clicked(object sender, EventArgs e)
         {
-            var pushUrl = "http://localhost:8123/api/haapp";
-
-            Shell.Current.GoToAsync($"/{nameof(HassPage)}?pushUrl={Uri.EscapeDataString(pushUrl)}");
+            Shell.Current.GoToAsync($"/{nameof(HassPage)}?pushUrl={Uri.EscapeDataString(_httpServer.BaseUrl)}");
         }
     }
 }

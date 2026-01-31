@@ -158,4 +158,51 @@ public static class MauiAppBuilderExtensions
 
         return builder;
     }
+
+    public static MauiAppBuilder UseHttpServer(this MauiAppBuilder builder, int port, Action<HttpServer> setupRoutes = null)
+    {
+        builder.Services.AddSingleton<HttpServer>(serviceProvider =>
+        {
+            var httpServer = new HttpServer();
+            setupRoutes?.Invoke(httpServer);
+            return httpServer;
+        });
+
+        builder.ConfigureLifecycleEvents(events =>
+        {
+            events.AddWindows(w => w
+                .OnLaunched((window, args) =>
+                {
+                    var httpServer = MauiApplication.Current.Services.GetService<HttpServer>();
+                    if (httpServer != null)
+                    {
+                        Task.Run(() => httpServer.StartAsync(HttpServer.GetLocalIPv4Address(), port));
+                    }
+                })
+                .OnClosed((window, args) =>
+                {
+                    var httpServer = MauiApplication.Current.Services.GetService<HttpServer>();
+                    httpServer?.Stop();
+                })
+            );
+
+            events.AddAndroid(a => a
+                .OnCreate((activity, bundle) =>
+                {
+                    var httpServer = MauiApplication.Current.Services.GetService<HttpServer>();
+                    if (httpServer != null)
+                    {
+                        Task.Run(() => httpServer.StartAsync(HttpServer.GetLocalIPv4Address(), port));
+                    }
+                })
+                .OnDestroy(activity =>
+                {
+                    var httpServer = MauiApplication.Current.Services.GetService<HttpServer>();
+                    httpServer?.Stop();
+                })
+            );
+        });
+
+        return builder;
+    }
 }

@@ -1,5 +1,7 @@
 using HassWebView.Core;
+using HassWebView.Core.Services;
 using HassWebView.Core.Views;
+using HassWebView.HassApi.Models;
 using Microsoft.Extensions.Logging;
 
 namespace HassWebView.Demo
@@ -41,7 +43,30 @@ namespace HassWebView.Demo
                 // This is for Android fullscreen.
                 .UseImmersiveMode()
                 // This extension method now handles registering KeyService and platform-specific key listeners.
-                .UseRemoteControl();
+                .UseRemoteControl()
+                .UseHttpServer(8125, server =>
+                {
+                    server.Post("/", async (req, res) =>
+                    {
+                        var payload = await req.JsonAsync<NotificationPayload>();
+
+                        if (payload.Title == "url" && payload.Message.StartsWith("http"))
+                        {
+                            // 链接跳转
+                            MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync($"/{nameOf(HassPage)}?url={Uri.EscapeDataString(payload.Message)}"));
+                        }
+                        else if (payload.Title == "input")
+                        {
+                            // 输入文本
+                        }
+                        else if (payload.Title == "video")
+                        {
+                            MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync($"/{nameOf(HassMediaPage)}?url={Uri.EscapeDataString(payload.Message)}"));
+                        }
+                        await res.Text("", System.Net.HttpStatusCode.Created);
+                    });
+                    
+                });
 
 #if DEBUG
     		builder.Logging.AddDebug();

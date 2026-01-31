@@ -14,6 +14,7 @@ namespace HassWebView.Core.Services
 {
     public class HttpServer : IDisposable
     {
+        public string BaseUrl { get; private set; }
         private readonly HttpListener _listener = new HttpListener();
 
         public class Request
@@ -113,8 +114,8 @@ namespace HassWebView.Core.Services
         public async Task StartAsync(string ip, int port)
         {
             if (!HttpListener.IsSupported) throw new NotSupportedException("HttpListener is not supported.");
-            _listener.Prefixes.Add($"http://{ip}:{port}/");
-
+            BaseUrl = $"http://{ip}:{port}/";
+            _listener.Prefixes.Add(BaseUrl);
             _listener.Start();
             Console.WriteLine($"Listening on {_listener.Prefixes.First()}...");
             try
