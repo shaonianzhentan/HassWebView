@@ -99,10 +99,10 @@ public partial class HassPage : ContentPage
         }
     }
 
-    
 
 
 
+    private readonly HttpServer _httpServer;
     private readonly KeyService _keyService;
     private readonly HassWebViewOptions _options;
     private readonly HttpClient _httpClient = new();
@@ -115,11 +115,49 @@ public partial class HassPage : ContentPage
 
         _keyService = IPlatformApplication.Current.Services.GetService<KeyService>();
         _options = IPlatformApplication.Current.Services.GetRequiredService<HassWebViewOptions>();
+         
+        _httpServer = IPlatformApplication.Current.Services.GetService<HttpServer>();
 
         if (_keyService != null)
         {
             cursor.IsVisible = true;
             _cursorControl = new CursorControl(cursor, root, wv);
+        }
+
+        if (_httpServer != null)
+        {
+            _httpServer.Post("/input", async (req, res) =>
+            {
+                var appendText = req.Query["append"] == "1" ? "el.value +" : "";
+                var text = req.Query["text"];
+                string escapedContent = text.Replace("'", "\\'")
+                                            .Replace("\\", "\\\\")
+                                            .Replace("\r", "\\r")
+                                            .Replace("\n", "\\n");
+                string jsCode = $@"
+(function() {{
+    // 定位焦点元素，仅处理INPUT/TEXTAREA输入框
+    const el = document.activeElement;
+    if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return;
+
+    // 处理赋值逻辑：覆盖/追加（先赋值DOM值）
+    el.value = {appendText}'{escapedContent}';
+
+    // 核心：触发框架可识别的全套事件（模拟原生输入，同步响应式数据）
+    ['input', 'change', 'compositionstart', 'compositionend', 'blur', 'focus'].forEach(evt => {{
+        el.dispatchEvent(new Event(evt, {{
+            bubbles: true,
+            cancelable: true,
+            view: window
+        }}));
+    }});
+
+    // 恢复光标到内容末尾，提升用户体验
+    el.selectionStart = el.selectionEnd = el.value.length;
+}})();";
+                MainThread.BeginInvokeOnMainThread(() => wv.EvaluateJavaScriptAsync(jsCode));
+                await res.Text("");
+            });
         }
 
         wv.Navigating += OnWebViewNavigating;

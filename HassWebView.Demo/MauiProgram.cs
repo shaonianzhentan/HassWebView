@@ -1,5 +1,4 @@
 using HassWebView.Core;
-using HassWebView.Core.Services;
 using HassWebView.Core.Views;
 using HassWebView.HassApi.Models;
 using Microsoft.Extensions.Logging;
@@ -40,7 +39,6 @@ namespace HassWebView.Demo
                         });
                     };
                 })
-                // This is for Android fullscreen.
                 .UseImmersiveMode()
                 // This extension method now handles registering KeyService and platform-specific key listeners.
                 .UseRemoteControl()
@@ -75,7 +73,6 @@ namespace HassWebView.Demo
             // Services are now registered by the extension methods above, so we can remove the explicit registrations here.
 
             // Register pages for dependency injection
-            builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<HassPage>();
             builder.Services.AddTransient<HassMediaPage>();
 
