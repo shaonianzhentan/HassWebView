@@ -7,10 +7,6 @@ using System.Web;
 
 namespace HassWebView.Demo
 {
-    public class EchoData
-    {
-        public string Message { get; set; }
-    }
 
     public partial class MainPage : ContentPage
     {
@@ -22,10 +18,9 @@ namespace HassWebView.Demo
 
         private void Button_Clicked(object sender, EventArgs e)
         {
-            var deviceId = "test";
             var pushUrl = "http://localhost:8123/api/haapp";
 
-            Shell.Current.GoToAsync($"/{nameof(HassPage)}?deviceId={Uri.EscapeDataString(deviceId)}&pushUrl={Uri.EscapeDataString(pushUrl)}");
+            Shell.Current.GoToAsync($"/{nameof(HassPage)}?pushUrl={Uri.EscapeDataString(pushUrl)}");
         }
     }
 }

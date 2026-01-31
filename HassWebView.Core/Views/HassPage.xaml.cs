@@ -14,7 +14,6 @@ namespace HassWebView.Core.Views;
 
 [QueryProperty(nameof(Url), "url")]
 [QueryProperty(nameof(Mode), "mode")]
-[QueryProperty(nameof(DeviceId), "deviceId")]
 [QueryProperty(nameof(PushUrl), "pushUrl")]
 public partial class HassPage : ContentPage
 {
@@ -25,11 +24,13 @@ public partial class HassPage : ContentPage
     {
         get
         {
-            return Preferences.Get("DeviceId", "");
-        }
-        set
-        {
-            if (!string.IsNullOrEmpty(value)) Preferences.Set("DeviceId", value);
+            var id = Preferences.Get("DeviceId", string.Empty);
+            if(string.IsNullOrEmpty(id))
+            {
+                id = Guid.NewGuid().ToString();
+                Preferences.Get("DeviceId", id);
+            }
+            return id;
         }
     }
     public string PushUrl
