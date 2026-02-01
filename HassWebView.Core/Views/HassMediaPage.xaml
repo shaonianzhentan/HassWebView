@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="HassWebView.Core.Views.HassMediaPage"
              xmlns:core="clr-namespace:HassWebView.Core.Views"
-             Title="MediaPage">
+             Shell.NavBarIsVisible="False"
+             Title="视频播放">
     <core:HassMediaView x:Name="wv" />
 </ContentPage>

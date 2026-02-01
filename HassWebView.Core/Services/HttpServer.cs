@@ -96,7 +96,11 @@ namespace HassWebView.Core.Services
         public HttpServer(string ip, int port)
         {
             BaseUrl = $"http://{ip}:{port}/";
-            _listener.Prefixes.Add(BaseUrl);
+#if WINDOWS
+            _listener.Prefixes.Add($"http://127.0.0.1:{port}/");
+#else
+            _listener.Prefixes.Add($"http://+:{port}/");
+#endif
         }
 
         public void AddRoute(string method, string path, Func<Request, Response, Task> handler)
@@ -117,10 +121,12 @@ namespace HassWebView.Core.Services
         public async Task StartAsync()
         {
             if (!HttpListener.IsSupported) throw new NotSupportedException("HttpListener is not supported.");
-            _listener.Start();
-            Console.WriteLine($"Listening on {_listener.Prefixes.First()}...");
+            
             try
             {
+                _listener.Start();
+                Console.WriteLine($"Listening on {_listener.Prefixes.First()}...");
+
                 while (_listener.IsListening)
                 {
                     var context = await _listener.GetContextAsync();
@@ -130,6 +136,10 @@ namespace HassWebView.Core.Services
             catch (HttpListenerException ex) when (_listener.IsListening)
             {
                 Console.WriteLine($"HttpListenerException: {ex.Message}");
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 

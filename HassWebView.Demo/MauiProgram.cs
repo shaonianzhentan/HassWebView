@@ -35,7 +35,7 @@ namespace HassWebView.Demo
                         MainThread.BeginInvokeOnMainThread(() =>
                         {
                             // 用户在这里决定导航到哪个页面，例如 HassMediaPage
-                            Shell.Current.GoToAsync($"{nameof(HassMediaPage)}?Url={Uri.EscapeDataString(url)}");
+                            Shell.Current.GoToAsync($"/{nameof(HassPage)}/{nameof(HassMediaPage)}?Url={Uri.EscapeDataString(url)}");
                         });
                     };
                 })

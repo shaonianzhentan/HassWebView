@@ -171,6 +171,12 @@ public partial class HassPage : ContentPage
     {
         base.OnNavigatedTo(args);
 
+        if (args.NavigationType == NavigationType.Pop && args.PreviousPage is HassMediaPage)
+        {
+            // 如果是从 HassMediaPage 返回的，直接终止执行后续逻辑
+            return;
+        }
+
         string effectiveMode = Mode?.ToLower();
 
         // These branches are for explicit navigation actions and should always run.
