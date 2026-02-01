@@ -44,6 +44,10 @@ namespace HassWebView.Demo
                 .UseRemoteControl()
                 .UseHttpServer(8125, server =>
                 {
+                    server.Get("/", async (req, res) =>
+                    {
+                        await res.Text(DateTime.Now.ToString());
+                    });
                     server.Post("/", async (req, res) =>
                     {
                         var payload = await req.JsonAsync<NotificationPayload>();
@@ -52,10 +56,6 @@ namespace HassWebView.Demo
                         {
                             // 链接跳转
                             MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync($"/{nameof(HassPage)}?url={Uri.EscapeDataString(payload.Message)}"));
-                        }
-                        else if (payload.Title == "input")
-                        {
-                            // 输入文本
                         }
                         else if (payload.Title == "video")
                         {

@@ -179,6 +179,14 @@ public partial class HassPage : ContentPage
             LoadEmbeddedHtml("HassWebView.Core.Resources.index.html");
             return;
         }
+        if (effectiveMode == "login" && !string.IsNullOrEmpty(Url))
+        {
+            var uri = new Uri(Url);
+            HassUrl = $"{uri.Scheme}://{uri.Authority}";
+            HassAuth hassAuth = new HassAuth(HassUrl);
+            wv.Source = hassAuth.AuthorizeUri;
+            return;
+        }
         if (!string.IsNullOrEmpty(Url))
         {
             wv.Source = new UrlWebViewSource { Url = this.Url };
@@ -246,9 +254,9 @@ public partial class HassPage : ContentPage
             if (tokenResult == null) return;
 
             // Store tokens and identifiers
-            Preferences.Set("AccessToken", tokenResult.AccessToken);
-            Preferences.Set("RefreshToken", tokenResult.RefreshToken);
-            Preferences.Set("ExpiresIn", tokenResult.ExpiresIn);
+            AccessToken = tokenResult.AccessToken;
+            RefreshToken = tokenResult.RefreshToken;
+            ExpiresIn = tokenResult.ExpiresIn;
 
             var deviceId = DeviceId;
 
@@ -271,7 +279,7 @@ public partial class HassPage : ContentPage
             var registrationResult = await hassClient.RegisterMobileAppAsync(registrationRequest);
             if (registrationResult?.WebhookId == null) return;
 
-            Preferences.Set("WebhookId", registrationResult.WebhookId);
+            WebhookId = registrationResult.WebhookId;
             var navigationUrl = $"/{nameof(HassPage)}?url={Uri.EscapeDataString(hassAuth.RedirectUri)}";
 
             await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync(navigationUrl));
@@ -398,14 +406,8 @@ public partial class HassPage : ContentPage
                 bool isValid = await IsHassUrlValid(urlFromForm);
                 if (isValid)
                 {
-                    var uri = new Uri(urlFromForm);
-                    HassUrl = $"{uri.Scheme}://{uri.Authority}";
-                    HassAuth hassAuth = new HassAuth(HassUrl);
-                    await MainThread.InvokeOnMainThreadAsync(() =>
-                    {
-                        this.Mode = "login";
-                        wv.Source = hassAuth.AuthorizeUri;
-                    });
+                    var navigationUrl = $"/{nameof(HassPage)}?mode=login&url={Uri.EscapeDataString(urlFromForm)}";
+                    await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync(navigationUrl));
                 }
                 else
                 {
