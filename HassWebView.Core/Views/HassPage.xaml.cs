@@ -419,6 +419,9 @@ public partial class HassPage : ContentPage
                 {
                     await DisplayAlert("Validation Failed", "This does not appear to be a valid Home Assistant URL.", "OK");
                 }
+            }else if (type == "x5/init")
+            {
+                await TencentX5Service.InitializeX5CoreAsync("https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm_045912_x5.tbs.apk");
             }
         }
         catch (JsonException ex)

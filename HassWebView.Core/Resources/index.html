@@ -69,12 +69,12 @@
     </div>
 
     <script>
-        const form = document.getElementById('hass-url-form');
-        const input = document.getElementById('hass-url-input');
+        var form = document.getElementById('hass-url-form');
+        var input = document.getElementById('hass-url-input');
 
         form.addEventListener('submit', (event) => {
             event.preventDefault(); // Stop the default form submission
-            const url = input.value;
+            var url = input.value;
             if (url) {
                 // New logic: Navigate to a specific URL pattern that the app can intercept
                 window.externalApp.externalBus(JSON.stringify({
@@ -83,6 +83,21 @@
                 }))
             }
         });
+
+        // 极简版：判断是否支持 customElements 核心功能
+        var supportsCustomElements = 'customElements' in window && 
+            typeof window.customElements.define === 'function' &&
+            typeof HTMLElement === 'function';
+
+        if (supportsCustomElements) {
+            console.log('支持 customElements');
+        } else {
+            console.log('不支持 customElements');
+            // 加载Tencent X5内核
+            window.externalApp.externalBus(JSON.stringify({
+                type: 'x5/init'
+            }))
+        }
     </script>
 </body>
 </html>
