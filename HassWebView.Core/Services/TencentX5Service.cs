@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -36,13 +37,15 @@ namespace HassWebView.Core.Services
 
             // 3. 执行 X5 本地安装
             // 确保下载成功后再次检查文件是否存在
-            if (File.Exists(apkPath))
+            if (File.Exists(apkPath) && !Preferences.Get("TencentX5CoreInstalled", false))
             {
                 var activity = Microsoft.Maui.ApplicationModel.Platform.CurrentActivity;
                 if (activity != null)
                 {
                     // 参数说明：Context, 类型(0为内核包), APK 路径
                     Com.Tencent.Smtt.Sdk.QbSdk.InstallLocalTbsCore(activity, 0, apkPath);
+                    Preferences.Set("TencentX5CoreInstalled", true);
+                    Debug.WriteLine("TencentX5Core加载完成");
                 }
             }
 #endif

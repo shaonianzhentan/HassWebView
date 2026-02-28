@@ -316,7 +316,7 @@ public partial class HassPage : ContentPage
                 position: 'fixed', left: 0, top: 0, height: '100%', width: '30%', minWidth: '200px',
                 display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px',
                 backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '0 10px 10px 0',
-                boxSizing: 'border-box', zIndex: '9999', overflowY: 'auto'
+                boxSizing: 'border-box', zIndex: '2147483647', overflowY: 'auto'
             }});
             document.body.appendChild(container);
         }}
@@ -344,7 +344,7 @@ public partial class HassPage : ContentPage
 
         container.insertBefore(item, container.firstChild);
 
-        while (container.children.length > 10) {{
+        while (container.children.length > 6) {{
             container.removeChild(container.lastChild);
         }}
     }}
@@ -357,7 +357,7 @@ public partial class HassPage : ContentPage
         }
     }
 
-    private async void OnExternalBusMessageReceived(object? sender, string message)
+    private async void OnExternalBusMessageReceived(object sender, string message)
     {
         if (string.IsNullOrEmpty(message))
         {
@@ -419,9 +419,6 @@ public partial class HassPage : ContentPage
                 {
                     await DisplayAlert("Validation Failed", "This does not appear to be a valid Home Assistant URL.", "OK");
                 }
-            }else if (type == "x5/init")
-            {
-                await TencentX5Service.InitializeX5CoreAsync("https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm_045912_x5.tbs.apk");
             }
         }
         catch (JsonException ex)
@@ -513,9 +510,6 @@ public partial class HassPage : ContentPage
         return MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync(navigationUrl));
     }
 
-
-
-
     public async Task<AuthorizationResult> RefreshAccessTokenAsync()
     {
         try
@@ -543,7 +537,6 @@ public partial class HassPage : ContentPage
             return null;
         }
     }
-
 
     #region KeyService Handlers
 
@@ -597,11 +590,11 @@ public partial class HassPage : ContentPage
     private void OnDoubleClick(object sender, RemoteKeyEventArgs e)
     {
         if (_cursorControl is null) return;
-        MainThread.BeginInvokeOnMainThread(() =>
+        MainThread.BeginInvokeOnMainThread(async () =>
         {
             switch (e.KeyName)
             {
-                case "Enter": case "DpadCenter": _cursorControl.DoubleClick(); break;
+                case "Enter": case "DpadCenter": await _cursorControl.DoubleClick(); break;
                 case "Up": case "DpadUp": _cursorControl.SlideUp(); break;
                 case "Down": case "DpadDown": _cursorControl.SlideDown(); break;
                 case "Left": case "DpadLeft": _cursorControl.SlideLeft(); break;
