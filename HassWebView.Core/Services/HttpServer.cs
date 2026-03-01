@@ -50,7 +50,6 @@ namespace HassWebView.Core.Services
             }
         }
 
-        // The new Response wrapper class. It holds the listener response.
         public class Response
         {
             private readonly HttpListenerResponse _res;
@@ -89,7 +88,6 @@ namespace HassWebView.Core.Services
             }
         }
 
-        // The Func now uses the new HttpServer.Response type
         private readonly Dictionary<string, Dictionary<string, Func<Request, Response, Task>>> _routes =
             new Dictionary<string, Dictionary<string, Func<Request, Response, Task>>>();
 
@@ -146,9 +144,20 @@ namespace HassWebView.Core.Services
         private async Task RouteRequest(HttpListenerContext context)
         {
             var request = new Request(context.Request);
-            var response = new Response(context.Response); // Create an instance of our new Response wrapper
+            var response = new Response(context.Response);
             var path = context.Request.Url.AbsolutePath.ToLower();
             var method = context.Request.HttpMethod.ToUpper();
+
+            context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+            context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+            if (method == "OPTIONS")
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.NoContent;
+                context.Response.OutputStream.Close();
+                return;
+            }
 
             try
             {
@@ -187,7 +196,6 @@ namespace HassWebView.Core.Services
             try
             {
                 return NetworkInterface.GetAllNetworkInterfaces()
-                    // 过滤：仅限启动状态、非回环、非虚拟网卡
                     .Where(ni => ni.OperationalStatus == OperationalStatus.Up &&
                                  ni.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
                                  !ni.Description.ToLower().Contains("virtual") &&
@@ -197,21 +205,19 @@ namespace HassWebView.Core.Services
                     .Select(ua => ua.Address)
                     .OrderByDescending(ip =>
                     {
-                        // 计算优先级权重
                         byte[] bytes = ip.GetAddressBytes();
                         return bytes[0] switch
                         {
-                            10 => 3,                                  // 10.x.x.x 权重最高
-                            172 when bytes[1] >= 16 && bytes[1] <= 31 => 2, // 172.16-31.x.x
-                            192 when bytes[1] == 168 => 1,            // 192.168.x.x
-                            _ => 0                                    // 其他（如公网IP或169.254）
+                            10 => 3,
+                            172 when bytes[1] >= 16 && bytes[1] <= 31 => 2,
+                            192 when bytes[1] == 168 => 1,
+                            _ => 0
                         };
                     })
                     .FirstOrDefault()?.ToString() ?? string.Empty;
             }
             catch
             {
-                // 捕获权限或硬件异常，返回空
                 return string.Empty;
             }
         }
