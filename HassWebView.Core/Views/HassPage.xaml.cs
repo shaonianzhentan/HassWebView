@@ -6,6 +6,7 @@ using HassWebView.HassApi.Models;
 using System.Diagnostics;
 using System.Net;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Web;
@@ -126,15 +127,48 @@ public partial class HassPage : ContentPage
 
         if (_httpServer != null)
         {
-            _httpServer.Post("/input", async (req, res) =>
+
+            _httpServer.Get("/remote", async (req, res) =>
             {
-                var appendText = req.Query["append"] == "1" ? "el.value +" : "";
-                var text = req.Query["text"];
-                string escapedContent = text.Replace("'", "\\'")
-                                            .Replace("\\", "\\\\")
-                                            .Replace("\r", "\\r")
-                                            .Replace("\n", "\\n");
-                string jsCode = $@"
+                var assembly = GetType().GetTypeInfo().Assembly;
+                using (var stream = assembly.GetManifestResourceStream("HassWebView.Core.Resources.remote.html"))
+                {
+                    if (stream == null)
+                    {
+                        await res.Html("<h1>没找到远程控制资源页面</h1>");
+                        return;
+                    }
+                    using (var reader = new StreamReader(stream))
+                    {
+                        var htmlContent = reader.ReadToEnd();
+                        await res.Html(htmlContent);
+                    }
+                }
+            });
+
+            _httpServer.Post("/remote", async (req, res) =>
+            {
+                var query = HttpUtility.ParseQueryString(await req.BodyAsync());
+
+                var type = query["type"];
+
+                switch (type)
+                {
+                    case "move":
+                        _cursorControl.MoveBy(Convert.ToDouble(query["x"]), Convert.ToDouble(query["y"]));
+                        break;
+                    case "click":
+                        _cursorControl.Click();
+                        break;
+                    case "text":
+                        var appendText = query["append"] == "1" ? "el.value +" : "";
+                        var text = query["text"];
+
+                        string escapedContent = text.Replace("'", "\\'")
+                                                    .Replace("\\", "\\\\")
+                                                    .Replace("\r", "\\r")
+                                                    .Replace("\n", "\\n");
+                        string jsCode = $@"
 (function() {{
     // 定位焦点元素，仅处理INPUT/TEXTAREA输入框
     const el = document.activeElement;
@@ -155,7 +189,10 @@ public partial class HassPage : ContentPage
     // 恢复光标到内容末尾，提升用户体验
     el.selectionStart = el.selectionEnd = el.value.length;
 }})();";
-                MainThread.BeginInvokeOnMainThread(() => wv.EvaluateJavaScriptAsync(jsCode));
+                        MainThread.BeginInvokeOnMainThread(() => wv.EvaluateJavaScriptAsync(jsCode));
+                        break;
+                }
+
                 await res.Text("");
             });
         }
@@ -383,11 +420,7 @@ public partial class HassPage : ContentPage
                         canWriteTag = false
                     }
                 };
-
-                var responseJson = JsonSerializer.Serialize(response);
-                var js = $"window.externalBus({responseJson});";
-
-                await MainThread.InvokeOnMainThreadAsync(() => wv.EvaluateJavaScriptAsync(js));
+                wv.WindowExternalBusAsync(response);
             }
             else if (type == "config_screen/show")
             {
@@ -404,11 +437,12 @@ public partial class HassPage : ContentPage
             else if (type == "video/open")
             {
                 var videoUrl = msg?["data"]?.GetValue<string>();
-                
-            }else if(type == "auth")
+
+            }
+            else if (type == "webview/auth")
             {
                 var urlFromForm = msg?["data"]?.GetValue<string>();
-
+                Debug.WriteLine($"[ExternalBus] Received auth URL: {urlFromForm}");
                 bool isValid = await IsHassUrlValid(urlFromForm);
                 if (isValid)
                 {
@@ -417,8 +451,42 @@ public partial class HassPage : ContentPage
                 }
                 else
                 {
-                    await DisplayAlert("Validation Failed", "This does not appear to be a valid Home Assistant URL.", "OK");
+                    wv.WindowExternalBusAsync(new
+                    {
+                        type = "webview/auth",
+                        message = "无法访问提供的URL，请确保它是正确的Home Assistant实例地址，并且设备能够访问它。"
+                    });
                 }
+            }
+            else if (type == "webview/url")
+            {
+                if (_httpServer != null)
+                {
+                    wv.WindowExternalBusAsync(new
+                    {
+                        type = "webview/url",
+                        data = _httpServer.BaseUrl + "remote"
+                    });
+                }
+            }
+            else if (type == "x5/init")
+            {
+#if ANDROID
+                string apkUrl = string.Empty;
+                if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+                {
+                    apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm64_046295.tbs.apk";
+                }
+                else if (RuntimeInformation.ProcessArchitecture == Architecture.Arm)
+                {
+                    apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm_045912_x5.tbs.apk";
+                }
+                if (!string.IsNullOrEmpty(apkUrl))
+                {
+                    Debug.WriteLine($"[ExternalBus] Initializing Tencent X5 Core with APK: {apkUrl}");
+                    await TencentX5Service.InitializeX5CoreAsync(apkUrl);
+                }
+#endif
             }
         }
         catch (JsonException ex)

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HTTP 电视遥控器</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background: #121212;
+            color: white;
+            touch-action: none;
+        }
+
+        #touchpad {
+            width: 100vw;
+            height: 50vh;
+            background: #2c2c2c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 2px solid #3d3d3d;
+            color: #aaa;
+        }
+
+        .controls {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input {
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: #333;
+            color: white;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 15px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-blue {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-gray {
+            background: #444;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="touchpad">触摸此处移动鼠标</div>
+
+    <div class="controls">
+        <input type="text" id="textInput" placeholder="输入文字...">
+        <button class="btn-blue" onclick="postCmd('text', {text: document.getElementById('textInput').value})">一键发送文本</button>
+        <button class="btn-gray" onclick="postCmd('click')">模拟左键点击</button>
+    </div>
+
+    <script>
+        let lastX = 0, lastY = 0;
+        let isSending = false;
+
+        // 通用发送函数
+        async function postCmd(type, data = {}) {
+            try {
+                await fetch('', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({ type, ...data })
+                });
+            } catch (e) { console.error("发送失败", e); }
+        }
+
+        const touchpad = document.getElementById('touchpad');
+
+        touchpad.addEventListener('touchstart', e => {
+            lastX = e.touches[0].clientX;
+            lastY = e.touches[0].clientY;
+        });
+
+        touchpad.addEventListener('touchmove', e => {
+            // 简单的节流控制，避免 HTTP 请求过快导致电视端瘫痪
+            if (isSending) return;
+            isSending = true;
+
+            const dx = Math.round(e.touches[0].clientX - lastX);
+            const dy = Math.round(e.touches[0].clientY - lastY);
+
+            if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+                postCmd('move', { x: dx, y: dy }).then(() => {
+                    isSending = false;
+                });
+                lastX = e.touches[0].clientX;
+                lastY = e.touches[0].clientY;
+            } else {
+                isSending = false;
+            }
+        });
+    </script>
+</body>
+</html>

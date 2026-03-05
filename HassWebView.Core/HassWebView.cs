@@ -1,10 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Threading.Tasks;
 using HassWebView.Core.Bridges;
 using HassWebView.Core.Events;
 using Microsoft.Maui.Controls; // Added for MainThread
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace HassWebView.Core
 {
@@ -15,7 +16,6 @@ namespace HassWebView.Core
         /// <summary>
         /// Raised when the web content requests a new authentication token.
         /// The page hosting this WebView should handle this event, retrieve a new token,
-        /// and pass it back by calling <see cref="SendAuthTokenToWebView"/>.
         /// </summary>
         public event EventHandler AuthTokenRequested;
 
@@ -130,6 +130,13 @@ namespace HassWebView.Core
 
             Handler.Invoke(nameof(EvaluateJavaScriptAsync), new EvaluateJavaScriptAsyncRequest(tcs, script));
             return tcs.Task;
+        }
+
+        public void WindowExternalBusAsync<T>(T message)
+        {
+            var responseJson = JsonSerializer.Serialize(message);
+            var js = $"window.externalBus({responseJson});";
+            MainThread.InvokeOnMainThreadAsync(() => EvaluateJavaScriptAsync(js));
         }
 
         public void SimulateTouch(int x, int y)

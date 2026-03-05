@@ -21,6 +21,7 @@
             padding: 40px;
             border-radius: 12px;
             background-color: #2a2a2a;
+            height: 100%;
         }
         h1 {
             font-size: 2.5em;
@@ -31,8 +32,7 @@
             color: #bbbbbb;
             margin-bottom: 2em;
         }
-        input[type="url"] {
-            width: 100%;
+        input{
             padding: 15px;
             font-size: 1.2em;
             border-radius: 8px;
@@ -56,6 +56,13 @@
         button:hover, button:focus {
             background-color: #0288d1;
         }
+
+        #tips {
+            color: red;
+        }
+        #loading{
+            display:none;
+        }
     </style>
 </head>
 <body>
@@ -63,26 +70,121 @@
         <h1>设置您的 Home Assistant</h1>
         <p>请输入您的 Home Assistant 实例的地址 (例如 http://homeassistant.local:8123)</p>
         <form id="hass-url-form">
-            <input type="url" id="hass-url-input" placeholder="https://your-home-assistant-url" required>
+            <div>
+                <input id="btnProtocol" type="button" value="http://" />
+                <input type="text" id="hass-url-input" placeholder="192.168.0.100:8123" required>
+            </div>
+            <div id="tips"></div>
+            <progress id="loading"></progress>
             <button type="submit">连接</button>
         </form>
+        <div id="tv" style="display:none;">
+            <h2>远程输入控制</h2>
+            <img />
+        </div>
     </div>
 
     <script>
         var form = document.getElementById('hass-url-form');
+        var btnProtocol = document.getElementById('btnProtocol');
         var input = document.getElementById('hass-url-input');
+
+        btnProtocol.onclick = function () {
+            btnProtocol.value = btnProtocol.value == "http://" ? "https://" : "http://"
+        }
+
 
         form.addEventListener('submit', (event) => {
             event.preventDefault(); // Stop the default form submission
             var url = input.value;
             if (url) {
+                if ($("#loading").is(":visible")) {
+                    return
+                }
+                $("#loading").show()
                 // New logic: Navigate to a specific URL pattern that the app can intercept
                 window.externalApp.externalBus(JSON.stringify({
-                    type: 'auth',
-                    data: url
+                    type: 'webview/auth',
+                    data: btnProtocol.value + url
                 }))
             }
         });
+    </script>
+    <script>
+        function checkWebViewCompatibility() {
+            var result = {
+                isCompatible: true,
+                reason: "",
+                details: {}
+            };
+
+            // 1. 获取内核版本 (Chromium)
+            var ua = navigator.userAgent;
+            var chromeMatch = ua.match(/Chrome\/(\d+)\./);
+            var chromeVersion = chromeMatch ? parseInt(chromeMatch[1], 10) : 0;
+            result.details.chromeVersion = chromeVersion;
+
+            // 2. 核心特性检测 (使用 ES5 写法防止脚本崩溃)
+            // Home Assistant 极度依赖 Web Components (Shadow DOM)
+            result.details.shadowDOM = !!(document.head.attachShadow || document.head.createShadowRoot);
+
+            // 自定义元素支持
+            result.details.customElements = 'customElements' in window;
+
+            // 现代 JS 语法支持 (通过 eval 探测可选链)
+            var optionalChaining = false;
+            try {
+                eval('var a={}; a?.b');
+                optionalChaining = true;
+            } catch (e) { }
+            result.details.optionalChaining = optionalChaining;
+
+            // 异步支持
+            result.details.promises = typeof Promise !== "undefined" && !!Promise.allSettled;
+
+            // 3. 综合判定 (Home Assistant 2024-2026 的硬性门槛)
+            if (!result.details.customElements || !result.details.shadowDOM) {
+                result.isCompatible = false;
+                result.reason = "硬件不支持 Web Components (Shadow DOM)，Home Assistant 将无法渲染。";
+            } else if (!result.details.optionalChaining) {
+                result.isCompatible = false;
+                result.reason = "JS 引擎过旧（不支持 Optional Chaining），会导致前端脚本报错。";
+            } else if (chromeVersion < 90) {
+                result.isCompatible = false;
+                result.reason = "Chromium 内核版本 (" + chromeVersion + ") 低于 HA 官方推荐的 90+。";
+            }
+
+            return result;
+        }
+
+        // 使用示例
+        var check = checkWebViewCompatibility();
+        if (check.isCompatible) {
+            console.log("✅ 兼容性良好: " + check.details.chromeVersion);
+        } else {
+            window.externalApp.externalBus(JSON.stringify({
+                type: 'x5/init'
+            }))
+            console.error("❌ 不兼容: " + check.reason);
+        }
+    </script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script>
+        window.externalBus = function (msg) {
+            console.log(JSON.stringify(msg))
+            if (msg.type === 'webview/url') {
+                console.log("请求 URL...");
+                $("#tv img").attr("src", `https://cdn.dotmaui.com/qrc/?t=${encodeURIComponent(msg.data)}`)
+                $("#tv").show();
+            } else if (msg.type == "webview/auth") {
+                $("#tips").html(msg.message);
+                $("#loading").hide()
+            }
+        }
+
+        window.externalApp.externalBus(JSON.stringify({
+            type: 'webview/url'
+        }))
     </script>
 </body>
 </html>

@@ -72,24 +72,6 @@ public static class MauiAppBuilderExtensions
 
                     Console.WriteLine("InitX5Environment");
                     QbSdk.InitX5Environment(activity, preInitCallback);
-                    // 只在Android 10 以下执行下载内核操作
-                    if (!OperatingSystem.IsAndroidVersionAtLeast(29))
-                    {
-                        string apkUrl = string.Empty;
-                        if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
-                        {
-                            apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm64_046295.tbs.apk";
-                        }
-                        else if (RuntimeInformation.ProcessArchitecture == Architecture.Arm)
-                        {
-                            apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm_045912_x5.tbs.apk";
-                        }
-                        if (!string.IsNullOrEmpty(apkUrl))
-                        {
-                            Debug.WriteLine($"[ExternalBus] Initializing Tencent X5 Core with APK: {apkUrl}");
-                            await TencentX5Service.InitializeX5CoreAsync(apkUrl);
-                        }
-                    }
                 });
             });
 #endif

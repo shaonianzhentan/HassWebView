@@ -4,6 +4,5 @@
 
     <ScrollView>
 
-        <Button Text="授权" Clicked="Button_Clicked"></Button>
     </ScrollView>
 </ContentPage>
