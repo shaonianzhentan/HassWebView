@@ -12,7 +12,7 @@ namespace HassWebView.HassApi;
 
 public abstract class HttpClientBase
 {
-    private readonly string baseUrl;
+    public readonly string baseUrl;
     protected readonly HttpClient RawClient;
 
     protected static readonly JsonSerializerOptions SnakeCaseJsonOptions = new()
