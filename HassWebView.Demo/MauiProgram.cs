@@ -17,10 +17,8 @@ namespace HassWebView.Demo
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 })
-                // This extension method now handles registering IHassAuthService.
                 .UseHassWebView(options =>
                 {
-                    // 配置设置页面的导航
                     options.ShowSettingsScreen = () =>
                     {
                         MainThread.BeginInvokeOnMainThread(() =>
@@ -29,56 +27,49 @@ namespace HassWebView.Demo
                         });
                     };
 
-                    // 配置视频播放的导航
                     options.PlayVideo = (url) =>
                     {
                         MainThread.BeginInvokeOnMainThread(() =>
                         {
-                            // 用户在这里决定导航到哪个页面，例如 HassMediaPage
                             Shell.Current.GoToAsync($"/{nameof(HassPage)}/{nameof(HassMediaPage)}?Url={Uri.EscapeDataString(url)}");
                         });
                     };
                 })
                 .UseImmersiveMode()
-                // This extension method now handles registering KeyService and platform-specific key listeners.
-                .UseRemoteControl()
-                .UseHttpServer(8125, server =>
+                .UseRemoteControl();
+
+            var tempServices = builder.Services.BuildServiceProvider();
+            var webViewOptions = tempServices.GetRequiredService<HassWebViewOptions>();
+
+            builder.UseHttpServer(8125, server =>
+            {
+                webViewOptions.PushUrl = server.BaseUrl;
+
+                server.Get("/", async (req, res) =>
                 {
-                    // 从服务器实例中获取服务提供程序，并解析出 HassWebViewOptions
-                    var webViewOptions = server.ServiceProvider.GetRequiredService<HassWebViewOptions>();
-                    // 使用服务器的 BaseUrl 动态构建并设置 PushUrl
-                    webViewOptions.PushUrl = server.BaseUrl;
-
-
-                    server.Get("/", async (req, res) =>
-                    {
-                        await res.Text(DateTime.Now.ToString());
-                    });
-                    server.Post("/", async (req, res) =>
-                    {
-                        var payload = await req.JsonAsync<NotificationPayload>();
-
-                        if (payload.Title == "url" && payload.Message.StartsWith("http"))
-                        {
-                            // 链接跳转
-                            MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync($"/{nameof(HassPage)}?url={Uri.EscapeDataString(payload.Message)}"));
-                        }
-                        else if (payload.Title == "video")
-                        {
-                            MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync($"/{nameof(HassMediaPage)}?url={Uri.EscapeDataString(payload.Message)}"));
-                        }
-                        await res.Text("", System.Net.HttpStatusCode.Created);
-                    });
-                    
+                    await res.Text(DateTime.Now.ToString());
                 });
 
+                server.Post("/", async (req, res) =>
+                {
+                    var payload = await req.JsonAsync<NotificationPayload>();
+
+                    if (payload.Title == "url" && payload.Message.StartsWith("http"))
+                    {
+                        MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync($"/{nameof(HassPage)}?url={Uri.EscapeDataString(payload.Message)}"));
+                    }
+                    else if (payload.Title == "video")
+                    {
+                        MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync($"/{nameof(HassMediaPage)}?url={Uri.EscapeDataString(payload.Message)}"));
+                    }
+                    await res.Text("", System.Net.HttpStatusCode.Created);
+                });
+            });
+
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
-            // Services are now registered by the extension methods above, so we can remove the explicit registrations here.
-
-            // Register pages for dependency injection
             builder.Services.AddTransient<HassPage>();
             builder.Services.AddTransient<HassMediaPage>();
 

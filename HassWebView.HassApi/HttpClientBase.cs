@@ -68,6 +68,11 @@ public abstract class HttpClientBase
         return response.IsSuccessStatusCode ? await response.Content.ReadFromJsonAsync<T>(SnakeCaseJsonOptions, cancellationToken) : default;
     }
 
+    protected async Task PostJsonAsync<TRequest>(string endpoint, TRequest? payload, CancellationToken cancellationToken = default)
+    {
+        await ExecuteRequestAsync(() => RawClient.PostAsJsonAsync(endpoint, payload, SnakeCaseJsonOptions, cancellationToken));
+    }
+
     protected async Task<TResponse?> PostJsonAsync<TRequest, TResponse>(string endpoint, TRequest? payload, CancellationToken cancellationToken = default)
     {
         var response = await ExecuteRequestAsync(() => RawClient.PostAsJsonAsync(endpoint, payload, SnakeCaseJsonOptions, cancellationToken));

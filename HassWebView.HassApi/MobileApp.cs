@@ -55,7 +55,7 @@ public class MobileApp : HttpClientBase
     /// </summary>
     private async Task PostWebhookAsync<TRequest>(TRequest payload, CancellationToken cancellationToken)
     {
-        await PostJsonAsync(WebhookUrl, payload, cancellationToken);
+        await PostJsonAsync<TRequest>(WebhookUrl, payload, cancellationToken);
     }
 
     // --- 高层级 API (发送/无响应) ---
