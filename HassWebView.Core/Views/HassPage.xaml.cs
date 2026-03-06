@@ -100,9 +100,6 @@ public partial class HassPage : ContentPage
         }
     }
 
-
-
-
     private readonly HttpServer _httpServer;
     private readonly KeyService _keyService;
     private readonly HassWebViewOptions _options;
@@ -131,7 +128,7 @@ public partial class HassPage : ContentPage
         if (_httpServer != null)
         {
 
-            _httpServer.Get("/remote", async (req, res) =>
+            _httpServer.Get("/webview/remote", async (req, res) =>
             {
                 var assembly = GetType().GetTypeInfo().Assembly;
                 using (var stream = assembly.GetManifestResourceStream("HassWebView.Core.Resources.remote.html"))
@@ -143,13 +140,18 @@ public partial class HassPage : ContentPage
                     }
                     using (var reader = new StreamReader(stream))
                     {
-                        var htmlContent = reader.ReadToEnd();
+                        var htmlContent = await reader.ReadToEndAsync();
                         await res.Html(htmlContent);
                     }
                 }
             });
 
-            _httpServer.Post("/remote", async (req, res) =>
+            _httpServer.Get("/webview/config", async (req, res) =>
+            {
+                await res.Json(new { width = wv.Width });
+            });
+
+            _httpServer.Post("/webview/remote", async (req, res) =>
             {
                 var query = HttpUtility.ParseQueryString(await req.BodyAsync());
 
@@ -158,6 +160,7 @@ public partial class HassPage : ContentPage
                 switch (type)
                 {
                     case "move":
+                        // The scale factor is now calculated on the client-side.
                         _cursorControl.MoveBy(Convert.ToDouble(query["x"]), Convert.ToDouble(query["y"]));
                         break;
                     case "click":
@@ -468,7 +471,7 @@ public partial class HassPage : ContentPage
                     wv.WindowExternalBusAsync(new
                     {
                         type = "webview/url",
-                        data = _httpServer.BaseUrl + "remote"
+                        data = _httpServer.BaseUrl + "webview/remote"
                     });
                 }
             }

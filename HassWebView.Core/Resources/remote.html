@@ -72,16 +72,40 @@
     <script>
         let lastX = 0, lastY = 0;
         let isSending = false;
+        let moveScaleFactor = 1.0; // Default scale factor
+
+        // Fetch config and calculate the scale factor on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/webview/config');
+                const config = await response.json();
+                const tvWidth = config.width;
+                const phoneWidth = window.innerWidth;
+
+                if (tvWidth && phoneWidth > 0) {
+                    moveScaleFactor = tvWidth / phoneWidth;
+                    console.log(`TV Width: ${tvWidth}, Phone Width: ${phoneWidth}, Scale Factor: ${moveScaleFactor}`);
+                }
+            } catch (e) {
+                console.error("获取配置失败或计算缩放比例失败", e);
+            }
+        });
 
         // 通用发送函数
         async function postCmd(type, data = {}) {
             try {
+                const params = new URLSearchParams();
+                params.append('type', type);
+                for (const key in data) {
+                    params.append(key, data[key]);
+                }
+
                 await fetch('', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
                     },
-                    body: new URLSearchParams({ type, ...data })
+                    body: params.toString()
                 });
             } catch (e) { console.error("发送失败", e); }
         }
@@ -94,12 +118,12 @@
         });
 
         touchpad.addEventListener('touchmove', e => {
-            // 简单的节流控制，避免 HTTP 请求过快导致电视端瘫痪
             if (isSending) return;
             isSending = true;
 
-            const dx = Math.round(e.touches[0].clientX - lastX);
-            const dy = Math.round(e.touches[0].clientY - lastY);
+            // Apply the calculated scale factor
+            const dx = Math.round((e.touches[0].clientX - lastX) * moveScaleFactor);
+            const dy = Math.round((e.touches[0].clientY - lastY) * moveScaleFactor);
 
             if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
                 postCmd('move', { x: dx, y: dy }).then(() => {
