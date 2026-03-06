@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -11,20 +11,17 @@ namespace HassWebView.HassApi;
 /// <summary>
 /// Home Assistant REST API 客户端
 /// </summary>
-public class HassClient: HttpClientBase
+public class HassRestApi: HttpClientBase
 {
     /// <summary>
-    /// 初始化 HassClient
+    /// 初始化 HassRestApi
     /// </summary>
     /// <param name="baseUrl">HA 地址 (例如: http://192.168.1.5:8123)</param>
-    /// <param name="accessToken">长期访问令牌 (Long-Lived Access Token)</param>
-    public HassClient(string baseUrl, string accessToken): base(baseUrl)
+    /// <param name="tokenRefreshCallback">一个用于在需要时自动获取新令牌的回调函数。bool 参数表示是否需要强制刷新。</param>
+    public HassRestApi(string baseUrl, Func<bool, Task<string>>? tokenRefreshCallback = null)
+        : base(baseUrl, tokenRefreshCallback)
     {
-        // 基础校验
-        if (string.IsNullOrWhiteSpace(accessToken)) throw new ArgumentNullException(nameof(accessToken));
-
-        // 配置默认请求头
-        this.SetAuthorizationToken(accessToken);
+        // The constructor now simply passes the required parameters to the base class.
     }
 
     // --- 核心状态 API ---
@@ -40,7 +37,7 @@ public class HassClient: HttpClientBase
         return await GetJsonAsync<ApiStatusResponse>("api/", cancellationToken);
     }
 
-    // 在 HassClient.cs 中添加以下方法：
+    // 在 HassRestApi.cs 中添加以下方法：
 
     /// <summary>
     /// 注册移动应用设备。此接口用于获取后续通信所需的 Webhook ID 和 URL。
@@ -53,9 +50,10 @@ public class HassClient: HttpClientBase
         MobileAppRegistrationRequest request,
         CancellationToken cancellationToken = default)
     {
-        return await PostJsonAsync<MobileAppRegistrationResponse>(
-            "api/mobile_app/registrations",
-            request,
+        // This method requires an authenticated request, the base class will handle token acquisition.
+        return await PostJsonAsync<MobileAppRegistrationRequest, MobileAppRegistrationResponse>(
+            "api/mobile_app/registrations", 
+            request, 
             cancellationToken);
     }
 
@@ -135,7 +133,7 @@ public class HassClient: HttpClientBase
     {
         var endpoint = $"api/services/{domain}/{service}";
 
-        var result = await PostJsonAsync<List<HassState>>(endpoint, payload, cancellationToken);
+        var result = await PostJsonAsync<object, List<HassState>>(endpoint, payload, cancellationToken);
         return result ?? new List<HassState>();
     }
 
@@ -277,26 +275,27 @@ public class HassClient: HttpClientBase
 
     /// <summary>
     /// 渲染一个 Home Assistant 模板。
-    /// POST /api/template
     /// </summary>
     /// <param name="request">包含要渲染的模板字符串的请求体。</param>
     /// <param name="cancellationToken">用于取消长时间运行的操作的令牌。</param>
     /// <returns>渲染后的模板字符串。</returns>
-    public async Task<string> RenderTemplateAsync(TemplateRenderRequest request, CancellationToken cancellationToken = default)
+    public async Task<string?> RenderTemplateAsync(TemplateRenderRequest request, CancellationToken cancellationToken = default)
     {
-        // 注意：此 API 通常返回原始字符串，不是 JSON 对象。
-        return await PostRawAsync("api/template", request, cancellationToken);
+        var response = await ExecuteRequestAsync(() => RawClient.PostAsJsonAsync("api/template", request, SnakeCaseJsonOptions, cancellationToken));
+        if(response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadAsStringAsync();
+        }
+        return null;
     }
 
     /// <summary>
     /// 触发配置文件的核心检查。
-    /// POST /api/config/core/check_config
     /// </summary>
     /// <param name="cancellationToken">用于取消长时间运行的操作的令牌。</param>
     /// <returns>包含检查结果和错误信息的响应模型。</returns>
     public async Task<ConfigCheckResponse?> CheckConfigAsync(CancellationToken cancellationToken = default)
     {
-        // 此 API 不需要 Payload，但需要发送 POST 请求
-        return await PostJsonAsync<ConfigCheckResponse>("api/config/core/check_config", payload: null, cancellationToken);
+        return await PostJsonAsync<object, ConfigCheckResponse>("api/config/core/check_config", null, cancellationToken);
     }
 }
