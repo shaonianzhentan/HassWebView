@@ -114,6 +114,9 @@ public partial class HassPage : ContentPage
     {
         InitializeComponent();
 
+        // Load the initial loading screen to provide immediate feedback and avoid a blank page.
+        LoadEmbeddedHtml("HassWebView.Core.Resources.loading.html");
+
         _keyService = IPlatformApplication.Current.Services.GetService<KeyService>();
         _options = IPlatformApplication.Current.Services.GetRequiredService<HassWebViewOptions>();
          
