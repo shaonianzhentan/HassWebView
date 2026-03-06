@@ -132,8 +132,8 @@ public partial class HassPage : ContentPage
                     case "text":
                         var appendText = query["append"] == "1" ? "el.value + " : "";
                         var text = query["text"];
-                        string escapedContent = text.Replace("'", "\'").Replace("\", "\\").Replace("", "\r").Replace("
-", "\n");
+                        string escapedContent = text.Replace("\'", "\\\'").Replace("\\", "\\\\").Replace("", "\\r").Replace("
+", "\\n");
                         string jsCode = $@"
 (function() {{
     const el = document.activeElement;
