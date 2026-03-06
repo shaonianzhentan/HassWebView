@@ -211,8 +211,9 @@ public partial class HassPage : ContentPage
             });
 
             var hassAuth = new HassAuth(HassUrl);
-            var navigationUrl = $"/{nameof(HassPage)}?url={Uri.EscapeDataString(hassAuth.RedirectUri)}";
-            await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync(navigationUrl));
+            var navigationUrl = $"///{nameof(HassPage)}?url={Uri.EscapeDataString(hassAuth.RedirectUri)}";
+            await Shell.Current.GoToAsync(navigationUrl);
+
         }
     }
 
@@ -259,12 +260,12 @@ public partial class HassPage : ContentPage
             if (registrationResult?.WebhookId == null) return;
 
             WebhookId = registrationResult.WebhookId;
-            var navigationUrl = $"/{nameof(HassPage)}?url={Uri.EscapeDataString(hassAuth.RedirectUri)}";
+            var navigationUrl = $"///{nameof(HassPage)}?url={Uri.EscapeDataString(hassAuth.RedirectUri)}";
             await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync(navigationUrl));
         }
     }
 
-    private void OnWebViewResourceLoading(object? sender, ResourceLoadingEventArgs e)
+    private void OnWebViewResourceLoading(object sender, ResourceLoadingEventArgs e)
     {
         var urlString = e.Url.ToString();
         Debug.WriteLine($"ResourceLoading：{urlString}");
@@ -342,7 +343,7 @@ public partial class HassPage : ContentPage
                     Debug.WriteLine($"[ExternalBus] Received auth URL: {urlFromForm}");
                     if (await IsHassUrlValid(urlFromForm))
                     {
-                        var navigationUrl = $"/{nameof(HassPage)}?mode=login&url={Uri.EscapeDataString(urlFromForm)}";
+                        var navigationUrl = $"///{nameof(HassPage)}?mode=login&url={Uri.EscapeDataString(urlFromForm)}";
                         await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync(navigationUrl));
                     }
                     else
@@ -458,7 +459,7 @@ public partial class HassPage : ContentPage
     private Task GoToAuthMode()
     {
         _isInitialized = false;
-        var navigationUrl = $"/{nameof(HassPage)}?mode=auth";
+        var navigationUrl = $"///{nameof(HassPage)}?mode=auth";
         return MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync(navigationUrl));
     }
 

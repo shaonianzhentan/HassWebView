@@ -8,7 +8,7 @@ namespace HassWebView.Demo
         {
             InitializeComponent();
 
-            // Routing.RegisterRoute(nameof(HassPage), typeof(HassPage));
+            //Routing.RegisterRoute(nameof(HassPage), typeof(HassPage));
             Routing.RegisterRoute(nameof(HassMediaPage), typeof(HassMediaPage));
         }
     }

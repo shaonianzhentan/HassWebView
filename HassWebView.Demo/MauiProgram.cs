@@ -1,4 +1,5 @@
 using HassWebView.Core;
+using HassWebView.Core.Configuration;
 using HassWebView.Core.Views;
 using HassWebView.HassApi.Models;
 using Microsoft.Extensions.Logging;

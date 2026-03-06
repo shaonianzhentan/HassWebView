@@ -32,7 +32,12 @@
 		<PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <None Remove="Resources\loading.html" />
+	</ItemGroup>
+
     <ItemGroup>
+      <EmbeddedResource Include="Resources\loading.html" />
       <EmbeddedResource Include="Resources\remote.html" />
       <EmbeddedResource Include="Resources\index.html" />
     </ItemGroup>
