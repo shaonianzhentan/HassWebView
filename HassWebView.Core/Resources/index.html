@@ -205,7 +205,7 @@
         // This function is CALLED BY C# to send messages TO the WebView.
         window.externalBus = function (msg) {
             console.log("Message received from C#: " + msg);
-            hideLoading();
+            
             var message;
             try {
                 // C# sends a JSON string, so we must parse it into an object.
@@ -218,13 +218,19 @@
 
             switch(message.type){
                 case 'webview/url':
+                    hideLoading();
                     $("#tv img").attr("src", "https://cdn.dotmaui.com/qrc/?t=" + encodeURIComponent(message.data));
                     $("#tv").show();
                     break;
                 case 'webview/auth':
+                    hideLoading();
                     showToast(message.message);
                     break;
-                case 'x5/init': 
+                case 'x5/download':
+                    showLoading("下载进度 " + message.data + "%")
+                    break;
+                case 'x5/init':
+                    hideLoading();
                     showToast("腾讯X5内核加载成功，可以正常使用啦");
                     break;
                 default:

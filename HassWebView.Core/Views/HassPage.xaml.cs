@@ -484,11 +484,19 @@ public partial class HassPage : ContentPage
                 if (!string.IsNullOrEmpty(apkUrl))
                 {
                     Debug.WriteLine($"[ExternalBus] Initializing Tencent X5 Core with APK: {apkUrl}");
-                    await TencentX5Service.InitializeX5CoreAsync(apkUrl);
-                    wv.WindowExternalBusAsync(new
-                    {
-                        type = "x5/init"
+                    var result = await TencentX5Service.InitializeX5CoreAsync(apkUrl, (progress)=>{
+                        wv.WindowExternalBusAsync(new
+                        {
+                            type = "x5/download",
+                            data = progress
+                        });
                     });
+                    if(result){
+                        wv.WindowExternalBusAsync(new
+                        {
+                            type = "x5/init"
+                        });
+                    }
                 }
 #endif
             }
