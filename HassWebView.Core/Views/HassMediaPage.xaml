@@ -2,8 +2,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="HassWebView.Core.Views.HassMediaPage"
-             xmlns:core="clr-namespace:HassWebView.Core.Views"
+             xmlns:core="clr-namespace:HassWebView.Core"
              Shell.NavBarIsVisible="False"
              Title="视频播放">
-    <core:HassMediaView x:Name="wv" />
+    <core:HassWebView x:Name="wv"/>
 </ContentPage>
