@@ -132,8 +132,7 @@ public partial class HassPage : ContentPage
                     case "text":
                         var appendText = query["append"] == "1" ? "el.value + " : "";
                         var text = query["text"];
-                        string escapedContent = text.Replace("\'", "\\\'").Replace("\\", "\\\\").Replace("", "\\r").Replace("
-", "\\n");
+                        string escapedContent = text.Replace("\\", "\\\\").Replace("'", "\\'").Replace("\r", "\\r").Replace("\n", "\\n");
                         string jsCode = $@"
 (function() {{
     const el = document.activeElement;
@@ -465,7 +464,7 @@ public partial class HassPage : ContentPage
 
     public async Task<AuthorizationResult> RefreshAccessTokenAsync(bool forceRefresh = false)
     {
-        if (!forceRefresh && !string.IsNullOrEmpty(AccessToken) && DateTime.UtcNow < TokenExpiryUtc.AddSeconds(-60))
+        if (!forceRefresh && !string.IsNullOrEmpty(AccessToken) && TokenExpiryUtc != DateTime.MinValue && DateTime.UtcNow < TokenExpiryUtc.AddSeconds(-60))
         {
             Debug.WriteLine("[Auth] Using cached access token.");
             return new AuthorizationResult(this.AccessToken, (int)(this.TokenExpiryUtc - DateTime.UtcNow).TotalSeconds, "Bearer")
