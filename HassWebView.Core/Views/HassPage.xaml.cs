@@ -15,7 +15,6 @@ namespace HassWebView.Core.Views;
 
 [QueryProperty(nameof(Url), "url")]
 [QueryProperty(nameof(Mode), "mode")]
-[QueryProperty(nameof(PushUrl), "pushUrl")]
 public partial class HassPage : ContentPage
 {
     public string Url { get; set; }
@@ -36,14 +35,7 @@ public partial class HassPage : ContentPage
             return id;
         }
     }
-    public string PushUrl
-    {
-        get => Preferences.Get("PushUrl", "");
-        set
-        {
-            if (!string.IsNullOrEmpty(value)) Preferences.Set("PushUrl", value);
-        }
-    }
+    
     public string HassUrl
     {
         get => Preferences.Get("HassUrl", "");
@@ -215,7 +207,7 @@ public partial class HassPage : ContentPage
                 Model = DeviceInfo.Current.Model,
                 Manufacturer = DeviceInfo.Current.Manufacturer,
                 OsVersion = DeviceInfo.Current.VersionString,
-                AppData = new MobileAppData(DeviceId, PushUrl)
+                AppData = new MobileAppData(DeviceId, _options.PushUrl)
             });
 
             var hassAuth = new HassAuth(HassUrl);
@@ -260,7 +252,7 @@ public partial class HassPage : ContentPage
                 OsName = DeviceInfo.Current.Platform.ToString(),
                 OsVersion = DeviceInfo.Current.VersionString,
                 SupportsEncryption = false,
-                AppData = new MobileAppData(DeviceId, PushUrl)
+                AppData = new MobileAppData(DeviceId, _options.PushUrl)
             };
 
             var registrationResult = await hassApi.RegisterMobileAppAsync(registrationRequest);

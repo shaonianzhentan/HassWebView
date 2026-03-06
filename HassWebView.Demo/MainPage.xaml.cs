@@ -13,8 +13,6 @@ namespace HassWebView.Demo
         public MainPage(HttpServer httpServer)
         {
             InitializeComponent();
-
-            Shell.Current.GoToAsync($"/{nameof(HassPage)}?pushUrl={Uri.EscapeDataString(httpServer.BaseUrl)}");
         }
 
     }

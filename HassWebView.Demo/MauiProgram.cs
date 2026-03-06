@@ -44,6 +44,12 @@ namespace HassWebView.Demo
                 .UseRemoteControl()
                 .UseHttpServer(8125, server =>
                 {
+                    // 从服务器实例中获取服务提供程序，并解析出 HassWebViewOptions
+                    var webViewOptions = server.ServiceProvider.GetRequiredService<HassWebViewOptions>();
+                    // 使用服务器的 BaseUrl 动态构建并设置 PushUrl
+                    webViewOptions.PushUrl = server.BaseUrl;
+
+
                     server.Get("/", async (req, res) =>
                     {
                         await res.Text(DateTime.Now.ToString());
