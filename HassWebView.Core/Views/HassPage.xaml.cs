@@ -24,9 +24,11 @@ public partial class HassPage : ContentPage
     private readonly HassPageOptions _pageOptions;
     private readonly CursorControl _cursorControl;
     private readonly IAuthStore _authStore;
+    private readonly IHassApiService _hassApiService; // 1. Add field for the service
     private string _defaultUserAgent;
 
-    public HassPage(HassPageOptions pageOptions, KeyService keyService = null, HttpServer httpServer = null)
+    // 2. Inject IHassApiService into the constructor
+    public HassPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService keyService = null, HttpServer httpServer = null)
     {
         InitializeComponent();
 
@@ -36,6 +38,7 @@ public partial class HassPage : ContentPage
         _authStore = pageOptions.AuthStore;
         _keyService = keyService;
         _httpServer = httpServer;
+        _hassApiService = hassApiService; // Assign the injected service
 
         _pageOptions.PlayVideo = DisplayVideoPlayer;
         _pageOptions.SetWebViewSource = (newSource) => MainThread.BeginInvokeOnMainThread(() => wv.Source = newSource);
@@ -218,6 +221,10 @@ public partial class HassPage : ContentPage
                 var token = await RefreshAccessTokenAsync(force);
                 return token?.AccessToken;
             });
+
+            // 3. Initialize the service with the newly created HassRestApi instance
+            _hassApiService.Initialize(hassApi);
+
             var deviceId = await _authStore.GetDeviceIdAsync();
             var registrationRequest = new MobileAppRegistrationRequest
             {
