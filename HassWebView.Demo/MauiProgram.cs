@@ -50,7 +50,7 @@ namespace HassWebView.Demo
 
                     if (payload.Title == "url" && payload.Message.StartsWith("http"))
                     {
-                        MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync($"/HassPage?url={Uri.EscapeDataString(payload.Message)}"));
+                        pageOptions.SetWebViewSource?.Invoke(new UrlWebViewSource { Url = payload.Message });
                     }
                     else if (payload.Title == "video")
                     {
