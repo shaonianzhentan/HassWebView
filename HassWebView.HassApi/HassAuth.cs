@@ -35,8 +35,8 @@ public class HassAuth: HttpClientBase
     {
         // 使用继承的 BaseUrl 属性进行 URL 拼接
         clientId = Uri.EscapeDataString(this.BaseUrl);
-        RedirectUri = $"{this.BaseUrl}/?external_auth=1"; 
-        AuthorizeUri = $"{this.BaseUrl}/auth/authorize?response_type=code&client_id={clientId}&redirect_uri={Uri.EscapeDataString(RedirectUri)}";
+        RedirectUri = $"{this.BaseUrl}?external_auth=1"; 
+        AuthorizeUri = $"{this.BaseUrl}auth/authorize?response_type=code&client_id={clientId}&redirect_uri={Uri.EscapeDataString(RedirectUri)}";
     }
 
     /// <summary>

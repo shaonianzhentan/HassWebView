@@ -202,8 +202,6 @@ public partial class HassPage : ContentPage
             var code = query["code"];
             if (string.IsNullOrEmpty(code)) return;
 
-            e.Cancel = true;
-
             var hassUrl = await _authStore.GetHassUrlAsync();
             var hassAuth = new HassAuth(hassUrl);
             var tokenResult = await hassAuth.GetRefreshTokenAsync(code);
@@ -357,7 +355,7 @@ public partial class HassPage : ContentPage
                     }
                     else
                     {
-                        await wv.WindowExternalBusAsync(new { type = "webview/auth", message = "无法访问提供的URL，请确保它是正确的Home Assistant实例地址，并且设备能够访问它。" });
+                        wv.WindowExternalBusAsync(new { type = "webview/auth", message = "无法访问提供的URL，请确保它是正确的Home Assistant实例地址，并且设备能够访问它。" });
                     }
                     break;
                 case "webview/url":
@@ -474,6 +472,7 @@ public partial class HassPage : ContentPage
             LoadEmbeddedHtml("HassWebView.Core.Resources.index.html");
             if (!string.IsNullOrEmpty(message))
             {
+                Task.Delay(1000);
                 wv.WindowExternalBusAsync(new { type = "webview/auth", message });
             }
         });
