@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using System.IO;
 using System;
 using HassWebView.HassApi.Models;
+using System.Net;
+using System.Diagnostics;
 
 namespace HassWebView.HassApi;
 
@@ -31,10 +33,28 @@ public class HassAuth: HttpClientBase
     /// </summary>
     public HassAuth(string baseUrl): base(baseUrl)
     {
-        // 使用继承的 baseUrl 字段进行 URL 拼接
-        clientId = Uri.EscapeDataString(baseUrl);
-        RedirectUri = $"{this.baseUrl}/?external_auth=1"; 
-        AuthorizeUri = $"{this.baseUrl}/auth/authorize?response_type=code&client_id={clientId}&redirect_uri={Uri.EscapeDataString(RedirectUri)}";
+        // 使用继承的 BaseUrl 属性进行 URL 拼接
+        clientId = Uri.EscapeDataString(this.BaseUrl);
+        RedirectUri = $"{this.BaseUrl}/?external_auth=1"; 
+        AuthorizeUri = $"{this.BaseUrl}/auth/authorize?response_type=code&client_id={clientId}&redirect_uri={Uri.EscapeDataString(RedirectUri)}";
+    }
+
+    /// <summary>
+    /// 检查 Home Assistant API 是否可访问且有效。
+    /// </summary>
+    /// <returns>如果 API 端点返回预期的状态码(401 Unauthorized)，则返回 true；否则返回 false。</returns>
+    public async Task<bool> CheckApiStatusAsync()
+    {
+        try
+        {
+            var response = await RawClient.GetAsync("api/");
+            return response.StatusCode == HttpStatusCode.Unauthorized;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[HassAuth] API status check failed for {BaseUrl}: {ex.Message}");
+            return false;
+        }
     }
 
     /// <summary>

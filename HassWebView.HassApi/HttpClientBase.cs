@@ -12,7 +12,7 @@ namespace HassWebView.HassApi;
 
 public abstract class HttpClientBase
 {
-    public readonly string baseUrl;
+    public string BaseUrl { get; }
     protected readonly HttpClient RawClient;
 
     protected static readonly JsonSerializerOptions SnakeCaseJsonOptions = new()
@@ -35,7 +35,7 @@ public abstract class HttpClientBase
         var cleanBaseUri = new Uri(inputUri.GetLeftPart(UriPartial.Authority));
 
         // 3. Assign the clean URI parts.
-        this.baseUrl = cleanBaseUri.ToString();
+        this.BaseUrl = cleanBaseUri.ToString();
         RawClient = new HttpClient
         {
             BaseAddress = cleanBaseUri
