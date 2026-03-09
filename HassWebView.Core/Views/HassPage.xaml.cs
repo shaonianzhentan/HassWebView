@@ -87,7 +87,7 @@ public partial class HassPage : ContentPage
                     case "text":
                         var appendText = query["append"] == "1" ? "el.value + " : "";
                         var text = query["text"];
-                        string escapedContent = text.Replace("\", "\\").Replace("'", "\'");
+                        string escapedContent = text.Replace("\\", "\\\\").Replace("'", "\'");
                         string jsCode = $@"(function() {{
     const el = document.activeElement;
     if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return;
@@ -273,7 +273,7 @@ public partial class HassPage : ContentPage
             // Inject CSS if it exists
             if (!string.IsNullOrWhiteSpace(config.Css))
             {
-                string escapedCss = config.Css.Replace("\", "\\").Replace("`", "\`").Replace("$", "\$");
+                string escapedCss = config.Css.Replace("\\", "\\\\").Replace("`", "\\`").Replace("$", "\\$");
                 string cssScript = $@"(function() {{
     var style = document.createElement('style');
     style.type = 'text/css';
@@ -386,7 +386,21 @@ public partial class HassPage : ContentPage
     {
         return MainThread.InvokeOnMainThreadAsync(() =>
         {
-            var mediaPage = new HassMediaPage { Url = url, BaseUrl = baseUrl };
+            var mediaPage = new HassMediaPage { Url = url };
+
+            if(!string.IsNullOrEmpty(baseUrl)){
+                var uri = new Uri(baseUrl);
+                var host = uri.Host;
+
+                var config = _pageOptions.DomainConfigs?
+                    .FirstOrDefault(kvp => host.EndsWith(kvp.Key, StringComparison.OrdinalIgnoreCase))
+                    .Value;
+
+                if (config != null){
+                    mediaPage.BaseUrl = config.Referer;
+                }
+            }
+
             return Shell.Current.Navigation.PushModalAsync(mediaPage, true);
         });
     }

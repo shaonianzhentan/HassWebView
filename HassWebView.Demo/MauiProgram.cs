@@ -56,7 +56,13 @@ namespace HassWebView.Demo
                     {
                         if (pageOptions.PlayVideo != null)
                         {
-                            await pageOptions.PlayVideo(payload.Message);
+                            var baseUrl = string.Empty;
+                            var data = payload.Data;
+                            if (data != null)
+                            {
+                                baseUrl = data["baseUrl"];
+                            }
+                            await pageOptions.PlayVideo(payload.Message, baseUrl);
                         }
                     }
                     await res.Text("", System.Net.HttpStatusCode.Created);
