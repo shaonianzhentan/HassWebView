@@ -37,6 +37,7 @@ public partial class HassPage : ContentPage
         _httpServer = httpServer;
 
         _pageOptions.PlayVideo = DisplayVideoPlayer;
+        _pageOptions.SetWebViewSource = (newSource) => MainThread.BeginInvokeOnMainThread(() => wv.Source = newSource);
 
         if (_keyService != null)
         {

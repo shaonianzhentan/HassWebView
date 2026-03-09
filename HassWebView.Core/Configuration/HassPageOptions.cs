@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using HassWebView.Core.Auth;
+using Microsoft.Maui.Controls; // 添加 using 语句
 
 namespace HassWebView.Core.Configuration
 {
@@ -11,6 +12,8 @@ namespace HassWebView.Core.Configuration
     /// </summary>
     public class HassPageOptions
     {
+        // ... (其他属性保持不变)
+
         /// <summary>
         /// Gets or sets the persistence mechanism for authentication data.
         /// Defaults to an implementation using MAUI's Preferences API.
@@ -36,6 +39,13 @@ namespace HassWebView.Core.Configuration
         /// This URL is used by the mobile app registration process.
         /// </summary>
         public string PushUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets the action to be executed to set the webview source.
+        /// The HassPage will assign its source update logic to this action upon initialization.
+        /// The Action takes a WebViewSource object.
+        /// </summary>
+        public Action<WebViewSource> SetWebViewSource { get; set; }
 
         public HassPageOptions()
         {
