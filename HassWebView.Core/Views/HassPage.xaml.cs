@@ -24,6 +24,7 @@ public partial class HassPage : ContentPage
     private readonly HassPageOptions _pageOptions;
     private readonly CursorControl _cursorControl;
     private readonly IAuthStore _authStore;
+    private string _defaultUserAgent;
 
     public HassPage(HassPageOptions pageOptions, KeyService keyService = null, HttpServer httpServer = null)
     {
@@ -86,9 +87,8 @@ public partial class HassPage : ContentPage
                     case "text":
                         var appendText = query["append"] == "1" ? "el.value + " : "";
                         var text = query["text"];
-                        string escapedContent = text.Replace("\\", "\\\\").Replace("'", "\'").Replace("\r", "\\r").Replace("\n", "\\n");
-                        string jsCode = $@"
-(function() {{
+                        string escapedContent = text.Replace("\", "\\").Replace("'", "\'");
+                        string jsCode = $@"(function() {{
     const el = document.activeElement;
     if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return;
     el.value = {appendText}'{escapedContent}';
@@ -105,6 +105,7 @@ public partial class HassPage : ContentPage
         }
 
         wv.Navigating += OnWebViewNavigating;
+        wv.Navigated += OnWebViewNavigated;
         wv.ResourceLoading += OnWebViewResourceLoading;
         wv.AuthTokenRequested += OnWebViewAuthTokenRequested;
         wv.LogoutRequested += OnWebViewLogoutRequested;
@@ -156,8 +157,41 @@ public partial class HassPage : ContentPage
 
     private async void OnWebViewNavigating(object? sender, WebNavigatingEventArgs e)
     {
-        Debug.WriteLine(e.Url);
+        Debug.WriteLine($"[HassPage] Navigating to: {e.Url}");
 
+        // Store the default UserAgent on the first navigation
+        if (string.IsNullOrEmpty(_defaultUserAgent) && !string.IsNullOrEmpty(wv.UserAgent))
+        {
+            _defaultUserAgent = wv.UserAgent;
+            Debug.WriteLine($"[HassPage] Default User-Agent captured: {_defaultUserAgent}");
+        }
+
+        // Apply domain-specific User-Agent
+        try
+        {
+            var uri = new Uri(e.Url);
+            var host = uri.Host;
+
+            var config = _pageOptions.DomainConfigs?
+                .FirstOrDefault(kvp => host.EndsWith(kvp.Key, StringComparison.OrdinalIgnoreCase))
+                .Value;
+
+            string targetUserAgent = (config != null && !string.IsNullOrWhiteSpace(config.UserAgent))
+                ? config.UserAgent
+                : _defaultUserAgent;
+
+            if (wv.UserAgent != targetUserAgent && !string.IsNullOrEmpty(targetUserAgent))
+            {
+                Debug.WriteLine($"[HassPage] Applying User-Agent for {host}: {targetUserAgent}");
+                wv.UserAgent = targetUserAgent;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[HassPage] Error applying User-Agent: {ex.Message}");
+        }
+
+        // --- YOUR ORIGINAL CODE ---
         if (_state == PageState.InLoginFlow)
         {
             var uri = new Uri(e.Url);
@@ -170,12 +204,12 @@ public partial class HassPage : ContentPage
             var hassUrl = await _authStore.GetHassUrlAsync();
             var hassAuth = new HassAuth(hassUrl);
             var tokenResult = await hassAuth.GetRefreshTokenAsync(code);
-            if (tokenResult == null) 
+            if (tokenResult == null)
             {
                 await GoToAuthModeWithError("无法获取凭据，请重试。");
                 return;
             }
-            
+
             await _authStore.SetAccessTokenAsync(tokenResult.AccessToken);
             await _authStore.SetRefreshTokenAsync(tokenResult.RefreshToken);
             await _authStore.SetTokenExpiryUtcAsync(DateTime.UtcNow.AddSeconds(tokenResult.ExpiresIn));
@@ -216,6 +250,53 @@ public partial class HassPage : ContentPage
         }
     }
 
+    private async void OnWebViewNavigated(object sender, WebNavigatedEventArgs e)
+    {
+        if (e.Result != WebNavigationResult.Success || e.Source is not UrlWebViewSource urlSource)
+        {
+            return;
+        }
+
+        Debug.WriteLine($"[HassPage] Navigated to: {urlSource.Url}");
+
+        try
+        {
+            var uri = new Uri(urlSource.Url);
+            var host = uri.Host;
+
+            var config = _pageOptions.DomainConfigs?
+                .FirstOrDefault(kvp => host.EndsWith(kvp.Key, StringComparison.OrdinalIgnoreCase))
+                .Value;
+
+            if (config == null) return;
+
+            // Inject CSS if it exists
+            if (!string.IsNullOrWhiteSpace(config.Css))
+            {
+                string escapedCss = config.Css.Replace("\", "\\").Replace("`", "\`").Replace("$", "\$");
+                string cssScript = $@"(function() {{
+    var style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = `{escapedCss}`;
+    document.head.appendChild(style);
+    console.log('[HassWebView] Injected custom CSS for {host}.');
+}})();";
+                await wv.EvaluateJavaScriptAsync(cssScript);
+            }
+
+            // Execute JS if it exists
+            if (!string.IsNullOrWhiteSpace(config.Js))
+            {
+                await wv.EvaluateJavaScriptAsync(config.Js);
+                Debug.WriteLine($"[HassWebView] Executed custom JS for {host}.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[HassPage] Error applying domain config (CSS/JS): {ex.Message}");
+        }
+    }
+
     private void OnWebViewResourceLoading(object sender, ResourceLoadingEventArgs e)
     {
         var urlString = e.Url.ToString();
@@ -226,7 +307,7 @@ public partial class HassPage : ContentPage
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                 var script = @"(function() { function addVideoToPanel(videoUrl) { const safeId = 'video-panel-item-' + encodeURIComponent(videoUrl).replace(/[^a-zA-Z0-9_-]/g, '_'); let container = document.getElementById('video-panel-container'); if (!container) { container = document.createElement('div'); container.id = 'video-panel-container'; Object.assign(container.style, { position: 'fixed', left: 0, top: 0, height: '100%', width: '30%', minWidth: '200px', display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px', backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '0 10px 10px 0', boxSizing: 'border-box', zIndex: '2147483647', overflowY: 'auto' }); document.body.appendChild(container); } let item = document.getElementById(safeId); if (!item) { item = document.createElement('div'); item.id = safeId; item.textContent = videoUrl; Object.assign(item.style, { padding: '8px', backgroundColor: 'rgba(255, 255, 255, 0.1)', color: '#ffffff', border: '1px solid #555', borderRadius: '5px', wordBreak: 'break-all', cursor: 'pointer' }); item.addEventListener('click', () => { window.externalApp.externalBus(JSON.stringify({ type: 'video/play', data: videoUrl })); }); } container.insertBefore(item, container.firstChild); while (container.children.length > 6) { container.removeChild(container.lastChild); } } addVideoToPanel('{urlString}'); })();";
+                 var script = @"(function() { function addVideoToPanel(videoUrl) { const safeId = 'video-panel-item-' + encodeURIComponent(videoUrl).replace(/[^a-zA-Z0-9_-]/g, '_'); let container = document.getElementById('video-panel-container'); if (!container) { container = document.createElement('div'); container.id = 'video-panel-container'; Object.assign(container.style, { position: 'fixed', left: 0, top: 0, height: '100%', width: '30%', minWidth: '200px', display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px', backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '0 10px 10px 0', boxSizing: 'border-box', zIndex: '2147483647', overflowY: 'auto' }); document.body.appendChild(container); } let item = document.getElementById(safeId); if (!item) { item = document.createElement('div'); item.id = safeId; item.textContent = videoUrl; Object.assign(item.style, { padding: '8px', backgroundColor: 'rgba(255, 255, 255, 0.1)', color: '#ffffff', border: '1px solid #555', borderRadius: '5px', wordBreak: 'break-all', cursor: 'pointer' }); item.addEventListener('click', () => { window.externalApp.externalBus(JSON.stringify({ type: 'video/play', data: videoUrl, origin: top.location.origin })); }); } container.insertBefore(item, container.firstChild); while (container.children.length > 6) { container.removeChild(container.lastChild); } } addVideoToPanel('{urlString}'); })();";
                 wv.EvaluateJavaScriptAsync(script);
             });
         }
@@ -251,7 +332,8 @@ public partial class HassPage : ContentPage
                     break;
                 case "video/play":
                     var videoUrl = msg?["data"]?.GetValue<string>();
-                    if (!string.IsNullOrEmpty(videoUrl)) await DisplayVideoPlayer(videoUrl);
+                    var origin = msg?["origin"]?.GetValue<string>();
+                    if (!string.IsNullOrEmpty(videoUrl)) await DisplayVideoPlayer(videoUrl, origin);
                     break;
                 case "webview/auth":
                     var urlFromForm = msg?["data"]?.GetValue<string>();
@@ -300,11 +382,11 @@ public partial class HassPage : ContentPage
         }
     }
 
-    private Task DisplayVideoPlayer(string url)
+    private Task DisplayVideoPlayer(string url, string? baseUrl)
     {
         return MainThread.InvokeOnMainThreadAsync(() =>
         {
-            var mediaPage = new HassMediaPage { Url = url };
+            var mediaPage = new HassMediaPage { Url = url, BaseUrl = baseUrl };
             return Shell.Current.Navigation.PushModalAsync(mediaPage, true);
         });
     }

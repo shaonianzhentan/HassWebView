@@ -12,7 +12,7 @@ namespace HassWebView.Core.Configuration
     public class HassPageOptions
     {
         public IAuthStore AuthStore { get; set; }
-        public Func<string, Task> PlayVideo { get; set; }
+        public Func<string, string?, Task> PlayVideo { get; set; }
         public Action ShowSettingsScreen { get; set; }
         public string PushUrl { get; set; }
         public Action<WebViewSource> SetWebViewSource { get; set; }
