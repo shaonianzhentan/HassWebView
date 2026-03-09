@@ -18,7 +18,8 @@ namespace HassWebView.Demo
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 })
-                .UseHassWebView(options =>
+                .UseHassWebView()
+                .UseHassPage(options =>
                 {
                     options.ShowSettingsScreen = () =>
                     {
@@ -27,24 +28,16 @@ namespace HassWebView.Demo
                             // Shell.Current.GoToAsync("///MySettingsPage");
                         });
                     };
-
-                    options.PlayVideo = (url) =>
-                    {
-                        MainThread.BeginInvokeOnMainThread(() =>
-                        {
-                            Shell.Current.GoToAsync($"/{nameof(HassPage)}/{nameof(HassMediaPage)}?Url={Uri.EscapeDataString(url)}");
-                        });
-                    };
                 })
                 .UseImmersiveMode()
                 .UseRemoteControl();
 
             var tempServices = builder.Services.BuildServiceProvider();
-            var webViewOptions = tempServices.GetRequiredService<HassWebViewOptions>();
+            var pageOptions = tempServices.GetRequiredService<HassPageOptions>();
 
             builder.UseHttpServer(8125, server =>
             {
-                webViewOptions.PushUrl = server.BaseUrl;
+                pageOptions.PushUrl = server.BaseUrl;
 
                 server.Get("/", async (req, res) =>
                 {
@@ -57,11 +50,14 @@ namespace HassWebView.Demo
 
                     if (payload.Title == "url" && payload.Message.StartsWith("http"))
                     {
-                        MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync($"/{nameof(HassPage)}?url={Uri.EscapeDataString(payload.Message)}"));
+                        MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync($"/HassPage?url={Uri.EscapeDataString(payload.Message)}"));
                     }
                     else if (payload.Title == "video")
                     {
-                        MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync($"/{nameof(HassMediaPage)}?url={Uri.EscapeDataString(payload.Message)}"));
+                        if (pageOptions.PlayVideo != null)
+                        {
+                            await pageOptions.PlayVideo(payload.Message);
+                        }
                     }
                     await res.Text("", System.Net.HttpStatusCode.Created);
                 });
@@ -70,9 +66,6 @@ namespace HassWebView.Demo
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
-
-            builder.Services.AddTransient<HassPage>();
-            builder.Services.AddTransient<HassMediaPage>();
 
             return builder.Build();
         }

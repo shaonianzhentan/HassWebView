@@ -57,9 +57,6 @@ public partial class HassPage : ContentPage
         set => Preferences.Set("AccessToken", value);
     }
 
-    /// <summary>
-    /// Stores the exact UTC DateTime when the access token expires.
-    /// </summary>
     public DateTime TokenExpiryUtc
     {
         get => Preferences.Get("TokenExpiryUtc", DateTime.MinValue);
@@ -70,20 +67,22 @@ public partial class HassPage : ContentPage
 
     private readonly HttpServer _httpServer;
     private readonly KeyService _keyService;
-    private readonly HassWebViewOptions _options;
+    private readonly HassPageOptions _pageOptions;
     private readonly HttpClient _httpClient = new();
     private readonly CursorControl _cursorControl;
     private bool _isInitialized = false;
 
-    public HassPage()
+    public HassPage(HassPageOptions pageOptions, KeyService keyService = null, HttpServer httpServer = null)
     {
         InitializeComponent();
 
         LoadEmbeddedHtml("HassWebView.Core.Resources.loading.html");
 
-        _keyService = IPlatformApplication.Current.Services.GetService<KeyService>();
-        _options = IPlatformApplication.Current.Services.GetRequiredService<HassWebViewOptions>();
-        _httpServer = IPlatformApplication.Current.Services.GetService<HttpServer>();
+        _pageOptions = pageOptions;
+        _keyService = keyService;
+        _httpServer = httpServer;
+
+        _pageOptions.PlayVideo = DisplayVideoPlayer;
 
         if (_keyService != null)
         {
@@ -132,17 +131,9 @@ public partial class HassPage : ContentPage
                     case "text":
                         var appendText = query["append"] == "1" ? "el.value + " : "";
                         var text = query["text"];
-                        string escapedContent = text.Replace("\\", "\\\\").Replace("'", "\\'").Replace("\r", "\\r").Replace("\n", "\\n");
-                        string jsCode = $@"
-(function() {{
-    const el = document.activeElement;
-    if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return;
-    el.value = {appendText}'{escapedContent}';
-    ['input', 'change', 'compositionstart', 'compositionend', 'blur', 'focus'].forEach(evt => {{
-        el.dispatchEvent(new Event(evt, {{ bubbles: true, cancelable: true, view: window }}));
-    }});
-    el.selectionStart = el.selectionEnd = el.value.length;
-}})();";
+                        string escapedContent = text.Replace("\", "\\").Replace("'", "\'").Replace("", "\r").Replace("
+", "\n");
+                        string jsCode = $@"\n(function() {{\n    const el = document.activeElement;\n    if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return;\n    el.value = {appendText}'{escapedContent}';\n    ['input', 'change', 'compositionstart', 'compositionend', 'blur', 'focus'].forEach(evt => {{\n        el.dispatchEvent(new Event(evt, {{ bubbles: true, cancelable: true, view: window }}));\n    }});\n    el.selectionStart = el.selectionEnd = el.value.length;\n}})();";
                         MainThread.BeginInvokeOnMainThread(() => wv.EvaluateJavaScriptAsync(jsCode));
                         break;
                 }
@@ -207,7 +198,7 @@ public partial class HassPage : ContentPage
                 Model = DeviceInfo.Current.Model,
                 Manufacturer = DeviceInfo.Current.Manufacturer,
                 OsVersion = DeviceInfo.Current.VersionString,
-                AppData = new MobileAppData(DeviceId, _options.PushUrl)
+                AppData = new MobileAppData(DeviceId, _pageOptions.PushUrl)
             });
 
             var hassAuth = new HassAuth(HassUrl);
@@ -253,7 +244,7 @@ public partial class HassPage : ContentPage
                 OsName = DeviceInfo.Current.Platform.ToString(),
                 OsVersion = DeviceInfo.Current.VersionString,
                 SupportsEncryption = false,
-                AppData = new MobileAppData(DeviceId, _options.PushUrl)
+                AppData = new MobileAppData(DeviceId, _pageOptions.PushUrl)
             };
 
             var registrationResult = await hassApi.RegisterMobileAppAsync(registrationRequest);
@@ -275,43 +266,7 @@ public partial class HassPage : ContentPage
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                 var script = @$"
-(function() {{
-    function addVideoToPanel(videoUrl) {{
-        const safeId = 'video-panel-item-' + encodeURIComponent(videoUrl).replace(/[^a-zA-Z0-9_-]/g, '_');
-        let container = document.getElementById('video-panel-container');
-        if (!container) {{
-            container = document.createElement('div');
-            container.id = 'video-panel-container';
-            Object.assign(container.style, {{
-                position: 'fixed', left: 0, top: 0, height: '100%', width: '30%', minWidth: '200px',
-                display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px',
-                backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '0 10px 10px 0',
-                boxSizing: 'border-box', zIndex: '2147483647', overflowY: 'auto'
-            }});
-            document.body.appendChild(container);
-        }}
-        let item = document.getElementById(safeId);
-        if (!item) {{
-            item = document.createElement('div');
-            item.id = safeId;
-            item.textContent = videoUrl;
-            Object.assign(item.style, {{
-                padding: '8px', backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                color: '#ffffff', border: '1px solid #555', borderRadius: '5px',
-                wordBreak: 'break-all', cursor: 'pointer'
-            }});
-            item.addEventListener('click', () => {{
-                window.externalApp.externalBus(JSON.stringify({{ type: 'video/play', data: videoUrl }}));
-            }});
-        }}
-        container.insertBefore(item, container.firstChild);
-        while (container.children.length > 6) {{
-            container.removeChild(container.lastChild);
-        }}
-    }}
-    addVideoToPanel('{urlString}');
-}})();";
+                 var script = @$"(function() {{ function addVideoToPanel(videoUrl) {{ const safeId = 'video-panel-item-' + encodeURIComponent(videoUrl).replace(/[^a-zA-Z0-9_-]/g, '_'); let container = document.getElementById('video-panel-container'); if (!container) {{ container = document.createElement('div'); container.id = 'video-panel-container'; Object.assign(container.style, {{ position: 'fixed', left: 0, top: 0, height: '100%', width: '30%', minWidth: '200px', display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px', backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '0 10px 10px 0', boxSizing: 'border-box', zIndex: '2147483647', overflowY: 'auto' }}); document.body.appendChild(container); }} let item = document.getElementById(safeId); if (!item) {{ item = document.createElement('div'); item.id = safeId; item.textContent = videoUrl; Object.assign(item.style, {{ padding: '8px', backgroundColor: 'rgba(255, 255, 255, 0.1)', color: '#ffffff', border: '1px solid #555', borderRadius: '5px', wordBreak: 'break-all', cursor: 'pointer' }}); item.addEventListener('click', () => {{ window.externalApp.externalBus(JSON.stringify({{ type: 'video/play', data: videoUrl }})); }}); }} container.insertBefore(item, container.firstChild); while (container.children.length > 6) {{ container.removeChild(container.lastChild); }} }} addVideoToPanel('{urlString}'); }})();";
                 wv.EvaluateJavaScriptAsync(script);
             });
         }
@@ -332,11 +287,11 @@ public partial class HassPage : ContentPage
                     wv.WindowExternalBusAsync(new { id, type = "result", success = true, result = new { hasSettingsScreen = true, canWriteTag = false } });
                     break;
                 case "config_screen/show":
-                    _options.ShowSettingsScreen?.Invoke();
+                    _pageOptions.ShowSettingsScreen?.Invoke();
                     break;
                 case "video/play":
                     var videoUrl = msg?["data"]?.GetValue<string>();
-                    if (!string.IsNullOrEmpty(videoUrl)) _options.PlayVideo?.Invoke(videoUrl);
+                    if (!string.IsNullOrEmpty(videoUrl)) await DisplayVideoPlayer(videoUrl);
                     break;
                 case "webview/auth":
                     var urlFromForm = msg?["data"]?.GetValue<string>();
@@ -380,21 +335,26 @@ public partial class HassPage : ContentPage
         }
     }
 
+    private Task DisplayVideoPlayer(string url)
+    {
+        return MainThread.InvokeOnMainThreadAsync(() =>
+        {
+            var mediaPage = new HassMediaPage { Url = url };
+            return Shell.Current.Navigation.PushModalAsync(mediaPage, true);
+        });
+    }
+
     private void LoadEmbeddedHtml(string resourceName)
     {
         var assembly = GetType().GetTypeInfo().Assembly;
-        using (var stream = assembly.GetManifestResourceStream(resourceName))
+        using var stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream == null)
         {
-            if (stream == null)
-            {
-                wv.Source = new HtmlWebViewSource { Html = "<h1>Error: Embedded resource not found.</h1>" };
-                return;
-            }
-            using (var reader = new StreamReader(stream))
-            {
-                wv.Source = new HtmlWebViewSource { Html = reader.ReadToEnd() };
-            }
+            wv.Source = new HtmlWebViewSource { Html = "<h1>Error: Embedded resource not found.</h1>" };
+            return;
         }
+        using var reader = new StreamReader(stream);
+        wv.Source = new HtmlWebViewSource { Html = reader.ReadToEnd() };
     }
 
     private async Task<bool> IsHassUrlValid(string url)
@@ -504,7 +464,7 @@ public partial class HassPage : ContentPage
             return result;
         }
         catch (Exception ex)
-        {
+        { 
             Debug.WriteLine($"[Auth] Critical error on refresh: {ex.Message}");
             Logout();
             await GoToAuthMode();

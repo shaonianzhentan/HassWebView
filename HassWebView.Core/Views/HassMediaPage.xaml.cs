@@ -4,8 +4,6 @@ using System.Diagnostics;
 
 namespace HassWebView.Core.Views;
 
-[QueryProperty(nameof(BaseUrl), "BaseUrl")]
-[QueryProperty(nameof(Url), "Url")]
 public partial class HassMediaPage : ContentPage
 {
     public string BaseUrl { get; set; }
@@ -46,19 +44,7 @@ public partial class HassMediaPage : ContentPage
         if (string.IsNullOrEmpty(videoUrl)) return;
         Debug.WriteLine($"Loading video URL: {videoUrl}");
 
-        string htmlContent = $@"
-                <html>
-                <head>
-                    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
-                    <style>
-                        html,body {{ margin: 0; padding: 0; height: {wv.Height}px; background-color: black; }}
-                        video {{ width: 100%; height: 100%; object-fit: contain;  }}
-                    </style>
-                </head>
-                <body>
-                    <video controls autoplay src='{videoUrl}'></video>
-                </body>
-                </html>";
+        string htmlContent = $@"\n                <html>\n                <head>\n                    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>\n                    <style>\n                        html,body {{ margin: 0; padding: 0; height: {wv.Height}px; background-color: black; }}\n                        video {{ width: 100%; height: 100%; object-fit: contain;  }}\n                    </style>\n                </head>\n                <body>\n                    <video controls autoplay src='{videoUrl}'></video>\n                </body>\n                </html>";
 
         var uri = new Uri(videoUrl);
         if (string.IsNullOrEmpty(baseUrl))
@@ -76,24 +62,12 @@ public partial class HassMediaPage : ContentPage
 
     void VideoSeek(int second)
     {
-        wv.EvaluateJavaScriptAsync($@"(function() {{
-                var video = document.querySelector('video');
-                if (video) video.currentTime += {second};
-            }})()");
+        wv.EvaluateJavaScriptAsync($@"(function() {{\n                var video = document.querySelector('video');\n                if (video) video.currentTime += {second};\n            }})()");
     }
 
     void PlayPause()
     {
-        wv.EvaluateJavaScriptAsync(@"(function() {
-                var video = document.querySelector('video');
-                if (video) {
-                    if (video.paused) {
-                        video.play();
-                    } else {
-                        video.pause();
-                    }
-                }
-            })()");
+        wv.EvaluateJavaScriptAsync(@"(function() {\n                var video = document.querySelector('video');\n                if (video) {\n                    if (video.paused) {\n                        video.play();\n                    } else {\n                        video.pause();\n                    }\n                }\n            })()");
     }
 
     public bool OnKeyDown(object sender, RemoteKeyEventArgs args)
@@ -118,7 +92,7 @@ public partial class HassMediaPage : ContentPage
 
                 case "Escape":
                 case "Back":
-                    await Shell.Current.GoToAsync("..");
+                    await Shell.Current.Navigation.PopModalAsync();
                     break;
 
                 case "Left":
