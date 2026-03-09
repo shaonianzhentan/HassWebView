@@ -1,55 +1,69 @@
 using System;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using HassWebView.Core.Auth;
-using Microsoft.Maui.Controls; // 添加 using 语句
+using Microsoft.Maui.Controls;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace HassWebView.Core.Configuration
 {
-    /// <summary>
-    /// Provides configuration options for HassPage-specific behaviors.
-    /// This object is registered as a singleton and allows other parts of the application
-    /// to trigger actions that are handled by the active HassPage instance.
-    /// </summary>
     public class HassPageOptions
     {
-        // ... (其他属性保持不变)
-
-        /// <summary>
-        /// Gets or sets the persistence mechanism for authentication data.
-        /// Defaults to an implementation using MAUI's Preferences API.
-        /// Assign a custom implementation of IAuthStore to change the storage behavior.
-        /// </summary>
         public IAuthStore AuthStore { get; set; }
-
-        /// <summary>
-        /// Gets or sets the action to be executed to play a video.
-        /// The HassPage will assign its video playback logic to this action upon initialization.
-        /// The Func takes a video URL string and returns a Task.
-        /// </summary>
         public Func<string, Task> PlayVideo { get; set; }
-
-        /// <summary>
-        /// Gets or sets the action to be executed to show a custom settings screen.
-        /// This action is provided by the application and invoked by the HassPage.
-        /// </summary>
         public Action ShowSettingsScreen { get; set; }
-
-        /// <summary>
-        /// Gets or sets the URL for receiving push notifications.
-        /// This URL is used by the mobile app registration process.
-        /// </summary>
         public string PushUrl { get; set; }
+        public Action<WebViewSource> SetWebViewSource { get; set; }
 
         /// <summary>
-        /// Gets or sets the action to be executed to set the webview source.
-        /// The HassPage will assign its source update logic to this action upon initialization.
-        /// The Action takes a WebViewSource object.
+        /// Gets or sets the URL for the remote YAML configuration file.
         /// </summary>
-        public Action<WebViewSource> SetWebViewSource { get; set; }
+        public string RemoteConfigsUrl { get; set; }
+
+        /// <summary>
+        /// Stores the parsed domain-specific configurations from the remote YAML file.
+        /// The key is the domain name (e.g., "www.baidu.com").
+        /// </summary>
+        public Dictionary<string, WebViewDomainConfig> DomainConfigs { get; private set; } = new();
 
         public HassPageOptions()
         {
             AuthStore = new PreferencesAuthStore();
+        }
+
+        /// <summary>
+        /// Downloads and parses the remote YAML configuration file.
+        /// </summary>
+        public async Task LoadRemoteConfigsAsync()
+        {
+            if (string.IsNullOrEmpty(RemoteConfigsUrl))
+            {
+                return;
+            }
+
+            try
+            {
+                using var httpClient = new HttpClient();
+                var yamlContent = await httpClient.GetStringAsync(RemoteConfigsUrl);
+
+                var deserializer = new DeserializerBuilder()
+                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                    .Build();
+
+                var configs = deserializer.Deserialize<Dictionary<string, WebViewDomainConfig>>(yamlContent);
+
+                if (configs != null)
+                {
+                    DomainConfigs = configs;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle it as needed
+                System.Diagnostics.Debug.WriteLine($"[HassPageOptions] Error loading remote configs: {ex.Message}");
+            }
         }
     }
 }
