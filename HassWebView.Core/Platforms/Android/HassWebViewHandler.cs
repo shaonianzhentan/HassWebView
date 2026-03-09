@@ -164,8 +164,8 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         webView.Settings.SetAllowUniversalAccessFromFileURLs(true);
         webView.Settings.BlockNetworkImage = false;
         webView.Settings.LoadsImagesAutomatically = true;
-        webView.Settings.SavePassword = true;
-        webView.Settings.SaveFormData = true;
+        webView.Settings.SavePassword = false;
+        webView.Settings.SaveFormData = false;
         webView.Settings.MediaPlaybackRequiresUserGesture = false;
         webView.Settings.LoadWithOverviewMode = true;
         webView.Settings.UseWideViewPort = true;
