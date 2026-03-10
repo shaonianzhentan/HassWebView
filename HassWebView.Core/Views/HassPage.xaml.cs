@@ -51,6 +51,9 @@ public partial class HassPage : ContentPage
 
         if (_httpServer != null)
         {
+            if(string.IsNullOrEmpty(_pageOptions.PushUrl)){
+                _pageOptions.PushUrl = _httpServer.BaseUrl;
+            }
             _httpServer.Get("/webview/remote", async (req, res) =>
             {
                 var assembly = GetType().GetTypeInfo().Assembly;

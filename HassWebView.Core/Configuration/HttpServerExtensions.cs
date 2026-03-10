@@ -8,12 +8,13 @@ namespace HassWebView.Core.Configuration
 {
     public static class HttpServerExtensions
     {
-        public static MauiAppBuilder UseHttpServer(this MauiAppBuilder builder, int port, Action<HttpServer> setupRoutes = null)
-        { 
+        public static MauiAppBuilder UseHttpServer(this MauiAppBuilder builder, int port, Action<IServiceProvider, HttpServer> setupRoutes = null)
+        {
             builder.Services.AddSingleton<HttpServer>(serviceProvider =>
             {
-                var httpServer = new HttpServer(HttpServer.GetLocalIPv4Address(), port);
-                setupRoutes?.Invoke(httpServer);
+                var httpServer = new HttpServer(HttpServer.GetLocalIPv4V4Address(), port);
+                // Pass the serviceProvider and the httpServer to the setup action
+                setupRoutes?.Invoke(serviceProvider, httpServer);
                 return httpServer;
             });
 

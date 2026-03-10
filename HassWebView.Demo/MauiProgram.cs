@@ -1,35 +1,25 @@
 using HassWebView.Core;
 using HassWebView.Core.Configuration;
-using HassWebView.Core.Views;
 using HassWebView.HassApi.Models;
 using Microsoft.Extensions.Logging;
 
-namespace HassWebView.Demo
+namespace HassWebView.Demo;
+
+public static class MauiProgram
 {
-    public static class MauiProgram
+    public static MauiApp CreateMauiApp()
     {
-        public static MauiApp CreateMauiApp()
-        {
-            var builder = MauiApp.CreateBuilder();
+        var builder = MauiApp.CreateBuilder();
 
-            // Prepare a variable to pass the server address
-            string serverUrl = null;
-
-            builder
-                .UseMauiApp<App>()
-                .ConfigureFonts(fonts =>
-                {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                });
-
-            // Configure HttpServer
-            builder.UseHttpServer(8125, server =>
+        builder
+            .UseMauiApp<App>()
+            .ConfigureFonts(fonts =>
             {
-                // 1. Immediately store the server address in our variable
-                serverUrl = server.BaseUrl;
-
-                // (Your server routing logic remains unchanged)
+                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+            })
+            .UseHttpServer(8125, (sp, server) =>
+            {
                 server.Get("/", async (req, res) =>
                 {
                     await res.Text(DateTime.Now.ToString());
@@ -37,8 +27,7 @@ namespace HassWebView.Demo
 
                 server.Post("/", async (req, res) =>
                 {
-                    // When the request arrives, get the correct options instance from the request's service provider
-                    var pageOptions = req.Services.GetRequiredService<HassPageOptions>();
+                    var pageOptions = sp.GetRequiredService<HassPageOptions>();
                     var payload = await req.JsonAsync<NotificationPayload>();
 
                     if (payload.Title == "url" && payload.Message.StartsWith("http"))
@@ -51,46 +40,35 @@ namespace HassWebView.Demo
                         {
                             var baseUrl = string.Empty;
                             var data = payload.Data;
-                            if (data != null)
+                            // Correctly and safely extract the baseUrl from the dictionary
+                            if (data != null && data.TryGetValue("baseUrl", out object baseUrlObject) && baseUrlObject != null)
                             {
-                                data.TryGetValue("baseUrl", out baseUrl);
+                                baseUrl = baseUrlObject.ToString();
                             }
                             await pageOptions.PlayVideo(payload.Message, baseUrl);
                         }
                     }
                     await res.Text("", System.Net.HttpStatusCode.Created);
                 });
-            });
-
-
-            // (Your other UseXXX configurations remain unchanged)
-            builder
-                .UseHassWebView()
-                .UseHassPage(options =>
+            })
+            .UseHassWebView()
+            .UseHassPage((sp, options) =>
+            {
+                options.ShowSettingsScreen = () =>
                 {
-                    // 2. Get the server address from the variable and assign it to PushUrl
-                    options.PushUrl = serverUrl;
-
-                    // (Your other page configurations remain unchanged)
-                    options.ShowSettingsScreen = () =>
+                    MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        MainThread.BeginInvokeOnMainThread(() =>
-                        {
-                            // Shell.Current.GoToAsync("///MySettingsPage");
-                        });
-                    };
-                })
-                .UseImmersiveMode()
-                .UseRemoteControl();
-
+                        // Shell.Current.GoToAsync("///MySettingsPage");
+                    });
+                };
+            })
+            .UseImmersiveMode()
+            .UseRemoteControl();
 
 #if DEBUG
-            builder.Logging.AddDebug();
+        builder.Logging.AddDebug();
 #endif
 
-            // (The incorrect temporary service container code has been removed)
-
-            return builder.Build();
-        }
+        return builder.Build();
     }
 }
