@@ -475,8 +475,7 @@ public partial class HassPage : ContentPage
             LoadEmbeddedHtml("HassWebView.Core.Resources.index.html");
             if (!string.IsNullOrEmpty(message))
             {
-                Task.Delay(1000);
-                wv.WindowExternalBusAsync(new { type = "webview/auth", message });
+                ToastService.Show(message);
             }
         });
     }
