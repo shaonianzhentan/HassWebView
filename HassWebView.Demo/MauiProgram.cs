@@ -3,6 +3,7 @@ using HassWebView.Core.Configuration;
 using HassWebView.HassApi.Models;
 using Microsoft.Extensions.Logging;
 using HassWebView.Component;
+using HassWebView.AndroidService.NotificationForwarding;
 
 namespace HassWebView.Demo;
 
@@ -15,6 +16,7 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseHassComponents() // <-- Initialize the component library
+            .UseNotificationForwarding()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
