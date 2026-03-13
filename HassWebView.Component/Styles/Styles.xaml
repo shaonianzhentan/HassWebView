@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- ========== COLOR DEFINITIONS ========== -->
+    <Color x:Key="CardBackgroundColor"><AppThemeBinding Light="#F2F0F5" Dark="#2A2730" /></Color>
+    <Color x:Key="TitleColor"><AppThemeBinding Light="#000000" Dark="#FFFFFF" /></Color>
+    <Color x:Key="DescriptionColor"><AppThemeBinding Light="#8E8E93" Dark="#8E8E93" /></Color>
+
+    <!-- ========== SIZE-BASED RESOURCES ========== -->
+    <!-- Padding -->
+    <Thickness x:Key="CardPaddingSmall">10</Thickness>
+    <Thickness x:Key="CardPaddingMedium">15</Thickness>
+    <Thickness x:Key="CardPaddingLarge">20</Thickness>
+
+    <!-- Margin -->
+    <Thickness x:Key="CardMarginSmall">8</Thickness>
+    <Thickness x:Key="CardMarginMedium">10</Thickness>
+    <Thickness x:Key="CardMarginLarge">12</Thickness>
+
+    <!-- Title Font Sizes -->
+    <x:Double x:Key="TitleFontSizeSmall">15</x:Double>
+    <x:Double x:Key="TitleFontSizeMedium">18</x:Double>
+    <x:Double x:Key="TitleFontSizeLarge">22</x:Double>
+
+    <!-- Description Font Sizes -->
+    <x:Double x:Key="DescriptionFontSizeSmall">12</x:Double>
+    <x:Double x:Key="DescriptionFontSizeMedium">14</x:Double>
+    <x:Double x:Key="DescriptionFontSizeLarge">16</x:Double>
+
+    <!-- ========== BASE COMPONENT STYLES ========== -->
+    <!-- Default styles are set to Medium size -->
+
+    <!-- Card Style -->
+    <Style TargetType="Frame" x:Key="CardFrameStyle">
+        <Setter Property="BackgroundColor" Value="{DynamicResource CardBackgroundColor}" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="{StaticResource CardPaddingMedium}" />
+        <Setter Property="Margin" Value="{StaticResource CardMarginMedium}" />
+        <Setter Property="HasShadow" Value="True" />
+    </Style>
+
+    <!-- Title Style -->
+    <Style TargetType="Label" x:Key="ListItemTitleLabelStyle">
+        <Setter Property="TextColor" Value="{DynamicResource TitleColor}" />
+        <Setter Property="FontSize" Value="{StaticResource TitleFontSizeMedium}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <!-- Description Style -->
+    <Style TargetType="Label" x:Key="ListItemDescriptionLabelStyle">
+        <Setter Property="TextColor" Value="{DynamicResource DescriptionColor}" />
+        <Setter Property="FontSize" Value="{StaticResource DescriptionFontSizeMedium}" />
+    </Style>
+
+</ResourceDictionary>

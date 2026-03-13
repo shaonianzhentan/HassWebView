@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="HassWebView.AndroidService/HassWebView.AndroidService.csproj" />
+  <Project Path="HassWebView.Component/HassWebView.Component.csproj" />
   <Project Path="HassWebView.Core/HassWebView.Core.csproj" />
   <Project Path="HassWebView.Demo/HassWebView.Demo.csproj">
     <Deploy Solution="Debug|*" />

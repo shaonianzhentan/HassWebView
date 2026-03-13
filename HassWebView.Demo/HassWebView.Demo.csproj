@@ -71,6 +71,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\HassWebView.Core\HassWebView.Core.csproj" />
+	  <ProjectReference Include="..\HassWebView.Component\HassWebView.Component.csproj" />
 	</ItemGroup>
 
 </Project>

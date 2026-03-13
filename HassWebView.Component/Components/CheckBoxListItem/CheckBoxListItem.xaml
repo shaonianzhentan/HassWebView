@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:HassWebView.Component.Models"
+             x:Class="HassWebView.Component.CheckBoxListItem"
+             x:Name="this">
+
+    <ContentView.Resources>
+        <ResourceDictionary Source="../../Styles/Styles.xaml" />
+    </ContentView.Resources>
+
+    <ContentView.GestureRecognizers>
+        <TapGestureRecognizer Tapped="OnTapped" />
+    </ContentView.GestureRecognizers>
+
+    <Grid ColumnSpacing="15">
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Setter Property="Padding" Value="15,10" />
+                <Style.Triggers>
+                    <DataTrigger TargetType="Grid" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Small}">
+                        <Setter Property="Padding" Value="10,10" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Grid" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Large}">
+                        <Setter Property="Padding" Value="20,10" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" /> 
+            <ColumnDefinition Width="*" />    
+        </Grid.ColumnDefinitions>
+
+        <CheckBox 
+            Grid.Column="0"
+            VerticalOptions="Center"
+            IsChecked="{Binding Source={x:Reference this}, Path=IsChecked, Mode=OneWay}"
+            CheckedChanged="OnCheckBoxCheckedChanged"/>
+
+        <VerticalStackLayout 
+            Grid.Column="1"
+            VerticalOptions="Center">
+            
+            <Label Text="{Binding Source={x:Reference this}, Path=Title}">
+                 <Label.Style>
+                    <Style TargetType="Label" BasedOn="{StaticResource ListItemTitleLabelStyle}">
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Small}">
+                                <Setter Property="FontSize" Value="{StaticResource TitleFontSizeSmall}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Large}">
+                                <Setter Property="FontSize" Value="{StaticResource TitleFontSizeLarge}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Label.Style>
+            </Label>
+
+            <Label Text="{Binding Source={x:Reference this}, Path=Description}">
+                <Label.Style>
+                    <Style TargetType="Label" BasedOn="{StaticResource ListItemDescriptionLabelStyle}">
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Small}">
+                                <Setter Property="FontSize" Value="{StaticResource DescriptionFontSizeSmall}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Large}">
+                                <Setter Property="FontSize" Value="{StaticResource DescriptionFontSizeLarge}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Label.Style>
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Description}" Value="">
+                        <Setter Property="IsVisible" Value="False" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Description}" Value="{x:Null}">
+                        <Setter Property="IsVisible" Value="False" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+            
+        </VerticalStackLayout>
+    </Grid>
+
+</ContentView>

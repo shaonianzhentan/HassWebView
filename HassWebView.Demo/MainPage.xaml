@@ -1,8 +1,28 @@
-﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:hass="clr-namespace:HassWebView.Component;assembly=HassWebView.Component"
              x:Class="HassWebView.Demo.MainPage">
 
     <ScrollView>
+        <VerticalStackLayout Spacing="25" Padding="30">
 
+            <Label 
+                Text="Component Library Demo"
+                FontSize="32"
+                FontAttributes="Bold"
+                HorizontalOptions="Center" />
+
+            <!-- Card with Title, Description, and event handler -->
+            <hass:SwitchCard 
+                Title="Enable Advanced Analytics"
+                Description="Unlock detailed usage statistics and insights."
+                Toggled="OnAnalyticsToggled" />
+
+            <!-- A simpler card without a description -->
+            <hass:SwitchCard 
+                Title="Enable Dark Mode" />
+
+        </VerticalStackLayout>
     </ScrollView>
+
 </ContentPage>

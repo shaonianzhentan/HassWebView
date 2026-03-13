@@ -15,5 +15,10 @@ namespace HassWebView.Demo
             InitializeComponent();
         }
 
+        private void OnAnalyticsToggled(object sender, ToggledEventArgs e)
+        {
+            bool isNowEnabled = e.Value;
+            Debug.WriteLine($"Advanced Analytics is now: {(isNowEnabled ? "Enabled" : "Disabled")}");
+        }
     }
 }
