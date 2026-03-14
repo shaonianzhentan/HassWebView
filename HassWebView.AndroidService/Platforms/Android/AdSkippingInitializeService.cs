@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Maui;
 using System.Threading.Tasks;
+using HassWebView.AndroidService.AdSkipping;
 
 namespace HassWebView.AndroidService.Platforms.Android
 {
