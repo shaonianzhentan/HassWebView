@@ -6,7 +6,6 @@ using HassWebView.HassApi;
 using HassWebView.HassApi.Models;
 using System.Diagnostics;
 using System.Net;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -24,21 +23,20 @@ public partial class HassPage : ContentPage
     private readonly HassPageOptions _pageOptions;
     private readonly CursorControl _cursorControl;
     private readonly IAuthStore _authStore;
-    private readonly IHassApiService _hassApiService; // 1. Add field for the service
+    private readonly IHassApiService _hassApiService;
     private string _defaultUserAgent;
 
-    // 2. Inject IHassApiService into the constructor
     public HassPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService keyService = null, HttpServer httpServer = null)
     {
         InitializeComponent();
 
-        LoadEmbeddedHtml("HassWebView.Core.Resources.loading.html");
+        LoadEmbeddedHtml("loading.html");
 
         _pageOptions = pageOptions;
         _authStore = pageOptions.AuthStore;
         _keyService = keyService;
         _httpServer = httpServer;
-        _hassApiService = hassApiService; // Assign the injected service
+        _hassApiService = hassApiService;
 
         _pageOptions.PlayVideo = DisplayVideoPlayer;
         _pageOptions.SetWebViewSource = (newSource) => MainThread.BeginInvokeOnMainThread(() => wv.Source = newSource);
@@ -56,20 +54,8 @@ public partial class HassPage : ContentPage
             }
             _httpServer.Get("/webview/remote", async (req, res) =>
             {
-                var assembly = GetType().GetTypeInfo().Assembly;
-                using (var stream = assembly.GetManifestResourceStream("HassWebView.Core.Resources.remote.html"))
-                {
-                    if (stream == null)
-                    {
-                        await res.Html("<h1>没找到远程控制资源页面</h1>");
-                        return;
-                    }
-                    using (var reader = new StreamReader(stream))
-                    {
-                        var htmlContent = await reader.ReadToEndAsync();
-                        await res.Html(htmlContent);
-                    }
-                }
+                var htmlContent = await ResourceHelper.GetResourceAsync("remote.html");
+                await res.Html(htmlContent);
             });
 
             _httpServer.Get("/webview/config", async (req, res) =>
@@ -91,19 +77,9 @@ public partial class HassPage : ContentPage
                         _cursorControl.Click();
                         break;
                     case "text":
-                        var appendText = query["append"] == "1" ? "el.value + " : "";
+                        var append = query["append"] == "1";
                         var text = query["text"];
-                        string escapedContent = text.Replace("\\", "\\\\").Replace("'", "\'");
-                        string jsCode = $@"(function() {{
-    const el = document.activeElement;
-    if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return;
-    el.value = {appendText}'{escapedContent}';
-    ['input', 'change', 'compositionstart', 'compositionend', 'blur', 'focus'].forEach(evt => {{
-        el.dispatchEvent(new Event(evt, {{ bubbles: true, cancelable: true, view: window }}));
-    }});
-    el.selectionStart = el.selectionEnd = el.value.length;
-}})();";
-                        MainThread.BeginInvokeOnMainThread(() => wv.EvaluateJavaScriptAsync(jsCode));
+                        await ExecuteScriptAsync("Scripts/TextInput.js", $"HassTextInput.insert('{text.Replace("\'", "\\\'")}', {append.ToString().ToLower()});");
                         break;
                 }
                 await res.Text("");
@@ -131,7 +107,7 @@ public partial class HassPage : ContentPage
         if (string.IsNullOrEmpty(hassUrl) || string.IsNullOrEmpty(refreshToken) || string.IsNullOrEmpty(webhookId))
         {
             _state = PageState.NeedsAuth;
-            LoadEmbeddedHtml("HassWebView.Core.Resources.index.html");
+            await LoadEmbeddedHtml("index.html");
         }
         else
         {
@@ -139,7 +115,7 @@ public partial class HassPage : ContentPage
             if (tokenResult == null)
             {
                 _state = PageState.NeedsAuth;
-                LoadEmbeddedHtml("HassWebView.Core.Resources.index.html");
+                await LoadEmbeddedHtml("index.html");
                 return;
             }
 
@@ -165,14 +141,12 @@ public partial class HassPage : ContentPage
     {
         Debug.WriteLine($"[HassPage] Navigating to: {e.Url}");
 
-        // Store the default UserAgent on the first navigation
         if (string.IsNullOrEmpty(_defaultUserAgent) && !string.IsNullOrEmpty(wv.UserAgent))
         {
             _defaultUserAgent = wv.UserAgent;
             Debug.WriteLine($"[HassPage] Default User-Agent captured: {_defaultUserAgent}");
         }
 
-        // Apply domain-specific User-Agent
         try
         {
             var uri = new Uri(e.Url);
@@ -197,7 +171,6 @@ public partial class HassPage : ContentPage
             Debug.WriteLine($"[HassPage] Error applying User-Agent: {ex.Message}");
         }
 
-        // --- YOUR ORIGINAL CODE ---
         if (_state == PageState.InLoginFlow)
         {
             var uri = new Uri(e.Url);
@@ -223,7 +196,6 @@ public partial class HassPage : ContentPage
                 return token?.AccessToken;
             });
 
-            // 3. Initialize the service with the newly created HassRestApi instance
             _hassApiService.Initialize(hassApi);
 
             var deviceId = await _authStore.GetDeviceIdAsync();
@@ -260,11 +232,7 @@ public partial class HassPage : ContentPage
 
     private async void OnWebViewNavigated(object sender, WebNavigatedEventArgs e)
     {
-        if (e.Result != WebNavigationResult.Success || e.Source is not UrlWebViewSource urlSource)
-        {
-            return;
-        }
-
+        if (e.Result != WebNavigationResult.Success || e.Source is not UrlWebViewSource urlSource) return;
         Debug.WriteLine($"[HassPage] Navigated to: {urlSource.Url}");
 
         try
@@ -278,21 +246,12 @@ public partial class HassPage : ContentPage
 
             if (config == null) return;
 
-            // Inject CSS if it exists
             if (!string.IsNullOrWhiteSpace(config.Css))
             {
-                string escapedCss = config.Css.Replace("\\", "\\\\").Replace("`", "\\`").Replace("$", "\\$");
-                string cssScript = $@"(function() {{
-    var style = document.createElement('style');
-    style.type = 'text/css';
-    style.innerHTML = `{escapedCss}`;
-    document.head.appendChild(style);
-    console.log('[HassWebView] Injected custom CSS for {host}.');
-}})();";
-                await wv.EvaluateJavaScriptAsync(cssScript);
+                string escapedCss = config.Css.Replace("\'", "\\\'").Replace("`", "\\`").Replace("$", "\\$");
+                await ExecuteScriptAsync("Scripts/CssInjector.js", $"HassCssInjector.inject(`{escapedCss}`, '{host}');");
             }
 
-            // Execute JS if it exists
             if (!string.IsNullOrWhiteSpace(config.Js))
             {
                 await wv.EvaluateJavaScriptAsync(config.Js);
@@ -305,7 +264,7 @@ public partial class HassPage : ContentPage
         }
     }
 
-    private void OnWebViewResourceLoading(object sender, ResourceLoadingEventArgs e)
+    private async void OnWebViewResourceLoading(object sender, ResourceLoadingEventArgs e)
     {
         var urlString = e.Url.ToString();
         Debug.WriteLine($"ResourceLoading：{urlString}");
@@ -313,11 +272,7 @@ public partial class HassPage : ContentPage
             (urlString.Contains(".mp4", StringComparison.OrdinalIgnoreCase) ||
              urlString.Contains(".m3u8", StringComparison.OrdinalIgnoreCase)))
         {
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                 var script = @"(function() { function addVideoToPanel(videoUrl) { const safeId = 'video-panel-item-' + encodeURIComponent(videoUrl).replace(/[^a-zA-Z0-9_-]/g, '_'); let container = document.getElementById('video-panel-container'); if (!container) { container = document.createElement('div'); container.id = 'video-panel-container'; Object.assign(container.style, { position: 'fixed', left: 0, top: 0, height: '100%', width: '30%', minWidth: '200px', display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px', backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '0 10px 10px 0', boxSizing: 'border-box', zIndex: '2147483647', overflowY: 'auto' }); document.body.appendChild(container); } let item = document.getElementById(safeId); if (!item) { item = document.createElement('div'); item.id = safeId; item.textContent = videoUrl; Object.assign(item.style, { padding: '8px', backgroundColor: 'rgba(255, 255, 255, 0.1)', color: '#ffffff', border: '1px solid #555', borderRadius: '5px', wordBreak: 'break-all', cursor: 'pointer' }); item.addEventListener('click', () => { window.externalApp.externalBus(JSON.stringify({ type: 'video/play', data: videoUrl, origin: top.location.origin })); }); } container.insertBefore(item, container.firstChild); while (container.children.length > 6) { container.removeChild(container.lastChild); } } addVideoToPanel('{urlString}'); })();";
-                wv.EvaluateJavaScriptAsync(script);
-            });
+            await ExecuteScriptAsync("Scripts/VideoPanel.js", $"HassVideoPanel.add('{urlString}');");
         }
     }
 
@@ -413,17 +368,18 @@ public partial class HassPage : ContentPage
         });
     }
 
-    private void LoadEmbeddedHtml(string resourceName)
+    private async Task LoadEmbeddedHtml(string resourcePath)
     {
-        var assembly = GetType().GetTypeInfo().Assembly;
-        using var stream = assembly.GetManifestResourceStream(resourceName);
-        if (stream == null)
+        try
         {
-            wv.Source = new HtmlWebViewSource { Html = "<h1>Error: Embedded resource not found.</h1>" };
-            return;
+            var htmlContent = await ResourceHelper.GetResourceAsync(resourcePath);
+            wv.Source = new HtmlWebViewSource { Html = htmlContent };
         }
-        using var reader = new StreamReader(stream);
-        wv.Source = new HtmlWebViewSource { Html = reader.ReadToEnd() };
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[HassPage] Error loading embedded HTML: {ex.Message}");
+            wv.Source = new HtmlWebViewSource { Html = "<h1>Error: Embedded resource not found.</h1>" };
+        }
     }
 
     protected override void OnAppearing()
@@ -446,11 +402,11 @@ public partial class HassPage : ContentPage
             var tokenExpiry = await _authStore.GetTokenExpiryUtcAsync();
             var expiresIn = (int)(tokenExpiry - DateTime.UtcNow).TotalSeconds;
             var js = $"window.externalAuthSetToken(true, {{ access_token: '{token.AccessToken}', expires_in: {expiresIn} }});";
-            await MainThread.InvokeOnMainThreadAsync(() => wv.EvaluateJavaScriptAsync(js));
+            await EvaluateJavaScriptAsync(js);
         }
         else
         {
-            await MainThread.InvokeOnMainThreadAsync(() => wv.EvaluateJavaScriptAsync("window.externalAuthSetToken(false);"));
+            await EvaluateJavaScriptAsync("window.externalAuthSetToken(false);");
             await GoToAuthModeWithError("会话已过期，请重新登录。");
         }
     }
@@ -469,10 +425,10 @@ public partial class HassPage : ContentPage
 
     private Task GoToAuthModeWithError(string message)
     {
-        return MainThread.InvokeOnMainThreadAsync(() =>
+        return MainThread.InvokeOnMainThreadAsync(async () =>
         {
             _state = PageState.NeedsAuth;
-            LoadEmbeddedHtml("HassWebView.Core.Resources.index.html");
+            await LoadEmbeddedHtml("index.html");
             if (!string.IsNullOrEmpty(message))
             {
                 ToastService.Show(message);
@@ -534,6 +490,19 @@ public partial class HassPage : ContentPage
             return null;
         }
     }
+    
+    private async Task EvaluateJavaScriptAsync(string script)
+    {
+        if (string.IsNullOrEmpty(script)) return;
+        await MainThread.InvokeOnMainThreadAsync(() => wv.EvaluateJavaScriptAsync(script));
+    }
+
+    private async Task ExecuteScriptAsync(string scriptPath, string functionCall = null)
+    {
+        var scriptContent = await ResourceHelper.GetResourceAsync(scriptPath);
+        var fullScript = functionCall == null ? scriptContent : $"{scriptContent}\n{functionCall};";
+        await EvaluateJavaScriptAsync(fullScript);
+    }
 
     #region KeyService Handlers
 
@@ -558,24 +527,25 @@ public partial class HassPage : ContentPage
 
     private bool OnFilterKeyDown(object sender, RemoteKeyEventArgs e) => e.KeyName != "VolumeUp" && e.KeyName != "VolumeDown";
 
-    private void OnSingleClick(object sender, RemoteKeyEventArgs e)
+    private async void OnSingleClick(object sender, RemoteKeyEventArgs e)
     {
         if (_cursorControl is null) return;
-        MainThread.BeginInvokeOnMainThread(() =>
+        
+        switch (e.KeyName)
         {
-            switch (e.KeyName)
-            {
-                case "Enter": case "DpadCenter": _cursorControl.Click(); break;
-                case "Escape": case "Back": if (wv.CanGoBack) wv.GoBack(); break;
-                case "Up": case "DpadUp": _cursorControl.MoveUpBy(); break;
-                case "Down": case "DpadDown": _cursorControl.MoveDownBy(); break;
-                case "Left": case "DpadLeft": _cursorControl.MoveLeftBy(); break;
-                case "Right": case "DpadRight": _cursorControl.MoveRightBy(); break;
-                case "Menu":
-                    wv.EvaluateJavaScriptAsync("(function() { var div = document.getElementById('video-panel-container'); if (div) { div.style.display = div.style.display === 'none' ? 'flex' : 'none'; } })();");
-                    break;
-            }
-        });
+            case "Enter": case "DpadCenter": _cursorControl.Click(); break;
+            case "Escape": case "Back": 
+                if (wv.CanGoBack) 
+                    MainThread.BeginInvokeOnMainThread(() => wv.GoBack()); 
+                break;
+            case "Up": case "DpadUp": _cursorControl.MoveUpBy(); break;
+            case "Down": case "DpadDown": _cursorControl.MoveDownBy(); break;
+            case "Left": case "DpadLeft": _cursorControl.MoveLeftBy(); break;
+            case "Right": case "DpadRight": _cursorControl.MoveRightBy(); break;
+            case "Menu":
+                await ExecuteScriptAsync("Scripts/VideoPanel.js", "HassVideoPanel.toggle();");
+                break;
+        }
     }
 
     private void OnDoubleClick(object sender, RemoteKeyEventArgs e)
