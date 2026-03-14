@@ -12,7 +12,7 @@ namespace HassWebView.Core.Configuration
         {
             builder.Services.AddSingleton<HttpServer>(serviceProvider =>
             {
-                var httpServer = new HttpServer(HttpServer.GetLocalIPv4V4Address(), port);
+                var httpServer = new HttpServer(HttpServer.GetLocalIPv4Address(), port);
                 // Pass the serviceProvider and the httpServer to the setup action
                 setupRoutes?.Invoke(serviceProvider, httpServer);
                 return httpServer;
