@@ -30,7 +30,7 @@ public partial class HassPage : ContentPage
     {
         InitializeComponent();
 
-        LoadEmbeddedHtml("loading.html");
+        _ = LoadEmbeddedHtml("loading.html");
 
         _pageOptions = pageOptions;
         _authStore = pageOptions.AuthStore;
@@ -133,13 +133,23 @@ public partial class HassPage : ContentPage
 
             _state = PageState.Authenticated;
             var hassAuth = new HassAuth(hassUrl);
-            wv.Source = new UrlWebViewSource { Url = hassAuth.RedirectUri };
+            MainThread.BeginInvokeOnMainThread(() => 
+            {
+                wv.Source = new UrlWebViewSource { Url = hassAuth.RedirectUri };
+            });
         }
     }
 
     private async void OnWebViewNavigating(object? sender, WebNavigatingEventArgs e)
     {
         Debug.WriteLine($"[HassPage] Navigating to: {e.Url}");
+
+        if (_state == PageState.Authenticated && e.NavigationEvent == WebNavigationEvent.Back && e.Url.StartsWith("about:"))
+        {
+            Debug.WriteLine("[HassPage] Back navigation to initial page blocked.");
+            e.Cancel = true;
+            return;
+        }
 
         if (string.IsNullOrEmpty(_defaultUserAgent) && !string.IsNullOrEmpty(wv.UserAgent))
         {
@@ -163,7 +173,10 @@ public partial class HassPage : ContentPage
             if (wv.UserAgent != targetUserAgent && !string.IsNullOrEmpty(targetUserAgent))
             {
                 Debug.WriteLine($"[HassPage] Applying User-Agent for {host}: {targetUserAgent}");
-                wv.UserAgent = targetUserAgent;
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    wv.UserAgent = targetUserAgent;
+                });
             }
         }
         catch (Exception ex)
@@ -373,12 +386,18 @@ public partial class HassPage : ContentPage
         try
         {
             var htmlContent = await ResourceHelper.GetResourceAsync(resourcePath);
-            wv.Source = new HtmlWebViewSource { Html = htmlContent };
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                wv.Source = new HtmlWebViewSource { Html = htmlContent };
+            });
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"[HassPage] Error loading embedded HTML: {ex.Message}");
-            wv.Source = new HtmlWebViewSource { Html = "<h1>Error: Embedded resource not found.</h1>" };
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                wv.Source = new HtmlWebViewSource { Html = "<h1>Error: Embedded resource not found.</h1>" };
+            });
         }
     }
 

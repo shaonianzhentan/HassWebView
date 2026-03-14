@@ -49,33 +49,42 @@ public partial class HassMediaPage : ContentPage
 
         string htmlContent = await ResourceHelper.GetResourceAsync("MediaPlayer.html");
 
-        htmlContent = htmlContent.Replace("{{HEIGHT}}", wv.Height.ToString())
-                                 .Replace("{{VIDEO_URL}}", videoUrl);
-
-        var uri = new Uri(videoUrl);
-        if (string.IsNullOrEmpty(baseUrl))
+        MainThread.BeginInvokeOnMainThread(() =>
         {
-            baseUrl = $"{uri.Scheme}://{uri.Host}/";
-        }
+            var finalHtml = htmlContent.Replace("{{HEIGHT}}", wv.Height.ToString())
+                                         .Replace("{{VIDEO_URL}}", videoUrl);
 
-        var htmlSource = new HtmlWebViewSource
-        {
-            BaseUrl = baseUrl,
-            Html = htmlContent
-        };
+            var uri = new Uri(videoUrl);
+            if (string.IsNullOrEmpty(baseUrl))
+            {
+                baseUrl = $"{uri.Scheme}://{uri.Host}/";
+            }
 
-        Debug.WriteLine("Setting WebView source with HTML content from MediaPlayer.html.");
-        wv.Source = htmlSource;
+            var htmlSource = new HtmlWebViewSource
+            {
+                BaseUrl = baseUrl,
+                Html = finalHtml
+            };
+
+            Debug.WriteLine("Setting WebView source with HTML content from MediaPlayer.html.");
+            wv.Source = htmlSource;
+        });
     }
 
     void VideoSeek(int second)
     {
-        wv.EvaluateJavaScriptAsync($"videoSeek({second})");
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            wv.EvaluateJavaScriptAsync($"videoSeek({second})");
+        });
     }
 
     void PlayPause()
     {
-        wv.EvaluateJavaScriptAsync("playPause()");
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            wv.EvaluateJavaScriptAsync("playPause()");
+        });
     }
 
     public bool OnKeyDown(object sender, RemoteKeyEventArgs args)
