@@ -2,6 +2,7 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using AndroidX.Core.App;
+using AndroidX.Core.Content;
 using HassWebView.AndroidService.Notifications;
 
 namespace HassWebView.AndroidService.ForegroundNotifications
@@ -16,7 +17,7 @@ namespace HassWebView.AndroidService.ForegroundNotifications
             var notification = new NotificationCompat.Builder(this, "HassWebView_Channel")
                 .SetContentTitle("HassWebView is running")
                 .SetContentText("The foreground service is active.")
-                .SetSmallIcon(Resource.Drawable.appicon) // Replace with your app icon
+                .SetSmallIcon(Microsoft.Maui.ApplicationModel.Platform.AppContext.ApplicationInfo.Icon) // Replace with your app icon
                 .Build();
 
             StartForeground(1, notification);

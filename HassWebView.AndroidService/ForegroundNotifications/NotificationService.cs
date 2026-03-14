@@ -2,6 +2,8 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using AndroidX.Core.App;
+using HassWebView.AndroidService.Notifications;
+using HassWebView.AndroidService.Platforms.Android.Notifications;
 using System.Collections.Generic;
 
 namespace HassWebView.AndroidService.ForegroundNotifications
@@ -19,7 +21,7 @@ namespace HassWebView.AndroidService.ForegroundNotifications
             var builder = new NotificationCompat.Builder(context, ChannelId)
                 .SetContentTitle(title)
                 .SetContentText(content)
-                .SetSmallIcon(Resource.Drawable.appicon)
+                .SetSmallIcon(context.ApplicationInfo.Icon)
                 .SetContentIntent(pendingIntent)
                 .SetAutoCancel(true);
 

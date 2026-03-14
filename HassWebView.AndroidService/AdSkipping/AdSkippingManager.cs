@@ -1,6 +1,7 @@
 using Android.Content;
 using Android.Provider;
 using HassWebView.AndroidService.AdSkipping;
+using HassWebView.AndroidService.Platforms.Android;
 using Microsoft.Maui.ApplicationModel;
 using System.Net.Http;
 
@@ -19,7 +20,8 @@ namespace HassWebView.AndroidService.AdSkipping
         {
             var context = Platform.AppContext;
             // Use the full name of the service type to avoid ambiguity
-            var serviceName = $"{context.PackageName}/{typeof(HassWebView.AndroidService.AdSkipping.AdSkippingService).FullName}";
+            // var serviceName = $"{context.PackageName}/{typeof(HassWebView.AndroidService.AdSkipping.AdSkippingService).FullName}";
+            var serviceName = "";
 
             try
             {
