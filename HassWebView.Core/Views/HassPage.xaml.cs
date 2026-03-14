@@ -399,14 +399,16 @@ public partial class HassPage : ContentPage
         var token = await RefreshAccessTokenAsync(forceRefresh: false);
         if (token != null)
         {
+            Debug.WriteLine("授权请求");
             var tokenExpiry = await _authStore.GetTokenExpiryUtcAsync();
             var expiresIn = (int)(tokenExpiry - DateTime.UtcNow).TotalSeconds;
             var js = $"window.externalAuthSetToken(true, {{ access_token: '{token.AccessToken}', expires_in: {expiresIn} }});";
-            await wv.EvaluateJavaScriptAsync(js);
+            MainThread.BeginInvokeOnMainThread(() => wv.EvaluateJavaScriptAsync(js));
         }
         else
         {
-            await wv.EvaluateJavaScriptAsync("window.externalAuthSetToken(false);");
+            Debug.WriteLine("会话已过期");
+            MainThread.BeginInvokeOnMainThread(() => wv.EvaluateJavaScriptAsync("window.externalAuthSetToken(false);"));
             await GoToAuthModeWithError("会话已过期，请重新登录。");
         }
     }
