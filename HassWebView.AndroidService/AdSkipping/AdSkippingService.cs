@@ -12,7 +12,7 @@ using Action = Android.Views.Accessibility.Action;
 
 namespace HassWebView.AndroidService.Platforms.Android
 {
-    [Service(Label = "HassWebView Ad Skipping Service", Permission = "android.permission.BIND_ACCESSIBILITY_SERVICE")]
+    [Service(Label = "HassWebView Ad Skipping Service", Permission = "android.permission.BIND_ACCESSIBILITY_SERVICE", Exported = false)]
     [IntentFilter(new[] { "android.accessibilityservice.AccessibilityService" })]
     public class AdSkippingService : AccessibilityService
     {
