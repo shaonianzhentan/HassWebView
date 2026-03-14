@@ -3,7 +3,7 @@ using Microsoft.Maui;
 using System.Threading.Tasks;
 using HassWebView.AndroidService.AdSkipping;
 
-namespace HassWebView.AndroidService.Platforms.Android
+namespace HassWebView.AndroidService.AdSkipping
 {
     /// <summary>
     /// Initializes the ad skipping rules when the application starts.
