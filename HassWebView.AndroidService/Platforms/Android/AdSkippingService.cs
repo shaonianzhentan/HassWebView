@@ -42,7 +42,7 @@ namespace HassWebView.AndroidService.Platforms.Android
                 foreach (var rule in group.Rules)
                 {
                     // Simplified selector for now: only handles text, desc, and id.
-                    // Example: "[text='跳过'][id='com.example.app:id/skip_button']"
+                    // Example: "[text=\'跳过\'][id=\'com.example.app:id/skip_button\']"
                     var nodes = FindNodesBySelector(rootNode, rule.Matches);
                     if (nodes.Any())
                     {                        
@@ -63,10 +63,10 @@ namespace HassWebView.AndroidService.Platforms.Android
             var nodes = new List<AccessibilityNodeInfo>();
             if (root == null || string.IsNullOrWhiteSpace(selector)) return nodes;
 
-            // Very basic parser for attributes like [text='...'], [desc='...'], [id='...']
-            var textMatch = Regex.Match(selector, @"text='([^']*)'");
-            var descMatch = Regex.Match(selector, @"desc='([^']*)'");
-            var idMatch = Regex.Match(selector, @"id='([^']*)'");
+            // Very basic parser for attributes like [text=\'...\'], [desc=\'...\'], [id=\'...\']
+            var textMatch = Regex.Match(selector, @"text=\'([^\']*)\'");
+            var descMatch = Regex.Match(selector, @"desc=\'([^\']*)\'");
+            var idMatch = Regex.Match(selector, @"id=\'([^\']*)\'");
 
             var queue = new Queue<AccessibilityNodeInfo>();
             queue.Enqueue(root);
@@ -85,7 +85,7 @@ namespace HassWebView.AndroidService.Platforms.Android
                 {
                     nodes.Add(node);
                 } else {
-                    node.Recycle(); // Recycle if it doesn't match
+                    node.Recycle(); // Recycle if it doesn\'t match
                 }
 
                 for (int i = 0; i < node.ChildCount; i++)
@@ -123,7 +123,8 @@ namespace HassWebView.AndroidService.Platforms.Android
             {
                 EventTypes = EventTypes.WindowStateChanged | EventTypes.WindowContentChanged,
                 FeedbackType = FeedbackFlags.Generic,
-                Flags = AccessibilityServiceFlags.Default | AccessibilityServiceFlags.RetrieveWindowContent,
+                // The integer value for RetrieveWindowContent is 8. Using it directly for compatibility.
+                Flags = AccessibilityServiceFlags.Default | (AccessibilityServiceFlags)8,
                 NotificationTimeout = 100
             };
             SetServiceInfo(serviceInfo);

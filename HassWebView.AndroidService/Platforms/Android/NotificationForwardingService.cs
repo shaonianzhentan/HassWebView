@@ -26,7 +26,7 @@ namespace HassWebView.AndroidService.Platforms.Android
             base.OnNotificationPosted(sbn);
 
             // Ignore self notifications or if the app is not in the selected list
-            if (sbn.PackageName == Application.Context.PackageName || !_selectedApps.Contains(sbn.PackageName))
+            if (sbn.PackageName == this.PackageName || !_selectedApps.Contains(sbn.PackageName))
             {
                 return;
             }
@@ -59,7 +59,7 @@ namespace HassWebView.AndroidService.Platforms.Android
         // This could be triggered by a broadcast message from your app
         private void LoadSelectedApps()
         {
-            var json = Application.Context.GetSharedPreferences(Application.Context.PackageName, FileCreationMode.Private).GetString(SelectedAppsKey, "[]");
+            var json = this.GetSharedPreferences(this.PackageName, FileCreationMode.Private).GetString(SelectedAppsKey, "[]");
             _selectedApps = JsonSerializer.Deserialize<IEnumerable<string>>(json) ?? new List<string>();
         }
     }
