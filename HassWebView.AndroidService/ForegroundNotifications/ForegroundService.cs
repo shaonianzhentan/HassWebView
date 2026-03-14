@@ -4,7 +4,7 @@ using Android.OS;
 using AndroidX.Core.App;
 using HassWebView.AndroidService.Notifications;
 
-namespace HassWebView.AndroidService.Platforms.Android.Notifications
+namespace HassWebView.AndroidService.ForegroundNotifications
 {
     [Service]
     public class ForegroundService : Service
@@ -16,7 +16,7 @@ namespace HassWebView.AndroidService.Platforms.Android.Notifications
             var notification = new NotificationCompat.Builder(this, "HassWebView_Channel")
                 .SetContentTitle("HassWebView is running")
                 .SetContentText("The foreground service is active.")
-                .SetSmallIcon(Resource.Mipmap.AppIcon) // Replace with your app icon
+                .SetSmallIcon(Resource.Drawable.appicon) // Replace with your app icon
                 .Build();
 
             StartForeground(1, notification);

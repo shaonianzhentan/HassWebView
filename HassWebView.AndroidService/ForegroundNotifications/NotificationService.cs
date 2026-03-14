@@ -2,10 +2,9 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using AndroidX.Core.App;
-using HassWebView.AndroidService.Notifications;
 using System.Collections.Generic;
 
-namespace HassWebView.AndroidService.Platforms.Android.Notifications
+namespace HassWebView.AndroidService.ForegroundNotifications
 {
     public class NotificationService : INotificationService
     {
@@ -14,13 +13,13 @@ namespace HassWebView.AndroidService.Platforms.Android.Notifications
         public void ShowNotification(string title, string content, int notificationId, List<NotificationAction> actions)
         {
             var context = global::Android.App.Application.Context;
-            var intent = new Intent(context, typeof(MainActivity)); // Replace with your main activity
+            var intent = context.PackageManager.GetLaunchIntentForPackage(context.PackageName);
             var pendingIntent = PendingIntent.GetActivity(context, 0, intent, PendingIntentFlags.Immutable);
 
             var builder = new NotificationCompat.Builder(context, ChannelId)
                 .SetContentTitle(title)
                 .SetContentText(content)
-                .SetSmallIcon(Resource.Mipmap.AppIcon) // Replace with your app icon
+                .SetSmallIcon(Resource.Drawable.appicon)
                 .SetContentIntent(pendingIntent)
                 .SetAutoCancel(true);
 
