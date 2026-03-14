@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Reflection;
+using HassWebView.Core; // Use the correct namespace for HassWebView
 
 namespace HassWebView.Core.Services;
 
@@ -31,5 +32,17 @@ public static class ResourceHelper
                 return resourceContent;
             }
         }
+    }
+
+    public static async Task ExecuteScriptAsync(HassWebView webView, string scriptPath, string functionCall = null)
+    {
+        if (webView == null) return;
+
+        var scriptContent = await GetResourceAsync(scriptPath);
+        var fullScript = functionCall == null ? scriptContent : $"{scriptContent}\n{functionCall};";
+        
+        if (string.IsNullOrEmpty(fullScript)) return;
+
+        await MainThread.InvokeOnMainThreadAsync(() => webView.EvaluateJavaScriptAsync(fullScript));
     }
 }
