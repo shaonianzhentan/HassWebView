@@ -1,6 +1,8 @@
 using HassWebView.Core.Events;
 using HassWebView.Core.Services;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 
 namespace HassWebView.Core.Views;
 
@@ -20,7 +22,8 @@ public partial class HassMediaPage : ContentPage
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
-        LoadUrl(Url, BaseUrl);
+        // Fire and forget is okay here
+        _ = LoadUrl(Url, BaseUrl);
     }
 
     protected override void OnAppearing()
@@ -39,35 +42,40 @@ public partial class HassMediaPage : ContentPage
         _keyService.LongClick -= OnLongClick;
     }
 
-    public void LoadUrl(string videoUrl, string baseUrl)
+    public async Task LoadUrl(string videoUrl, string baseUrl)
     {
         if (string.IsNullOrEmpty(videoUrl)) return;
         Debug.WriteLine($"Loading video URL: {videoUrl}");
 
-        string htmlContent = $@"\n                <html>\n                <head>\n                    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>\n                    <style>\n                        html,body {{ margin: 0; padding: 0; height: {wv.Height}px; background-color: black; }}\n                        video {{ width: 100%; height: 100%; object-fit: contain;  }}\n                    </style>\n                </head>\n                <body>\n                    <video controls autoplay src='{videoUrl}'></video>\n                </body>\n                </html>";
+        string htmlContent = await ResourceHelper.GetResourceAsync("MediaPlayer.html");
+
+        htmlContent = htmlContent.Replace("{{HEIGHT}}", wv.Height.ToString())
+                                 .Replace("{{VIDEO_URL}}", videoUrl);
 
         var uri = new Uri(videoUrl);
         if (string.IsNullOrEmpty(baseUrl))
         {
             baseUrl = $"{uri.Scheme}://{uri.Host}/";
         }
+
         var htmlSource = new HtmlWebViewSource
         {
             BaseUrl = baseUrl,
             Html = htmlContent
         };
-        Debug.WriteLine("Setting WebView source with HTML content.");
+
+        Debug.WriteLine("Setting WebView source with HTML content from MediaPlayer.html.");
         wv.Source = htmlSource;
     }
 
     void VideoSeek(int second)
     {
-        wv.EvaluateJavaScriptAsync($@"(function() {{\n                var video = document.querySelector('video');\n                if (video) video.currentTime += {second};\n            }})()");
+        wv.EvaluateJavaScriptAsync($"videoSeek({second})");
     }
 
     void PlayPause()
     {
-        wv.EvaluateJavaScriptAsync(@"(function() {\n                var video = document.querySelector('video');\n                if (video) {\n                    if (video.paused) {\n                        video.play();\n                    } else {\n                        video.pause();\n                    }\n                }\n            })()");
+        wv.EvaluateJavaScriptAsync("playPause()");
     }
 
     public bool OnKeyDown(object sender, RemoteKeyEventArgs args)

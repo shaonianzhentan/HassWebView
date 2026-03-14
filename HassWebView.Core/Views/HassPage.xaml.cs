@@ -79,7 +79,7 @@ public partial class HassPage : ContentPage
                     case "text":
                         var append = query["append"] == "1";
                         var text = query["text"];
-                        await ExecuteScriptAsync("Scripts/TextInput.js", $"HassTextInput.insert('{text.Replace("\'", "\\\'")}', {append.ToString().ToLower()});");
+                        await ResourceHelper.ExecuteScriptAsync(wv, "Scripts/TextInput.js", $"HassTextInput.insert('{text.Replace("\'", "\\\'")}', {append.ToString().ToLower()});");
                         break;
                 }
                 await res.Text("");
@@ -249,7 +249,7 @@ public partial class HassPage : ContentPage
             if (!string.IsNullOrWhiteSpace(config.Css))
             {
                 string escapedCss = config.Css.Replace("\'", "\\\'").Replace("`", "\\`").Replace("$", "\\$");
-                await ExecuteScriptAsync("Scripts/CssInjector.js", $"HassCssInjector.inject(`{escapedCss}`, '{host}');");
+                await ResourceHelper.ExecuteScriptAsync(wv, "Scripts/CssInjector.js", $"HassCssInjector.inject(`{escapedCss}`, '{host}');");
             }
 
             if (!string.IsNullOrWhiteSpace(config.Js))
@@ -272,7 +272,7 @@ public partial class HassPage : ContentPage
             (urlString.Contains(".mp4", StringComparison.OrdinalIgnoreCase) ||
              urlString.Contains(".m3u8", StringComparison.OrdinalIgnoreCase)))
         {
-            await ExecuteScriptAsync("Scripts/VideoPanel.js", $"HassVideoPanel.add('{urlString}');");
+            await ResourceHelper.ExecuteScriptAsync(wv, "Scripts/VideoPanel.js", $"HassVideoPanel.add('{urlString}');");
         }
     }
 
@@ -402,11 +402,11 @@ public partial class HassPage : ContentPage
             var tokenExpiry = await _authStore.GetTokenExpiryUtcAsync();
             var expiresIn = (int)(tokenExpiry - DateTime.UtcNow).TotalSeconds;
             var js = $"window.externalAuthSetToken(true, {{ access_token: '{token.AccessToken}', expires_in: {expiresIn} }});";
-            await EvaluateJavaScriptAsync(js);
+            await wv.EvaluateJavaScriptAsync(js);
         }
         else
         {
-            await EvaluateJavaScriptAsync("window.externalAuthSetToken(false);");
+            await wv.EvaluateJavaScriptAsync("window.externalAuthSetToken(false);");
             await GoToAuthModeWithError("会话已过期，请重新登录。");
         }
     }
@@ -491,19 +491,6 @@ public partial class HassPage : ContentPage
         }
     }
     
-    private async Task EvaluateJavaScriptAsync(string script)
-    {
-        if (string.IsNullOrEmpty(script)) return;
-        await MainThread.InvokeOnMainThreadAsync(() => wv.EvaluateJavaScriptAsync(script));
-    }
-
-    private async Task ExecuteScriptAsync(string scriptPath, string functionCall = null)
-    {
-        var scriptContent = await ResourceHelper.GetResourceAsync(scriptPath);
-        var fullScript = functionCall == null ? scriptContent : $"{scriptContent}\n{functionCall};";
-        await EvaluateJavaScriptAsync(fullScript);
-    }
-
     #region KeyService Handlers
 
     private void SetupKeyServiceListeners(bool subscribe)
@@ -543,7 +530,7 @@ public partial class HassPage : ContentPage
             case "Left": case "DpadLeft": _cursorControl.MoveLeftBy(); break;
             case "Right": case "DpadRight": _cursorControl.MoveRightBy(); break;
             case "Menu":
-                await ExecuteScriptAsync("Scripts/VideoPanel.js", "HassVideoPanel.toggle();");
+                await ResourceHelper.ExecuteScriptAsync(wv, "Scripts/VideoPanel.js", "HassVideoPanel.toggle();");
                 break;
         }
     }
