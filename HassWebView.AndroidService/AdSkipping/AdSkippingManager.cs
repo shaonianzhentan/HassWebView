@@ -1,10 +1,11 @@
 using Android.Content;
 using Android.Provider;
+using HassWebView.AndroidService.AdSkipping;
 using HassWebView.AndroidService.Platforms.Android;
 using Microsoft.Maui.ApplicationModel;
 using System.Net.Http;
 
-namespace HassWebView.AndroidService.AdSkipping
+namespace HassWebView.AndroidService.Platforms.Android
 {
     public class AdSkippingManager : IAdSkippingManager
     {

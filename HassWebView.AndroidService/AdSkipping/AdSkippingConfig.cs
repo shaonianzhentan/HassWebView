@@ -1,10 +1,7 @@
 using Microsoft.Maui.Storage;
 using System.Threading.Tasks;
-#if ANDROID
-using HassWebView.AndroidService.Platforms.Android;
-#endif
 
-namespace HassWebView.AndroidService.AdSkipping
+namespace HassWebView.AndroidService.Platforms.Android
 {
     public interface IAdSkippingConfig
     {
@@ -29,12 +26,10 @@ namespace HassWebView.AndroidService.AdSkipping
 
         internal static async Task LoadRulesAsync(string url)
         {
-#if ANDROID
             if (!string.IsNullOrWhiteSpace(url))
             {
                 await AdSkippingService.RuleManager.LoadRulesFromUrl(url);
             }
-#endif
         }
     }
 }

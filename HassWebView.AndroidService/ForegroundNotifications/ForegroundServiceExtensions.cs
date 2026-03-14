@@ -1,3 +1,4 @@
+using HassWebView.AndroidService.Platforms.Android.Notifications;
 using Microsoft.Maui.Hosting;
 
 namespace HassWebView.AndroidService.Notifications

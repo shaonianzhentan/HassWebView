@@ -3,7 +3,7 @@ using Microsoft.Maui.Hosting;
 using Action = System.Action;
 
 
-namespace HassWebView.AndroidService.AdSkipping
+namespace HassWebView.AndroidService.Platforms.Android
 {
     public static class AdSkippingExtensions
     {

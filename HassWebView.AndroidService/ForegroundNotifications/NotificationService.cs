@@ -7,13 +7,13 @@ using System.Collections.Generic;
 
 namespace HassWebView.AndroidService.Platforms.Android.Notifications
 {
-    internal class NotificationService : INotificationService
+    public class NotificationService : INotificationService
     {
         private const string ChannelId = "HassWebView_Channel";
 
         public void ShowNotification(string title, string content, int notificationId, List<NotificationAction> actions)
         {
-            var context = Application.Context;
+            var context = global::Android.App.Application.Context;
             var intent = new Intent(context, typeof(MainActivity)); // Replace with your main activity
             var pendingIntent = PendingIntent.GetActivity(context, 0, intent, PendingIntentFlags.Immutable);
 
@@ -44,7 +44,7 @@ namespace HassWebView.AndroidService.Platforms.Android.Notifications
 
         public void CancelNotification(int notificationId)
         {
-            var context = Application.Context;
+            var context = global::Android.App.Application.Context;
             var notificationManager = NotificationManagerCompat.From(context);
             notificationManager.Cancel(notificationId);
         }
