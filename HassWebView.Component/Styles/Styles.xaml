@@ -3,11 +3,6 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!-- ========== COLOR DEFINITIONS ========== -->
-    <Color x:Key="CardBackgroundColor"><AppThemeBinding Light="#F2F0F5" Dark="#2A2730" /></Color>
-    <Color x:Key="TitleColor"><AppThemeBinding Light="#000000" Dark="#FFFFFF" /></Color>
-    <Color x:Key="DescriptionColor"><AppThemeBinding Light="#8E8E93" Dark="#8E8E93" /></Color>
-
     <!-- ========== SIZE-BASED RESOURCES ========== -->
     <!-- Padding -->
     <Thickness x:Key="CardPaddingSmall">10</Thickness>
@@ -34,7 +29,7 @@
 
     <!-- Card Style -->
     <Style TargetType="Frame" x:Key="CardFrameStyle">
-        <Setter Property="BackgroundColor" Value="{DynamicResource CardBackgroundColor}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light='#F2F0F5', Dark='#2A2730'}" />
         <Setter Property="CornerRadius" Value="10" />
         <Setter Property="Padding" Value="{StaticResource CardPaddingMedium}" />
         <Setter Property="Margin" Value="{StaticResource CardMarginMedium}" />
@@ -43,14 +38,14 @@
 
     <!-- Title Style -->
     <Style TargetType="Label" x:Key="ListItemTitleLabelStyle">
-        <Setter Property="TextColor" Value="{DynamicResource TitleColor}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
         <Setter Property="FontSize" Value="{StaticResource TitleFontSizeMedium}" />
         <Setter Property="FontAttributes" Value="Bold" />
     </Style>
 
     <!-- Description Style -->
     <Style TargetType="Label" x:Key="ListItemDescriptionLabelStyle">
-        <Setter Property="TextColor" Value="{DynamicResource DescriptionColor}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light='#8E8E93', Dark='#8E8E93'}" />
         <Setter Property="FontSize" Value="{StaticResource DescriptionFontSizeMedium}" />
     </Style>
 

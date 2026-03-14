@@ -23,8 +23,8 @@ namespace HassWebView.AndroidService.NotificationForwarding
         /// <summary>
         /// Gets a list of all user-installed applications that can be launched.
         /// </summary>
-        /// <returns>A list of AppInfo objects.</returns>
-        Task<IEnumerable<AppInfo>> GetInstalledApps();
+        /// <returns>A list of ForwardingAppInfo objects.</returns>
+        Task<IEnumerable<ForwardingAppInfo>> GetInstalledApps();
 
         /// <summary>
         /// Retrieves the list of package names for the apps selected by the user for notification forwarding.

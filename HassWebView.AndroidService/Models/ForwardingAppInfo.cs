@@ -1,9 +1,9 @@
 namespace HassWebView.AndroidService.Models
 {
     /// <summary>
-    /// Represents information about an installed application.
+    /// Represents information about an installed application for notification forwarding.
     /// </summary>
-    public class AppInfo
+    public class ForwardingAppInfo
     {
         /// <summary>
         /// The user-friendly name of the application.

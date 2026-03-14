@@ -32,13 +32,13 @@ namespace HassWebView.AndroidService.NotificationForwarding
             Platform.AppContext.StartActivity(intent);
         }
 
-        public async Task<IEnumerable<AppInfo>> GetInstalledApps()
+        public async Task<IEnumerable<ForwardingAppInfo>> GetInstalledApps()
         {
             return await Task.Run(() =>
             {
                 var pm = Platform.AppContext.PackageManager;
                 var packages = pm.GetInstalledApplications(PackageInfoFlags.MatchAll);
-                var apps = new List<AppInfo>();
+                var apps = new List<ForwardingAppInfo>();
 
                 foreach (var packageInfo in packages)
                 {
@@ -57,7 +57,7 @@ namespace HassWebView.AndroidService.NotificationForwarding
                             iconBase64 = Convert.ToBase64String(stream.ToArray());
                         }
 
-                        apps.Add(new AppInfo
+                        apps.Add(new ForwardingAppInfo
                         {
                             AppName = appName,
                             PackageName = packageName,
