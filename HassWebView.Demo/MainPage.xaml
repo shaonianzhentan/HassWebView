@@ -18,6 +18,11 @@
                 Description="Unlock detailed usage statistics and insights."
                 Toggled="OnAnalyticsToggled" />
 
+            <hass:SwitchCard 
+                Title="Ad Skipping"
+                Description="Enable ad skipping feature."
+                Toggled="AdSkippingClicked" />
+
             <!-- A simpler card without a description -->
             <hass:SwitchCard 
                 Title="Enable Dark Mode" />

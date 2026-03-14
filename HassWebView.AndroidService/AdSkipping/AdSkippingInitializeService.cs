@@ -1,3 +1,7 @@
+using System;
+using Microsoft.Maui;
+using System.Threading.Tasks;
+
 namespace HassWebView.AndroidService.AdSkipping
 {
     /// <summary>
@@ -15,7 +19,7 @@ namespace HassWebView.AndroidService.AdSkipping
         public void Initialize(IServiceProvider services)
         {
             // Load rules from the locally saved file on startup.
-            _adSkippingManager.LoadRulesFromLocalFileAsync();
+            _adSkippingManager.LoadRulesFromLocalFileAsync().GetAwaiter().GetResult();
         }
     }
 }

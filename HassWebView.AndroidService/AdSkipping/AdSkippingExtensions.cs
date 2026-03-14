@@ -1,4 +1,7 @@
 using Microsoft.Maui.Hosting;
+// Add a using alias to resolve the ambiguity between System.Action and Android.Views.Accessibility.Action
+using Action = System.Action;
+
 
 namespace HassWebView.AndroidService.AdSkipping
 {

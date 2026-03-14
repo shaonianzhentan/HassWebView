@@ -1,13 +1,42 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace HassWebView.AndroidService.AdSkipping
 {
     public class GkdRuleManager
     {
         private List<GkdApp> _rules = new();
+
+        /// <summary>
+        /// Loads GKD rules from a URL.
+        /// </summary>
+        /// <param name="url">The URL of the rules file.</param>
+        public async Task LoadRulesFromUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                ClearRules();
+                return;
+            }
+
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    var json5Content = await httpClient.GetStringAsync(url);
+                    LoadRulesFromString(json5Content);
+                }
+            }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AdSkipping] Error downloading or parsing GKD rules from URL: {ex.Message}");
+                ClearRules();
+            }
+        }
 
         /// <summary>
         /// Loads GKD rules from a JSON5 string.
@@ -25,11 +54,11 @@ namespace HassWebView.AndroidService.AdSkipping
             {
                 // Basic JSON5 to JSON conversion: remove comments and trailing commas
                 var json = Regex.Replace(json5Content, @"//.*", ""); // remove single line comments
-                json = Regex.Replace(json, @",(\s*[\]\}])", "$1"); // remove trailing commas
+                json = Regex.Replace(json, @",(\s*[\}\]])", "$1"); // remove trailing commas
 
                 _rules = JsonSerializer.Deserialize<List<GkdApp>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<GkdApp>();
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[AdSkipping] Error parsing GKD rules: {ex.Message}");
                 ClearRules(); // Ensure rules are empty on failure

@@ -1,4 +1,3 @@
-
 using Microsoft.Maui.Storage;
 using System.Threading.Tasks;
 #if ANDROID
@@ -25,17 +24,15 @@ namespace HassWebView.AndroidService.AdSkipping
         public async Task SetRuleUrlAsync(string url)
         {
             Preferences.Set(RuleUrlKey, url);
-            LoadRules(url);
-            await Task.CompletedTask;
+            await LoadRulesAsync(url);
         }
 
-        internal static void LoadRules(string url)
+        internal static async Task LoadRulesAsync(string url)
         {
 #if ANDROID
             if (!string.IsNullOrWhiteSpace(url))
             {
-                // Fire-and-forget background task
-                Task.Run(() => AdSkippingService.RuleManager.LoadRulesFromUrl(url));
+                await AdSkippingService.RuleManager.LoadRulesFromUrl(url);
             }
 #endif
         }

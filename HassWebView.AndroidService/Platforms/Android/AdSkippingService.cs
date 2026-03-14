@@ -1,11 +1,14 @@
 using Android.AccessibilityServices;
 using Android.App;
 using Android.Content;
+using Android.OS;
 using Android.Views.Accessibility;
 using HassWebView.AndroidService.AdSkipping;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+// Add a using alias to resolve the ambiguity between System.Action and Android.Views.Accessibility.Action
+using Action = Android.Views.Accessibility.Action;
 
 namespace HassWebView.AndroidService.Platforms.Android
 {
@@ -23,7 +26,7 @@ namespace HassWebView.AndroidService.Platforms.Android
                 return;
             }
 
-            var appRules = RuleManager.GetRulesForApp(e.PackageName);
+            var appRules = AdSkippingService.RuleManager.GetRulesForApp(e.PackageName);
             if (appRules == null || !appRules.Groups.Any())
             {
                 return;
@@ -45,7 +48,8 @@ namespace HassWebView.AndroidService.Platforms.Android
                     {                        
                         // Perform the click on the first matched node
                         var nodeToClick = nodes.First();
-                        nodeToClick.PerformAction(Action.Click);
+                        // Using the overload with a null Bundle to resolve compiler issues
+                        nodeToClick.PerformAction(Action.Click, null);
                         nodeToClick.Recycle(); // Recycle the node after use
                         return; // Action taken, no need to process more rules
                     }
