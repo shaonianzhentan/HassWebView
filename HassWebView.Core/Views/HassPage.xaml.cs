@@ -388,7 +388,11 @@ public partial class HassPage : ContentPage
             var htmlContent = await ResourceHelper.GetResourceAsync(resourcePath);
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                wv.Source = new HtmlWebViewSource { Html = htmlContent };
+                wv.Source = new HtmlWebViewSource 
+                {
+                    Html = htmlContent,
+                    BaseUrl = "https://hasswebview.local/"
+                };
             });
         }
         catch (Exception ex)

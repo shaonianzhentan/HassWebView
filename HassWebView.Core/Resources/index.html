@@ -250,14 +250,28 @@
     <script>
         // --- App Communication (C# to WebView) ---
         window.externalBus = function (msg) {
-            console.log("Message received from C#: " + msg);
+            console.log("Message received from C#: ", msg);
             
             var message;
-            try {
-                message = JSON.parse(msg);
-            } catch (e) {
-                console.error("Could not parse message from C# as JSON: ", msg);
-                showToast("收到来自应用的消息，但格式无法解析。");
+            if (typeof msg === 'string') {
+                try {
+                    message = JSON.parse(msg);
+                } catch (e) {
+                    console.error("Could not parse string message from C# as JSON: ", msg);
+                    showToast("收到的消息格式无法解析。");
+                    return;
+                }
+            } else if (typeof msg === 'object' && msg !== null) {
+                // If it's already an object, use it directly
+                message = msg;
+            } else {
+                console.error("Received message of unexpected type: ", typeof msg);
+                showToast("收到的消息类型无法识别。");
+                return;
+            }
+
+            if (!message || typeof message.type === 'undefined') {
+                console.error("Parsed message is invalid or does not have a 'type' property: ", message);
                 return;
             }
 
@@ -283,6 +297,7 @@
                     break;
             }
         };
+
 
         // --- UI Control Functions (ES5 Compliant) ---
         function showLoading(message) {
