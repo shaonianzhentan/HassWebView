@@ -3,8 +3,7 @@ using Microsoft.Maui.Controls;
 
 namespace HassWebView.Component
 {
-    [ContentProperty(nameof(Content))]
-    public partial class Card : ContentView
+    public partial class Card : Border // Changed base class from Frame to Border
     {
         public Card()
         {
@@ -23,31 +22,31 @@ namespace HassWebView.Component
 
         // BindableProperty for the Header content
         public static readonly BindableProperty HeaderProperty =
-            BindableProperty.Create(nameof(Header), typeof(View), typeof(Card), null);
+            BindableProperty.Create(nameof(Header), typeof(object), typeof(Card), null);
 
-        public View Header
+        public object Header
         {
-            get => (View)GetValue(HeaderProperty);
+            get => GetValue(HeaderProperty);
             set => SetValue(HeaderProperty, value);
         }
 
         // BindableProperty for the main Content
         public new static readonly BindableProperty ContentProperty =
-            BindableProperty.Create(nameof(Content), typeof(View), typeof(Card), null);
+            BindableProperty.Create(nameof(Content), typeof(object), typeof(Card), null);
 
-        public new View Content
+        public new object Content
         {
-            get => (View)GetValue(ContentProperty);
+            get => GetValue(ContentProperty);
             set => SetValue(ContentProperty, value);
         }
 
         // BindableProperty for the Footer content
         public static readonly BindableProperty FooterProperty =
-            BindableProperty.Create(nameof(Footer), typeof(View), typeof(Card), null);
+            BindableProperty.Create(nameof(Footer), typeof(object), typeof(Card), null);
 
-        public View Footer
+        public object Footer
         {
-            get => (View)GetValue(FooterProperty);
+            get => GetValue(FooterProperty);
             set => SetValue(FooterProperty, value);
         }
     }

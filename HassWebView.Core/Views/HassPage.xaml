@@ -12,16 +12,20 @@
             AbsoluteLayout.LayoutFlags="All"
             AbsoluteLayout.LayoutBounds="0,0,1,1"/>
 
-        <!-- 光标元素（可见鼠标） -->
-        <Frame x:Name="cursor"
-             BackgroundColor="{StaticResource Primary}"
-             BorderColor="{StaticResource PrimaryDark}"
-             CornerRadius="10"
-             WidthRequest="20"
-             HeightRequest="20"
-             IsVisible="False"
-             AbsoluteLayout.LayoutFlags="None"
-             AbsoluteLayout.LayoutBounds="100,100,20,20"
-             Opacity="0.9"/>
+        <!-- Cursor Element (replaces Frame with Border) -->
+        <Border x:Name="cursor"
+                BackgroundColor="{StaticResource Primary}"
+                Stroke="{StaticResource PrimaryDark}"
+                StrokeThickness="1"
+                WidthRequest="20"
+                HeightRequest="20"
+                IsVisible="False"
+                AbsoluteLayout.LayoutFlags="None"
+                AbsoluteLayout.LayoutBounds="100,100,20,20"
+                Opacity="0.9">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="10" />
+            </Border.StrokeShape>
+        </Border>
     </AbsoluteLayout>
 </ContentPage>

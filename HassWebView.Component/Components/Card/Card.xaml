@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<Frame xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-       xmlns:models="clr-namespace:HassWebView.Component.Models"
-       x:Class="HassWebView.Component.Card"
-       x:Name="this">
+<Border xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+        xmlns:models="clr-namespace:HassWebView.Component.Models"
+        x:Class="HassWebView.Component.Card"
+        x:Name="this">
 
-    <Frame.Style>
-        <Style TargetType="Frame" BasedOn="{StaticResource CardFrameStyle}">
+    <Border.Style>
+        <Style TargetType="Border" BasedOn="{StaticResource CardBorderStyle}">
             <Style.Triggers>
-                <DataTrigger TargetType="Frame" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Small}">
+                <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Small}">
                     <Setter Property="Padding" Value="{StaticResource CardPaddingSmall}" />
                     <Setter Property="Margin" Value="{StaticResource CardMarginSmall}" />
                 </DataTrigger>
-                <DataTrigger TargetType="Frame" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Large}">
+                <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Large}">
                     <Setter Property="Padding" Value="{StaticResource CardPaddingLarge}" />
                     <Setter Property="Margin" Value="{StaticResource CardMarginLarge}" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
-    </Frame.Style>
+    </Border.Style>
 
     <Grid RowDefinitions="Auto, *, Auto" RowSpacing="15">
 
@@ -36,4 +36,4 @@
                           Content="{Binding Source={x:Reference this}, Path=Footer}" />
 
     </Grid>
-</Frame>
+</Border>

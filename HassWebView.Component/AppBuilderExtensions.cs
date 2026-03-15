@@ -10,7 +10,7 @@ namespace HassWebView.Component
                 var mergedDictionaries = Application.Current.Resources.MergedDictionaries;
                 if (mergedDictionaries != null)
                 {
-                    mergedDictionaries.Add(new Styles.Styles());
+                    mergedDictionaries.Add(new Styles());
                 }
             });
 
