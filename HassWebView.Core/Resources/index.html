@@ -18,13 +18,13 @@
             box-sizing: inherit;
         }
         body {
-            height: 100vh;
             margin: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             background-color: #f0f2f5;
             color: #1c1e21;
+            /* height: 100vh; is removed to prevent keyboard jiggle */
         }
 
         /* --- Main Container --- */
@@ -335,6 +335,41 @@
 
         // --- Initialization ---
         $(document).ready(function() {
+            // --- Set Body Height to Prevent Keyboard Jiggle ---
+            var initialHeight = window.innerHeight;
+            $('body').css('height', initialHeight + 'px');
+
+            var form = $('#connect-form');
+            var ipInput = $('#ha-ip');
+            var urlInput = $('#ha-url');
+
+            // --- Load URL from LocalStorage ---
+            try {
+                var savedUrl = localStorage.getItem('last_ha_url');
+                if (savedUrl) {
+                    var parsedUrl = new URL(savedUrl);
+                    var ipRegex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+                    
+                    if (parsedUrl.port === '8123' && ipRegex.test(parsedUrl.hostname)) {
+                        // It's an IP address, switch to IP tab
+                        $('.tab-link').removeClass('active');
+                        $('.tab-content').removeClass('active');
+                        $('[data-tab="ip-panel"]').addClass('active');
+                        $('#ip-panel').addClass('active');
+                        ipInput.val(parsedUrl.hostname);
+                    } else {
+                        // It's a full URL, switch to URL tab
+                        $('.tab-link').removeClass('active');
+                        $('.tab-content').removeClass('active');
+                        $('[data-tab="url-panel"]').addClass('active');
+                        $('#url-panel').addClass('active');
+                        urlInput.val(savedUrl);
+                    }
+                }
+            } catch (e) {
+                console.error("Could not load or parse URL from localStorage: ", e);
+            }
+
             // --- Tab Switching Logic ---
             $('.tab-link').on('click', function() {
                 var tabId = $(this).data('tab');
@@ -343,10 +378,6 @@
                 $('.tab-content').removeClass('active');
                 $('#' + tabId).addClass('active');
             });
-
-            var form = $('#connect-form');
-            var ipInput = $('#ha-ip');
-            var urlInput = $('#ha-url');
 
             // Check compatibility
             var compatibility = checkWebViewCompatibility();
@@ -358,6 +389,11 @@
                 } else {
                     console.warn("Not in C# environment, cannot call externalApp for X5 init.");
                 }
+            }
+
+            // 显示远程控制二维码
+            if(window.externalApp && window.externalApp.externalBus){
+                window.externalApp.externalBus(JSON.stringify({ type: 'webview/url' }));
             }
 
             // --- App Communication (WebView to C#) ---
@@ -390,6 +426,13 @@
                 }
                 
                 if (urlToVerify) {
+                    // Save the URL to localStorage
+                    try {
+                        localStorage.setItem('last_ha_url', urlToVerify);
+                    } catch (e) {
+                        console.error("Could not save URL to localStorage: ", e);
+                    }
+                    
                     if ($("#loading").is(":visible")) { return; }
                     showLoading("正在验证地址...");
                     
