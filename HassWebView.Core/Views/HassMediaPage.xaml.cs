@@ -1,8 +1,6 @@
 using HassWebView.Core.Events;
 using HassWebView.Core.Services;
 using System.Diagnostics;
-using System.IO;
-using System.Reflection;
 
 namespace HassWebView.Core.Views;
 
@@ -17,33 +15,34 @@ public partial class HassMediaPage : ContentPage
     {
         InitializeComponent();
         _keyService = IPlatformApplication.Current.Services.GetRequiredService<KeyService>();
-        _keyService.KeyDown += OnKeyDown;
-        _keyService.SingleClick += OnSingleClick;
-        _keyService.LongClick += OnLongClick;
-    }
-
-    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
-    {
-        base.OnHandlerChanging(args);
-
-        // 页面即将销毁 → 彻底解绑所有事件
-        if (args.OldHandler != null)
-        {
-            // 停止长按任务
-            _keyService.StopRepeatingAction();
-
-            // 彻底解绑
-            _keyService.KeyDown -= OnKeyDown;
-            _keyService.SingleClick -= OnSingleClick;
-            _keyService.LongClick -= OnLongClick;
-        }
     }
 
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
-        // Fire and forget is okay here
+        Debug.WriteLine("[HassMediaPage] OnNavigatedTo: Subscribing to key events.");
+
+        // Subscribe to events when navigation to this page is complete.
+        _keyService.KeyDown += OnKeyDown;
+        _keyService.SingleClick += OnSingleClick;
+        _keyService.LongClick += OnLongClick;
+        
+        // Load the video content
         _ = LoadUrl(Url, BaseUrl);
+    }
+    
+    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    {
+        base.OnNavigatedFrom(args);
+        Debug.WriteLine("[HassMediaPage] OnNavigatedFrom: Unsubscribing from key events.");
+        
+        // Stop any repeating actions immediately when navigating away.
+        _keyService.StopRepeatingAction();
+
+        // Unsubscribe from events when leaving the page.
+        _keyService.KeyDown -= OnKeyDown;
+        _keyService.SingleClick -= OnSingleClick;
+        _keyService.LongClick -= OnLongClick;
     }
 
     public async Task LoadUrl(string videoUrl, string baseUrl)
@@ -53,33 +52,33 @@ public partial class HassMediaPage : ContentPage
 
         string htmlContent = await ResourceHelper.GetResourceAsync("MediaPlayer.html");
 
-            var finalHtml = htmlContent.Replace("__HEIGHT__", wv.Height.ToString())
-                                         .Replace("__VIDEO_URL__", videoUrl);
+        var finalHtml = htmlContent.Replace("__HEIGHT__", wv.Height.ToString())
+                                     .Replace("__VIDEO_URL__", videoUrl);
 
-            var uri = new Uri(videoUrl);
-            if (string.IsNullOrEmpty(baseUrl))
-            {
-                baseUrl = $"{uri.Scheme}://{uri.Host}/";
-            }
+        var uri = new Uri(videoUrl);
+        if (string.IsNullOrEmpty(baseUrl))
+        {
+            baseUrl = $"{uri.Scheme}://{uri.Host}/";
+        }
 
-            var htmlSource = new HtmlWebViewSource
-            {
-                BaseUrl = baseUrl,
-                Html = finalHtml
-            };
+        var htmlSource = new HtmlWebViewSource
+        {
+            BaseUrl = baseUrl,
+            Html = finalHtml
+        };
 
-            Debug.WriteLine("Setting WebView source with HTML content from MediaPlayer.html.");
-            wv.Source = htmlSource;
+        Debug.WriteLine("Setting WebView source with HTML content from MediaPlayer.html.");
+        wv.Source = htmlSource;
     }
 
     void VideoSeek(int second)
     {
-            wv.EvaluateJavaScriptAsync($"videoSeek({second})");
+        wv.EvaluateJavaScriptAsync($"videoSeek({second})");
     }
 
     void PlayPause()
     {
-            wv.EvaluateJavaScriptAsync("playPause()");
+        wv.EvaluateJavaScriptAsync("playPause()");
     }
 
     public bool OnKeyDown(object sender, RemoteKeyEventArgs args)
@@ -93,35 +92,35 @@ public partial class HassMediaPage : ContentPage
 
     public void OnSingleClick(object sender, RemoteKeyEventArgs e)
     {
-        Debug.WriteLine($"[HassMediaPage]单击：{e.KeyName}");
+        Debug.WriteLine($"[HassMediaPage] Single Click: {e.KeyName}");
         
-            switch (e.KeyName)
-            {
-                case "Enter":
-                case "DpadCenter":
-                    PlayPause();
-                    break;
+        switch (e.KeyName)
+        {
+            case "Enter":
+            case "DpadCenter":
+                PlayPause();
+                break;
 
-                case "Escape":
-                case "Back":
+            case "Escape":
+            case "Back":
                 MainThread.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PopModalAsync());
                 break;
 
-                case "Left":
-                case "DpadLeft":
-                    VideoSeek(-5);
-                    break;
+            case "Left":
+            case "DpadLeft":
+                VideoSeek(-5);
+                break;
 
-                case "Right":
-                case "DpadRight":
-                    VideoSeek(5);
-                    break;
-            }
+            case "Right":
+            case "DpadRight":
+                VideoSeek(5);
+                break;
+        }
     }
 
     public void OnLongClick(object sender, RemoteKeyEventArgs e)
     {
-        Debug.WriteLine($"[HassMediaPage]长按：{e.KeyName}");
+        Debug.WriteLine($"[HassMediaPage] Long Click: {e.KeyName}");
         int repeatInterval = 100;
         switch (e.KeyName)
         {
