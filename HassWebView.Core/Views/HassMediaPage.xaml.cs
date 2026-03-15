@@ -17,6 +17,26 @@ public partial class HassMediaPage : ContentPage
     {
         InitializeComponent();
         _keyService = IPlatformApplication.Current.Services.GetRequiredService<KeyService>();
+        _keyService.KeyDown += OnKeyDown;
+        _keyService.SingleClick += OnSingleClick;
+        _keyService.LongClick += OnLongClick;
+    }
+
+    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
+    {
+        base.OnHandlerChanging(args);
+
+        // 页面即将销毁 → 彻底解绑所有事件
+        if (args.OldHandler != null)
+        {
+            // 停止长按任务
+            _keyService.StopRepeatingAction();
+
+            // 彻底解绑
+            _keyService.KeyDown -= OnKeyDown;
+            _keyService.SingleClick -= OnSingleClick;
+            _keyService.LongClick -= OnLongClick;
+        }
     }
 
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
@@ -24,22 +44,6 @@ public partial class HassMediaPage : ContentPage
         base.OnNavigatedTo(args);
         // Fire and forget is okay here
         _ = LoadUrl(Url, BaseUrl);
-    }
-
-    protected override void OnAppearing()
-    {
-        base.OnAppearing();
-        _keyService.KeyDown += OnKeyDown;
-        _keyService.SingleClick += OnSingleClick;
-        _keyService.LongClick += OnLongClick;
-    }
-
-    protected override void OnDisappearing()
-    {
-        base.OnDisappearing();
-        _keyService.KeyDown -= OnKeyDown;
-        _keyService.SingleClick -= OnSingleClick;
-        _keyService.LongClick -= OnLongClick;
     }
 
     public async Task LoadUrl(string videoUrl, string baseUrl)
