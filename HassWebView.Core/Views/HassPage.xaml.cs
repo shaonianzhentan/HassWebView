@@ -329,11 +329,14 @@ public partial class HassPage : ContentPage
                         wv.WindowExternalBus(new { type = "webview/auth", message = "无法访问提供的URL，请确保它是正确的Home Assistant实例地址，并且设备能够访问它。" });
                     }
                     break;
-                case "webview/url":
+                case "webview/config":
+                    var hassUrl = await _authStore.GetHassUrlAsync();
+                    string remoteUrl = null;
                     if (_httpServer != null)
                     {
-                        wv.WindowExternalBus(new { type = "webview/url", data = _httpServer.BaseUrl + "webview/remote" });
+                        remoteUrl = _httpServer.BaseUrl + "webview/remote";
                     }
+                    wv.WindowExternalBus(new { type = "webview/config", data = new { hassUrl, remoteUrl } });
                     break;
 #if ANDROID
                 case "x5/init":

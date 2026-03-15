@@ -48,6 +48,7 @@ namespace HassWebView.Core.Auth
             Preferences.Remove(KeyRefreshToken);
             Preferences.Remove(KeyWebhookId);
             Preferences.Remove(KeyTokenExpiry);
+            // We are intentionally NOT removing KeyHassUrl here to preserve it for the next login.
             return Task.CompletedTask;
         }
     }
