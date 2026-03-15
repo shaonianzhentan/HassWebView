@@ -9,11 +9,7 @@ namespace HassWebView.Component
             // Merges the component library's styles into the application's resources.
             builder.ConfigureMauiHandlers(handlers =>
             {
-                var an = typeof(AppBuilderExtensions).Assembly.GetName().Name;
-                Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary
-                {
-                    Source = new Uri($"/{an};component/Styles.xaml", UriKind.Relative)
-                });
+                Application.Current.Resources.MergedDictionaries.Add(new Styles());
             });
 
             return builder;
