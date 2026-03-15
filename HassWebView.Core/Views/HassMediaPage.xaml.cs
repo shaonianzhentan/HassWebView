@@ -53,10 +53,8 @@ public partial class HassMediaPage : ContentPage
 
         string htmlContent = await ResourceHelper.GetResourceAsync("MediaPlayer.html");
 
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            var finalHtml = htmlContent.Replace("{{HEIGHT}}", wv.Height.ToString())
-                                         .Replace("{{VIDEO_URL}}", videoUrl);
+            var finalHtml = htmlContent.Replace("__HEIGHT__", wv.Height.ToString())
+                                         .Replace("__VIDEO_URL__", videoUrl);
 
             var uri = new Uri(videoUrl);
             if (string.IsNullOrEmpty(baseUrl))
@@ -72,23 +70,16 @@ public partial class HassMediaPage : ContentPage
 
             Debug.WriteLine("Setting WebView source with HTML content from MediaPlayer.html.");
             wv.Source = htmlSource;
-        });
     }
 
     void VideoSeek(int second)
     {
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
             wv.EvaluateJavaScriptAsync($"videoSeek({second})");
-        });
     }
 
     void PlayPause()
     {
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
             wv.EvaluateJavaScriptAsync("playPause()");
-        });
     }
 
     public bool OnKeyDown(object sender, RemoteKeyEventArgs args)
@@ -102,8 +93,8 @@ public partial class HassMediaPage : ContentPage
 
     public void OnSingleClick(object sender, RemoteKeyEventArgs e)
     {
-        MainThread.InvokeOnMainThreadAsync(async () =>
-        {
+        Debug.WriteLine($"[HassMediaPage]单击：{e.KeyName}");
+        
             switch (e.KeyName)
             {
                 case "Enter":
@@ -113,8 +104,8 @@ public partial class HassMediaPage : ContentPage
 
                 case "Escape":
                 case "Back":
-                    await Shell.Current.Navigation.PopModalAsync();
-                    break;
+                MainThread.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PopModalAsync());
+                break;
 
                 case "Left":
                 case "DpadLeft":
@@ -126,11 +117,11 @@ public partial class HassMediaPage : ContentPage
                     VideoSeek(5);
                     break;
             }
-        });
     }
 
     public void OnLongClick(object sender, RemoteKeyEventArgs e)
     {
+        Debug.WriteLine($"[HassMediaPage]长按：{e.KeyName}");
         int repeatInterval = 100;
         switch (e.KeyName)
         {
