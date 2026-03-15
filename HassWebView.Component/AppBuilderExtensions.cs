@@ -1,5 +1,3 @@
-using Microsoft.Maui.Controls;
-
 namespace HassWebView.Component
 {
     public static class AppBuilderExtensions
@@ -9,7 +7,11 @@ namespace HassWebView.Component
             // Merges the component library's styles into the application's resources.
             builder.ConfigureMauiHandlers(handlers =>
             {
-                Application.Current.Resources.MergedDictionaries.Add(new Styles());
+                var mergedDictionaries = Application.Current.Resources.MergedDictionaries;
+                if (mergedDictionaries != null)
+                {
+                    mergedDictionaries.Add(new Styles.Styles());
+                }
             });
 
             return builder;
