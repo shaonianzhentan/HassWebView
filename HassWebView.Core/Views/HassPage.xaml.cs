@@ -393,8 +393,7 @@ public partial class HassPage : ContentPage
             {
                 wv.Source = new HtmlWebViewSource 
                 {
-                    Html = htmlContent,
-                    BaseUrl = "https://hasswebview.local/"
+                    Html = htmlContent
                 };
             });
         }

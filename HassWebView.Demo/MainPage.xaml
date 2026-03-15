@@ -4,7 +4,16 @@
              xmlns:hass="clr-namespace:HassWebView.Component;assembly=HassWebView.Component">
 
     <ScrollView>
-        <hass:Card Header="dfsdf" Content="sdfsd" Footer="adfsd">
+        <hass:Card>
+            <hass:Card.Header>
+                <Label Text="标题" />
+            </hass:Card.Header>
+            <hass:Card.Content>
+                <Label Text="内容" />
+            </hass:Card.Content>
+            <hass:Card.Footer>
+                <Label Text="底部" />
+            </hass:Card.Footer>
         </hass:Card>
     </ScrollView>
 

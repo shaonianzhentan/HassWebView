@@ -55,12 +55,9 @@ public static class MauiProgram
             .UseHassWebView()
             .UseHassPage((sp, options) =>
             {
-                options.ShowSettingsScreen = () =>
+                options.ShowSettingsScreen = async () =>
                 {
-                    MainThread.BeginInvokeOnMainThread(() =>
-                    {
-                        Shell.Current.Navigation.PushModalAsync(new MainPage());
-                    });
+                    await Shell.Current.Navigation.PushModalAsync(new MainPage());
                 };
             })
             .UseImmersiveMode()
