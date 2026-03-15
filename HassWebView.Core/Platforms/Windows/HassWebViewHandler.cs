@@ -1,10 +1,12 @@
 using HassWebView.Core.Bridges;
 using HassWebView.Core.Events;
+using HassWebView.Core.Services;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -68,21 +70,12 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         {
             if (args is not HassWebView.SimulateTouchRequest request) return;
             if (handler.PlatformView is not WebView wv) return;
-            var script = $@"(function(){{
-    var vw = {wv.ActualWidth}; var vh = {wv.ActualHeight};
-    var cw = document.documentElement.clientWidth; var ch = document.documentElement.clientHeight;
-    var x = {request.X} * (cw/vw); var y = {request.Y} * (ch/vh);
-    var el = document.elementFromPoint(x, y);
-    if (el) {{
-        el.scrollIntoView({{block:'center',inline:'center'}});
-        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.focus();
-        else {{
-            el.dispatchEvent(new Event('touchstart',{{bubbles:true,cancelable:true}}));
-            el.dispatchEvent(new Event('touchend',{{bubbles:true,cancelable:true}}));
-            el.dispatchEvent(new MouseEvent('click',{{bubbles:true,cancelable:true,view:window}}));
-        }}
-    }}
-}})();";
+            var scriptTemplate = await ResourceHelper.GetResourceAsync("Scripts/SimulateTouch.js");
+            var script = scriptTemplate
+                .Replace("__VW__", wv.ActualWidth.ToString(CultureInfo.InvariantCulture))
+                .Replace("__VH__", wv.ActualHeight.ToString(CultureInfo.InvariantCulture))
+                .Replace("__X__", request.X.ToString(CultureInfo.InvariantCulture))
+                .Replace("__Y__", request.Y.ToString(CultureInfo.InvariantCulture));
             await wv.ExecuteScriptAsync(script);
         },
         [nameof(HassWebView.SimulateTouchSlide)] = async (handler, _, args) =>
@@ -90,42 +83,15 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             if (args is not HassWebView.SimulateTouchSlideRequest request) return;
             if (handler.PlatformView is not WebView wv) return;
 
-            var script = $@"(function(){{
-                var vw = {wv.ActualWidth}; var vh = {wv.ActualHeight};
-                var cw = document.documentElement.clientWidth; var ch = document.documentElement.clientHeight;
-                var x1 = {request.X1} * (cw/vw); var y1 = {request.Y1} * (ch/vh);
-                var x2 = {request.X2} * (cw/vw); var y2 = {request.Y2} * (ch/vh);
-                var duration = {request.Duration};
-
-                var el = document.elementFromPoint(x1, y1);
-                if (!el) return;
-
-                const createTouch = (x, y) => new Touch({{
-                    identifier: Date.now(), target: el, clientX: x, clientY: y, pageX: x, pageY: y
-                }});
-
-                const dispatchTouchEvent = (type, touches) => el.dispatchEvent(new TouchEvent(type, {{
-                    bubbles: true, cancelable: true, view: window, touches: touches, targetTouches: touches, changedTouches: touches
-                }}));
-
-                dispatchTouchEvent('touchstart', [createTouch(x1, y1)]);
-                
-                let startTime = performance.now();
-                function animate(currentTime) {{
-                    let elapsedTime = currentTime - startTime;
-                    if (elapsedTime >= duration) {{
-                        dispatchTouchEvent('touchmove', [createTouch(x2, y2)]);
-                        dispatchTouchEvent('touchend', [createTouch(x2, y2)]);
-                        return;
-                    }}
-                    let progress = elapsedTime / duration;
-                    let currentX = x1 + (x2 - x1) * progress;
-                    let currentY = y1 + (y2 - y1) * progress;
-                    dispatchTouchEvent('touchmove', [createTouch(currentX, currentY)]);
-                    requestAnimationFrame(animate);
-                }}
-                requestAnimationFrame(animate);
-            }})();";
+            var scriptTemplate = await ResourceHelper.GetResourceAsync("Scripts/SimulateTouchSlide.js");
+            var script = scriptTemplate
+                .Replace("__VW__", wv.ActualWidth.ToString(CultureInfo.InvariantCulture))
+                .Replace("__VH__", wv.ActualHeight.ToString(CultureInfo.InvariantCulture))
+                .Replace("__X1__", request.X1.ToString(CultureInfo.InvariantCulture))
+                .Replace("__Y1__", request.Y1.ToString(CultureInfo.InvariantCulture))
+                .Replace("__X2__", request.X2.ToString(CultureInfo.InvariantCulture))
+                .Replace("__Y2__", request.Y2.ToString(CultureInfo.InvariantCulture))
+                .Replace("__DURATION__", request.Duration.ToString(CultureInfo.InvariantCulture));
             await wv.ExecuteScriptAsync(script);
         },
         [nameof(HassWebView.ExitFullscreen)] = async (handler, _, args) =>
@@ -170,6 +136,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         core.Settings.AreDefaultContextMenusEnabled = true;
         core.NavigationStarting += Core_NavigationStarting;
         core.NavigationCompleted += Core_NavigationCompleted;
+        core.NewWindowRequested += Core_NewWindowRequested;
         core.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All);
         core.WebResourceRequested += Core_WebResourceRequested;
 
@@ -182,6 +149,12 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             }
         }
         LoadSource(VirtualView.Source);
+    }
+
+    private void Core_NewWindowRequested(CoreWebView2 sender, CoreWebView2NewWindowRequestedEventArgs args)
+    {
+        args.Handled = true;
+        PlatformView.CoreWebView2.Navigate(args.Uri);
     }
 
     private void Core_WebResourceRequested(CoreWebView2 sender, CoreWebView2WebResourceRequestedEventArgs args)
@@ -259,6 +232,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         {
             platformView.CoreWebView2.NavigationStarting -= Core_NavigationStarting;
             platformView.CoreWebView2.NavigationCompleted -= Core_NavigationCompleted;
+            platformView.CoreWebView2.NewWindowRequested -= Core_NewWindowRequested;
             platformView.CoreWebView2.WebResourceRequested -= Core_WebResourceRequested;
         }
         _jsBridgeHandler = null;
