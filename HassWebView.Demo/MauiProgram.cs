@@ -1,3 +1,4 @@
+using HassWebView.Component;
 using HassWebView.Core;
 using HassWebView.Core.Configuration;
 using HassWebView.HassApi.Models;
@@ -58,12 +59,13 @@ public static class MauiProgram
                 {
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        // Shell.Current.GoToAsync("///MySettingsPage");
+                        Shell.Current.Navigation.PushModalAsync(new MainPage());
                     });
                 };
             })
             .UseImmersiveMode()
-            .UseRemoteControl();
+            .UseRemoteControl()
+            .UseHassComponents();
 
 #if DEBUG
         builder.Logging.AddDebug();
