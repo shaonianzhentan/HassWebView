@@ -24,9 +24,11 @@ namespace HassWebView.Core.Services
             get => AbsoluteLayout.GetLayoutBounds(_cursor).X;
             set
             {
-                var rect = AbsoluteLayout.GetLayoutBounds(_cursor);
-                AbsoluteLayout.SetLayoutBounds(_cursor,
-                    new Rect(value, rect.Y, rect.Width, rect.Height));
+                MainThread.BeginInvokeOnMainThread(() => {
+                    var rect = AbsoluteLayout.GetLayoutBounds(_cursor);
+                    AbsoluteLayout.SetLayoutBounds(_cursor,
+                        new Rect(value, rect.Y, rect.Width, rect.Height));
+                });
             }
         }
 
@@ -35,9 +37,12 @@ namespace HassWebView.Core.Services
             get => AbsoluteLayout.GetLayoutBounds(_cursor).Y;
             set
             {
-                var rect = AbsoluteLayout.GetLayoutBounds(_cursor);
-                AbsoluteLayout.SetLayoutBounds(_cursor,
-                    new Rect(rect.X, value, rect.Width, rect.Height));
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    var rect = AbsoluteLayout.GetLayoutBounds(_cursor);
+                    AbsoluteLayout.SetLayoutBounds(_cursor,
+                        new Rect(rect.X, value, rect.Width, rect.Height));
+                });
             }
         }
 

@@ -127,16 +127,26 @@ namespace HassWebView.Core
                 tcs.SetException(new InvalidOperationException("Handler is not initialized."));
                 return tcs.Task;
             }
-
-            Handler.Invoke(nameof(EvaluateJavaScriptAsync), new EvaluateJavaScriptAsyncRequest(tcs, script));
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                try
+                {
+                    Handler.Invoke(nameof(EvaluateJavaScriptAsync), new EvaluateJavaScriptAsyncRequest(tcs, script));
+                }
+                catch (Exception ex)
+                {
+                    // 防止异常导致 Task 无法完成
+                    tcs.TrySetException(ex);
+                }
+            });
             return tcs.Task;
         }
 
-        public void WindowExternalBusAsync<T>(T message)
+        public void WindowExternalBus<T>(T message)
         {
             var responseJson = JsonSerializer.Serialize(message);
             var js = $"window.externalBus({responseJson});";
-            MainThread.InvokeOnMainThreadAsync(() => EvaluateJavaScriptAsync(js));
+            EvaluateJavaScriptAsync(js);
         }
 
         public void SimulateTouch(int x, int y)
@@ -146,7 +156,10 @@ namespace HassWebView.Core
                 return;
             }
 
-            Handler.Invoke(nameof(SimulateTouch), new SimulateTouchRequest(x, y));
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                Handler.Invoke(nameof(SimulateTouch), new SimulateTouchRequest(x, y));
+            });
         }
 
         public void SimulateTouchSlide(int x1, int y1, int x2, int y2, int duration)
@@ -156,7 +169,10 @@ namespace HassWebView.Core
                 return;
             }
 
-            Handler.Invoke(nameof(SimulateTouchSlide), new SimulateTouchSlideRequest(x1, y1, x2, y2, duration));
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                Handler.Invoke(nameof(SimulateTouchSlide), new SimulateTouchSlideRequest(x1, y1, x2, y2, duration));
+            });
         }
 
         public void ExitFullscreen()

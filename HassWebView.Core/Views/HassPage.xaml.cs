@@ -301,7 +301,7 @@ public partial class HassPage : ContentPage
             {
                 case "config/get":
                     var id = msg?["id"]?.GetValue<int>();
-                    wv.WindowExternalBusAsync(new { id, type = "result", success = true, result = new { hasSettingsScreen = true, canWriteTag = false } });
+                    wv.WindowExternalBus(new { id, type = "result", success = true, result = new { hasSettingsScreen = true, canWriteTag = false } });
                     break;
                 case "config_screen/show":
                     _pageOptions.ShowSettingsScreen?.Invoke();
@@ -326,13 +326,13 @@ public partial class HassPage : ContentPage
                     }
                     else
                     {
-                        wv.WindowExternalBusAsync(new { type = "webview/auth", message = "无法访问提供的URL，请确保它是正确的Home Assistant实例地址，并且设备能够访问它。" });
+                        wv.WindowExternalBus(new { type = "webview/auth", message = "无法访问提供的URL，请确保它是正确的Home Assistant实例地址，并且设备能够访问它。" });
                     }
                     break;
                 case "webview/url":
                     if (_httpServer != null)
                     {
-                        wv.WindowExternalBusAsync(new { type = "webview/url", data = _httpServer.BaseUrl + "webview/remote" });
+                        wv.WindowExternalBus(new { type = "webview/url", data = _httpServer.BaseUrl + "webview/remote" });
                     }
                     break;
 #if ANDROID
@@ -344,9 +344,9 @@ public partial class HassPage : ContentPage
                     {
                         Debug.WriteLine($"[ExternalBus] Initializing Tencent X5 Core with APK: {apkUrl}");
                         var result = await TencentX5Service.InitializeX5CoreAsync(apkUrl, (progress) => {
-                            wv.WindowExternalBusAsync(new { type = "x5/download", data = progress });
+                            wv.WindowExternalBus(new { type = "x5/download", data = progress });
                         });
-                        if (result) wv.WindowExternalBusAsync(new { type = "x5/init" });
+                        if (result) wv.WindowExternalBus(new { type = "x5/init" });
                     }
                     break;
 #endif
@@ -422,12 +422,12 @@ public partial class HassPage : ContentPage
             var tokenExpiry = await _authStore.GetTokenExpiryUtcAsync();
             var expiresIn = (int)(tokenExpiry - DateTime.UtcNow).TotalSeconds;
             var js = $"window.externalAuthSetToken(true, {{ access_token: '{token.AccessToken}', expires_in: {expiresIn} }});";
-            MainThread.BeginInvokeOnMainThread(() => wv.EvaluateJavaScriptAsync(js));
+            await wv.EvaluateJavaScriptAsync(js);
         }
         else
         {
             Debug.WriteLine("会话已过期");
-            MainThread.BeginInvokeOnMainThread(() => wv.EvaluateJavaScriptAsync("window.externalAuthSetToken(false);"));
+            await wv.EvaluateJavaScriptAsync("window.externalAuthSetToken(false);");
             await GoToAuthModeWithError("会话已过期，请重新登录。");
         }
     }
@@ -537,6 +537,7 @@ public partial class HassPage : ContentPage
 
     private async void OnSingleClick(object sender, RemoteKeyEventArgs e)
     {
+        Debug.WriteLine($"单击：{e.KeyName}");
         if (_cursorControl is null) return;
         
         switch (e.KeyName)
@@ -558,6 +559,7 @@ public partial class HassPage : ContentPage
 
     private void OnDoubleClick(object sender, RemoteKeyEventArgs e)
     {
+        Debug.WriteLine($"双击：{e.KeyName}");
         if (_cursorControl is null) return;
         MainThread.BeginInvokeOnMainThread(async () =>
         {
@@ -574,6 +576,7 @@ public partial class HassPage : ContentPage
 
     private async void OnLongClick(object sender, RemoteKeyEventArgs e)
     {
+        Debug.WriteLine($"长按：{e.KeyName}");
         if (_keyService is null) return;
         var hassUrl = await _authStore.GetHassUrlAsync();
         MainThread.BeginInvokeOnMainThread(() =>
