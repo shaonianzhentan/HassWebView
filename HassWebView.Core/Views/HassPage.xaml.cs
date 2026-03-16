@@ -539,10 +539,15 @@ public partial class HassPage : ContentPage
         }
     }
 
-    private bool OnFilterKeyDown(object sender, RemoteKeyEventArgs e) => e.NormalizedKeyName != "VolumeUp" && e.NormalizedKeyName != "VolumeDown";
+    private bool OnFilterKeyDown(object sender, RemoteKeyEventArgs e)
+    {
+        if (Shell.Current.Navigation.ModalStack.Count > 0) return false;
+        return e.NormalizedKeyName != "VolumeUp" && e.NormalizedKeyName != "VolumeDown";
+    }
 
     private async void OnSingleClick(object sender, RemoteKeyEventArgs e)
     {
+        if (Shell.Current.Navigation.ModalStack.Count > 0) return;
         Debug.WriteLine($"单击：{e.NormalizedKeyName}");
         if (_cursorControl is null) return;
         
@@ -565,6 +570,7 @@ public partial class HassPage : ContentPage
 
     private void OnDoubleClick(object sender, RemoteKeyEventArgs e)
     {
+        if (Shell.Current.Navigation.ModalStack.Count > 0) return;
         Debug.WriteLine($"双击：{e.NormalizedKeyName}");
         if (_cursorControl is null) return;
         MainThread.BeginInvokeOnMainThread(async () =>
@@ -582,6 +588,7 @@ public partial class HassPage : ContentPage
 
     private async void OnLongClick(object sender, RemoteKeyEventArgs e)
     {
+        if (Shell.Current.Navigation.ModalStack.Count > 0) return;
         Debug.WriteLine($"长按：{e.NormalizedKeyName}");
         if (_keyService is null) return;
         var hassUrl = await _authStore.GetHassUrlAsync();
