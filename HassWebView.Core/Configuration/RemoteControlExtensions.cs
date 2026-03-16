@@ -4,6 +4,8 @@ using Microsoft.Maui.LifecycleEvents;
 using System.Diagnostics;
 
 #if ANDROID
+using Android.App;
+using HassWebView.Core.Platforms.Android;
 #endif
 
 #if WINDOWS
@@ -29,20 +31,17 @@ namespace HassWebView.Core.Configuration
 #if ANDROID
                 events.AddAndroid(android =>
                 {
-                    android.OnCreate((activity, bundle) =>
+                    android.OnApplicationCreating(app => 
                     {
                         var keyService = IPlatformApplication.Current.Services.GetService<KeyService>();
                         if (keyService == null)
-                        { 
+                        {
                             Debug.WriteLine("[Critical Error] KeyService not found in DI container.");
                             return;
                         }
 
-                        var window = activity.Window;
-                        if (window.Callback is not Platforms.Android.KeyCallback)
-                        { 
-                            window.Callback = new Platforms.Android.KeyCallback(window.Callback, keyService);
-                        }
+                        var callbackManager = new GlobalKeyCallbackManager(keyService);
+                        app.RegisterActivityLifecycleCallbacks(callbackManager);
                     });
                 });
 #endif
