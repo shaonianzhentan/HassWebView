@@ -2,6 +2,7 @@ using HassWebView.Core.Configuration;
 using HassWebView.Core.Events;
 using HassWebView.Core.Auth;
 using HassWebView.Core.Services;
+using HassWebView.Core.Interfaces;
 using HassWebView.HassApi;
 using HassWebView.HassApi.Models;
 using System.Diagnostics;
@@ -13,7 +14,7 @@ using System.Web;
 
 namespace HassWebView.Core.Views;
 
-public partial class HassPage : ContentPage
+public partial class HassPage : ContentPage, IKeyHandler
 {
     private enum PageState { Initializing, NeedsAuth, InLoginFlow, Authenticated }
     private PageState _state = PageState.Initializing;
@@ -410,13 +411,12 @@ public partial class HassPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        SetupKeyServiceListeners(true);
     }
 
     protected override void OnDisappearing()
     {
+        _keyService?.StopRepeatingAction();
         base.OnDisappearing();
-        SetupKeyServiceListeners(false);
     }
 
     private async void OnWebViewAuthTokenRequested(object sender, EventArgs e)
@@ -518,42 +518,20 @@ public partial class HassPage : ContentPage
         }
     }
     
-    #region KeyService Handlers
+    #region IKeyHandler Implementation
 
-    private void SetupKeyServiceListeners(bool subscribe)
-    {
-        if (_keyService is null) return;
-        if (subscribe)
-        {
-            _keyService.SingleClick += OnSingleClick;
-            _keyService.DoubleClick += OnDoubleClick;
-            _keyService.LongClick += OnLongClick;
-            _keyService.KeyDown += OnFilterKeyDown;
-        }
-        else
-        {
-            _keyService.SingleClick -= OnSingleClick;
-            _keyService.DoubleClick -= OnDoubleClick;
-            _keyService.LongClick -= OnLongClick;
-            _keyService.KeyDown -= OnFilterKeyDown;
-        }
-    }
+    public string[] GetUnhandledKeys() => new string[] { "VolumeUp", "VolumeDown" };
 
-    private bool OnFilterKeyDown(object sender, RemoteKeyEventArgs e)
+    public async void OnSingleClick(RemoteKeyEventArgs args)
     {
-        if (Shell.Current.Navigation.ModalStack.Count > 0) return false;
-        return e.NormalizedKeyName != "VolumeUp" && e.NormalizedKeyName != "VolumeDown";
-    }
-
-    private async void OnSingleClick(object sender, RemoteKeyEventArgs e)
-    {
-        if (Shell.Current.Navigation.ModalStack.Count > 0) return;
-        Debug.WriteLine($"单击：{e.NormalizedKeyName}");
+        Debug.WriteLine($"[HassPage] Single Click: {args.KeyName}");
         if (_cursorControl is null) return;
         
-        switch (e.NormalizedKeyName)
+        switch (args.KeyName)
         {
-            case "Enter": _cursorControl.Click(); break;
+            case "Enter": 
+                _cursorControl.Click(); 
+                break;
             case "Back": 
                 if (wv.CanGoBack) 
                     MainThread.BeginInvokeOnMainThread(() => wv.GoBack()); 
@@ -568,14 +546,13 @@ public partial class HassPage : ContentPage
         }
     }
 
-    private void OnDoubleClick(object sender, RemoteKeyEventArgs e)
+    public void OnDoubleClick(RemoteKeyEventArgs args)
     {
-        if (Shell.Current.Navigation.ModalStack.Count > 0) return;
-        Debug.WriteLine($"双击：{e.NormalizedKeyName}");
+        Debug.WriteLine($"[HassPage] Double Click: {args.KeyName}");
         if (_cursorControl is null) return;
         MainThread.BeginInvokeOnMainThread(async () =>
         {
-            switch (e.NormalizedKeyName)
+            switch (args.KeyName)
             {
                 case "Enter": await _cursorControl.DoubleClick(); break;
                 case "Up": _cursorControl.SlideUp(); break;
@@ -586,16 +563,16 @@ public partial class HassPage : ContentPage
         });
     }
 
-    private async void OnLongClick(object sender, RemoteKeyEventArgs e)
+    public async void OnLongClick(RemoteKeyEventArgs args)
     {
-        if (Shell.Current.Navigation.ModalStack.Count > 0) return;
-        Debug.WriteLine($"长按：{e.NormalizedKeyName}");
-        if (_keyService is null) return;
+        Debug.WriteLine($"[HassPage] Long Click: {args.KeyName}");
+        if (_keyService is null) return; 
+
         var hassUrl = await _authStore.GetHassUrlAsync();
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            var repeatInterval = 100;
-            switch (e.NormalizedKeyName)
+            const int repeatInterval = 100;
+            switch (args.KeyName)
             {
                 case "Up": _keyService.StartRepeatingAction(() => _cursorControl?.MoveUpBy(), repeatInterval); break;
                 case "Down": _keyService.StartRepeatingAction(() => _cursorControl?.MoveDownBy(), repeatInterval); break;

@@ -1,10 +1,11 @@
 using HassWebView.Core.Events;
+using HassWebView.Core.Interfaces;
 using HassWebView.Core.Services;
 using System.Diagnostics;
 
 namespace HassWebView.Core.Views;
 
-public partial class HassMediaPage : ContentPage
+public partial class HassMediaPage : ContentPage, IKeyHandler
 {
     public string BaseUrl { get; set; }
     public string Url { get; set; }
@@ -14,35 +15,21 @@ public partial class HassMediaPage : ContentPage
     public HassMediaPage()
     {
         InitializeComponent();
+        // The KeyService is still needed for starting/stopping repeating actions.
         _keyService = IPlatformApplication.Current.Services.GetRequiredService<KeyService>();
     }
 
-    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    protected override void OnAppearing()
     {
-        base.OnNavigatedTo(args);
-        Debug.WriteLine("[HassMediaPage] OnNavigatedTo: Subscribing to key events.");
-
-        // Subscribe to events when navigation to this page is complete.
-        _keyService.KeyDown += OnKeyDown;
-        _keyService.SingleClick += OnSingleClick;
-        _keyService.LongClick += OnLongClick;
-        
-        // Load the video content
+        base.OnAppearing();
         _ = LoadUrl(Url, BaseUrl);
     }
-    
-    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
-    {
-        base.OnNavigatedFrom(args);
-        Debug.WriteLine("[HassMediaPage] OnNavigatedFrom: Unsubscribing from key events.");
-        
-        // Stop any repeating actions immediately when navigating away.
-        _keyService.StopRepeatingAction();
 
-        // Unsubscribe from events when leaving the page.
-        _keyService.KeyDown -= OnKeyDown;
-        _keyService.SingleClick -= OnSingleClick;
-        _keyService.LongClick -= OnLongClick;
+    protected override void OnDisappearing()
+    {
+        // Ensure any running repeating actions are stopped when the page is no longer visible.
+        _keyService.StopRepeatingAction();
+        base.OnDisappearing();
     }
 
     public async Task LoadUrl(string videoUrl, string baseUrl)
@@ -71,30 +58,25 @@ public partial class HassMediaPage : ContentPage
         wv.Source = htmlSource;
     }
 
-    void VideoSeek(int second)
+    private void VideoSeek(int second)
     {
         wv.EvaluateJavaScriptAsync($"videoSeek({second})");
     }
 
-    void PlayPause()
+    private void PlayPause()
     {
         wv.EvaluateJavaScriptAsync("playPause()");
     }
 
-    public bool OnKeyDown(object sender, RemoteKeyEventArgs args)
-    {
-        if (args.NormalizedKeyName == "VolumeUp" || args.NormalizedKeyName == "VolumeDown")
-        {
-            return false;
-        }
-        return true;
-    }
+    #region IKeyHandler Implementation
 
-    public void OnSingleClick(object sender, RemoteKeyEventArgs e)
+    public string[] GetUnhandledKeys() => new string[] { "VolumeUp", "VolumeDown" };
+
+    public void OnSingleClick(RemoteKeyEventArgs args)
     {
-        Debug.WriteLine($"[HassMediaPage] Single Click: {e.NormalizedKeyName}");
+        Debug.WriteLine($"[HassMediaPage] Single Click: {args.KeyName}");
         
-        switch (e.NormalizedKeyName)
+        switch (args.KeyName)
         {
             case "Enter":
                 PlayPause();
@@ -114,11 +96,11 @@ public partial class HassMediaPage : ContentPage
         }
     }
 
-    public void OnLongClick(object sender, RemoteKeyEventArgs e)
+    public void OnLongClick(RemoteKeyEventArgs args)
     {
-        Debug.WriteLine($"[HassMediaPage] Long Click: {e.NormalizedKeyName}");
-        int repeatInterval = 100;
-        switch (e.NormalizedKeyName)
+        Debug.WriteLine($"[HassMediaPage] Long Click: {args.KeyName}");
+        const int repeatInterval = 100;
+        switch (args.KeyName)
         {
             case "Left":
                 _keyService.StartRepeatingAction(() => VideoSeek(-15), repeatInterval);
@@ -128,4 +110,6 @@ public partial class HassMediaPage : ContentPage
                 break;
         }
     }
+
+    #endregion
 }

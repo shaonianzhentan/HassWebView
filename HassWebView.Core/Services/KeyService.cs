@@ -1,26 +1,22 @@
 using System.Diagnostics;
 using Microsoft.Maui.ApplicationModel;
 using HassWebView.Core.Events;
+using HassWebView.Core.Interfaces;
 using System;
+using System.Linq;
 using System.Threading;
+using Microsoft.Maui.Controls;
 
 namespace HassWebView.Core.Services;
 
 public class KeyService
 {
-    // Events for key actions
-    public event Func<object, RemoteKeyEventArgs, bool> KeyDown;
-    public event Action<object, RemoteKeyEventArgs> KeyUp;
-    public event Action<object, RemoteKeyEventArgs> SingleClick;
-    public event Action<object, RemoteKeyEventArgs> DoubleClick;
-    public event Action<object, RemoteKeyEventArgs> LongClick;
-
     private readonly int _longPressTimeout;
     private readonly int _doubleClickTimeout;
 
     private Timer _longPressTimer;
     private Timer _doubleClickTimer;
-    private string _lastKey;
+    private string _lastSourceKey;
     private int _pressCount = 0;
     private bool _longPressHasFired = false;
     private Timer _repeatingActionTimer;
@@ -30,6 +26,27 @@ public class KeyService
     {
         _longPressTimeout = longPressTimeout;
         _doubleClickTimeout = doubleClickTimeout;
+    }
+
+    private IKeyHandler GetCurrentHandler()
+    {
+        if (!MainThread.IsMainThread)
+            return MainThread.InvokeOnMainThreadAsync(GetCurrentHandlerInternal).Result;
+        
+        return GetCurrentHandlerInternal();
+    }
+    
+    private IKeyHandler GetCurrentHandlerInternal()
+    {
+        var navigation = Shell.Current?.Navigation;
+        if (navigation == null) return null;
+        
+        if (navigation.ModalStack.Count > 0)
+        {
+            return navigation.ModalStack.LastOrDefault() as IKeyHandler;
+        }
+
+        return Shell.Current.CurrentPage as IKeyHandler;
     }
 
     public void StartRepeatingAction(Action action, int interval = 100)
@@ -52,45 +69,42 @@ public class KeyService
         _repeatingAction = null;
     }
 
-    public bool OnPressed(string keyName)
+    public bool OnPressed(string sourceKeyName)
     {
-        var args = new RemoteKeyEventArgs(keyName);
-        bool handled = false;
-        if (KeyDown != null)
+        var handler = GetCurrentHandler();
+        if (handler == null)
         {
-            foreach (Func<object, RemoteKeyEventArgs, bool> handler in KeyDown.GetInvocationList())
-            {
-                if (handler(this, args))
-                {
-                    handled = true;
-                    break;
-                }
-            }
+            Debug.WriteLine("[KeyService] No active IKeyHandler found.");
+            return false;
         }
 
-        if (!handled)
+        var args = new RemoteKeyEventArgs(sourceKeyName);
+        var unhandledKeys = handler.GetUnhandledKeys();
+
+        if (unhandledKeys?.Contains(args.KeyName) ?? false)
         {
+            Debug.WriteLine($"[KeyService] Key '{args.KeyName}' is unhandled by {handler.GetType().Name} and will be passed to the system.");
             ResetDoubleClickState();
             return false;
         }
 
         if (_longPressHasFired) return true;
 
-        if (_lastKey != keyName)
+        if (_lastSourceKey != sourceKeyName)
         {
             StopRepeatingAction();
             ResetDoubleClickState();
             _pressCount = 0;
         }
 
-        _lastKey = keyName;
+        _lastSourceKey = sourceKeyName;
         _pressCount++;
 
         _doubleClickTimer?.Change(Timeout.Infinite, Timeout.Infinite);
 
         if (_pressCount == 1)
         {
-            _longPressTimer = new Timer(LongPressTimerCallback, keyName, _longPressTimeout, Timeout.Infinite);
+            _longPressTimer = new Timer(LongPressTimerCallback, sourceKeyName, _longPressTimeout, Timeout.Infinite);
         }
 
         return true;
@@ -100,14 +114,16 @@ public class KeyService
     {
         StopRepeatingAction();
 
-        if (_lastKey == null && !_longPressHasFired)
+        if (_lastSourceKey == null && !_longPressHasFired)
         {
             return false;
         }
+        
+        var handler = GetCurrentHandler();
 
-        if (_lastKey != null)
+        if (_lastSourceKey != null)
         {
-            KeyUp?.Invoke(this, new RemoteKeyEventArgs(_lastKey));
+            handler?.OnKeyUp(new RemoteKeyEventArgs(_lastSourceKey));
         }
 
         if (_longPressHasFired)
@@ -121,11 +137,11 @@ public class KeyService
 
         if (_pressCount == 1)
         {
-            _doubleClickTimer = new Timer(DoubleClickTimerCallback, _lastKey, _doubleClickTimeout, Timeout.Infinite);
+            _doubleClickTimer = new Timer(DoubleClickTimerCallback, _lastSourceKey, _doubleClickTimeout, Timeout.Infinite);
         }
         else if (_pressCount >= 2)
         {
-            DoubleClick?.Invoke(this, new RemoteKeyEventArgs(_lastKey));
+            handler?.OnDoubleClick(new RemoteKeyEventArgs(_lastSourceKey));
             ResetDoubleClickState();
         }
 
@@ -133,22 +149,29 @@ public class KeyService
     }
 
     private void LongPressTimerCallback(object state)
-    {
-        if (_longPressHasFired) return;
-        _longPressHasFired = true;
-        LongClick?.Invoke(this, new RemoteKeyEventArgs((string)state));
+    {        
+        MainThread.BeginInvokeOnMainThread(() => {
+            if (_longPressHasFired) return;
+            _longPressHasFired = true;
+            
+            var handler = GetCurrentHandler();
+            handler?.OnLongClick(new RemoteKeyEventArgs((string)state));
+        });
     }
 
     private void DoubleClickTimerCallback(object state)
     {
-        SingleClick?.Invoke(this, new RemoteKeyEventArgs((string)state));
-        ResetDoubleClickState();
+        MainThread.BeginInvokeOnMainThread(() => {
+            var handler = GetCurrentHandler();
+            handler?.OnSingleClick(new RemoteKeyEventArgs((string)state));
+            ResetDoubleClickState();
+        });
     }
 
     private void ResetDoubleClickState()
     {
         _pressCount = 0;
-        _lastKey = null;
+        _lastSourceKey = null;
         _doubleClickTimer?.Dispose();
         _doubleClickTimer = null;
         _longPressTimer?.Dispose();
