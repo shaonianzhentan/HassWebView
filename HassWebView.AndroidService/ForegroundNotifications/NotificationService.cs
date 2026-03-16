@@ -2,8 +2,6 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using AndroidX.Core.App;
-using HassWebView.AndroidService.Notifications;
-using HassWebView.AndroidService.Platforms.Android.Notifications;
 using System.Collections.Generic;
 
 namespace HassWebView.AndroidService.ForegroundNotifications
@@ -25,11 +23,13 @@ namespace HassWebView.AndroidService.ForegroundNotifications
                 .SetContentIntent(pendingIntent)
                 .SetAutoCancel(true);
 
+            int requestCode = 0;
             foreach (var action in actions)
             {
                 var actionIntent = new Intent(context, typeof(NotificationActionReceiver));
                 actionIntent.SetAction(action.ActionId);
-                var actionPendingIntent = PendingIntent.GetBroadcast(context, 0, actionIntent, PendingIntentFlags.Immutable);
+                // Use a unique request code for each action
+                var actionPendingIntent = PendingIntent.GetBroadcast(context, requestCode++, actionIntent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
                 builder.AddAction(new NotificationCompat.Action.Builder(0, action.Title, actionPendingIntent).Build());
             }
 

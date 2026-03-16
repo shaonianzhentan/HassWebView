@@ -1,16 +1,42 @@
+using Android.App;
 using Android.Content;
+using AndroidX.Core.App;
 
-namespace HassWebView.AndroidService.Platforms.Android.Notifications
+namespace HassWebView.AndroidService.ForegroundNotifications
 {
     [BroadcastReceiver(Enabled = true, Exported = false)]
     public class NotificationActionReceiver : BroadcastReceiver
-    {        
+    {
+        public const string ActionIdKey = "NotificationActionId";
+        public const string NotificationIdKey = "NotificationId";
+
         public override void OnReceive(Context context, Intent intent)
         {
-            // You can handle different actions based on intent.Action
             var actionId = intent.Action;
-            // Implement your logic here, e.g., send a message to your app
-            // or perform a background task.
+            if (string.IsNullOrEmpty(actionId))
+            {
+                return;
+            }
+
+            // Dismiss the notification that triggered the action
+            var notificationId = intent.GetIntExtra(NotificationIdKey, -1);
+            if (notificationId != -1)
+            {
+                var notificationManager = NotificationManagerCompat.From(context);
+                notificationManager.Cancel(notificationId);
+            }
+
+            // Close the notification shade
+            context.SendBroadcast(new Intent(Intent.ActionCloseSystemDialogs));
+
+            // Launch the main activity
+            var launchIntent = context.PackageManager.GetLaunchIntentForPackage(context.PackageName);
+            if (launchIntent != null)
+            {
+                launchIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTop);
+                launchIntent.PutExtra(ActionIdKey, actionId); // Pass the action ID to the activity
+                context.StartActivity(launchIntent);
+            }
         }
     }
 }

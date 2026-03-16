@@ -1,16 +1,13 @@
-using HassWebView.AndroidService.ForegroundNotifications;
-using HassWebView.AndroidService.Platforms.Android.Notifications;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Hosting;
 
-namespace HassWebView.AndroidService.Notifications
+namespace HassWebView.AndroidService.ForegroundNotifications
 {
     public static class ForegroundServiceExtensions
     {
-        public static MauiAppBuilder UseForegroundService(this MauiAppBuilder builder, Action<INotificationService> configure)
+        public static MauiAppBuilder UseForegroundNotifications(this MauiAppBuilder builder)
         {
-            var service = new NotificationService();
-            configure?.Invoke(service);
-            builder.Services.AddSingleton<INotificationService>(service);
+            builder.Services.AddSingleton<INotificationService, NotificationService>();
             return builder;
         }
     }

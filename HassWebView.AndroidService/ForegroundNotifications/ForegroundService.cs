@@ -2,27 +2,56 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using AndroidX.Core.App;
-using AndroidX.Core.Content;
-using HassWebView.AndroidService.Notifications;
 
 namespace HassWebView.AndroidService.ForegroundNotifications
 {
     [Service]
     public class ForegroundService : Service
     {
+        public const string ActionStart = "START";
+        public const string ActionStop = "STOP";
+        public const string ExtraTitle = "TITLE";
+        public const string ExtraText = "TEXT";
+
+        private const string ChannelId = "HassWebView_Channel";
+        private const int NotificationId = 1;
+
         public override IBinder OnBind(Intent intent) => null;
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
         {
-            var notification = new NotificationCompat.Builder(this, "HassWebView_Channel")
-                .SetContentTitle("HassWebView is running")
-                .SetContentText("The foreground service is active.")
-                .SetSmallIcon(Microsoft.Maui.ApplicationModel.Platform.AppContext.ApplicationInfo.Icon) // Replace with your app icon
-                .Build();
+            if (intent?.Action == ActionStart)
+            {
+                var title = intent.GetStringExtra(ExtraTitle) ?? "HassWebView is running";
+                var text = intent.GetStringExtra(ExtraText) ?? "The foreground service is active.";
 
-            StartForeground(1, notification);
+                CreateNotificationChannel();
+
+                var notification = new NotificationCompat.Builder(this, ChannelId)
+                    .SetContentTitle(title)
+                    .SetContentText(text)
+                    .SetSmallIcon(Application.Context.ApplicationInfo.Icon)
+                    .Build();
+
+                StartForeground(NotificationId, notification);
+            }
+            else if (intent?.Action == ActionStop)
+            {
+                StopForeground(true);
+                StopSelfResult(startId);
+            }
 
             return StartCommandResult.Sticky;
+        }
+
+        private void CreateNotificationChannel()
+        {
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
+            {
+                var channel = new NotificationChannel(ChannelId, "HassWebView", NotificationImportance.Default);
+                var notificationManager = (NotificationManager)GetSystemService(NotificationService);
+                notificationManager.CreateNotificationChannel(channel);
+            }
         }
     }
 }
