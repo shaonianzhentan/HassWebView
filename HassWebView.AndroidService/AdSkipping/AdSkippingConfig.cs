@@ -1,7 +1,7 @@
 using Microsoft.Maui.Storage;
 using System.Threading.Tasks;
 
-namespace HassWebView.AndroidService.Platforms.Android
+namespace HassWebView.AndroidService.AdSkipping
 {
     public interface IAdSkippingConfig
     {

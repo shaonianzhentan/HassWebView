@@ -1,7 +1,6 @@
 using Android.Content;
 using Android.Provider;
 using HassWebView.AndroidService.AdSkipping;
-using HassWebView.AndroidService.Platforms.Android;
 using Microsoft.Maui.ApplicationModel;
 using System.Net.Http;
 
@@ -20,8 +19,7 @@ namespace HassWebView.AndroidService.AdSkipping
         {
             var context = Platform.AppContext;
             // Use the full name of the service type to avoid ambiguity
-            // var serviceName = $"{context.PackageName}/{typeof(HassWebView.AndroidService.AdSkipping.AdSkippingService).FullName}";
-            var serviceName = "";
+            var serviceName = $"{context.PackageName}/{typeof(AdSkippingService).FullName}";
 
             try
             {
@@ -78,18 +76,17 @@ namespace HassWebView.AndroidService.AdSkipping
             return Task.FromResult(Preferences.Get(RulesUrlPreferenceKey, string.Empty));
         }
 
-        public Task LoadRulesFromLocalFileAsync()
+        public async Task LoadRulesFromLocalFileAsync()
         {            
             if (!File.Exists(LocalRulesPath))
             {
                 // Ensure rules are cleared if the file doesn't exist
                 AdSkippingService.RuleManager.ClearRules();
-                return Task.CompletedTask;
+                return;
             }
 
-            var rulesContent = File.ReadAllText(LocalRulesPath);
+            var rulesContent = await File.ReadAllTextAsync(LocalRulesPath);
             AdSkippingService.RuleManager.LoadRulesFromString(rulesContent);
-            return Task.CompletedTask;
         }
     }
 }

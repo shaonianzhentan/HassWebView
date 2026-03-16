@@ -19,8 +19,8 @@ namespace HassWebView.AndroidService.AdSkipping
 
         public void Initialize(IServiceProvider services)
         {
-            // Load rules from the locally saved file on startup.
-            _adSkippingManager.LoadRulesFromLocalFileAsync().GetAwaiter().GetResult();
+            // Load rules from the locally saved file on startup without blocking.
+            Task.Run(() => _adSkippingManager.LoadRulesFromLocalFileAsync());
         }
     }
 }

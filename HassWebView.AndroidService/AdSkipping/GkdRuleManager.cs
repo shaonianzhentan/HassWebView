@@ -2,13 +2,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace HassWebView.AndroidService.AdSkipping
 {
     public class GkdRuleManager
     {
+        private static readonly HttpClient _httpClient = new HttpClient();
         private List<GkdApp> _rules = new();
 
         /// <summary>
@@ -25,26 +25,23 @@ namespace HassWebView.AndroidService.AdSkipping
 
             try
             {
-                using (var httpClient = new HttpClient())
-                {
-                    var json5Content = await httpClient.GetStringAsync(url);
-                    LoadRulesFromString(json5Content);
-                }
+                var jsonContent = await _httpClient.GetStringAsync(url);
+                LoadRulesFromString(jsonContent);
             }
             catch (System.Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[AdSkipping] Error downloading or parsing GKD rules from URL: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[AdSkipping] Error downloading GKD rules from URL: {ex.Message}");
                 ClearRules();
             }
         }
 
         /// <summary>
-        /// Loads GKD rules from a JSON5 string.
+        /// Loads GKD rules from a JSON string with comments.
         /// </summary>
-        /// <param name="json5Content">The string content of the rules file.</param>
-        public void LoadRulesFromString(string json5Content)
+        /// <param name="jsonContent">The string content of the rules file.</param>
+        public void LoadRulesFromString(string jsonContent)
         {
-            if (string.IsNullOrWhiteSpace(json5Content))
+            if (string.IsNullOrWhiteSpace(jsonContent))
             {
                 ClearRules();
                 return;
@@ -52,13 +49,18 @@ namespace HassWebView.AndroidService.AdSkipping
 
             try
             {
-                // Basic JSON5 to JSON conversion: remove comments and trailing commas
-                var json = Regex.Replace(json5Content, @"//.*", ""); // remove single line comments
-                json = Regex.Replace(json, @",(\s*[\}\]])", "$1"); // remove trailing commas
+                var jsonOptions = new JsonDocumentOptions
+                {
+                    CommentHandling = JsonCommentHandling.Skip,
+                    AllowTrailingCommas = true
+                };
 
-                _rules = JsonSerializer.Deserialize<List<GkdApp>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<GkdApp>();
+                using (JsonDocument doc = JsonDocument.Parse(jsonContent, jsonOptions))
+                {
+                    _rules = JsonSerializer.Deserialize<List<GkdApp>>(doc.RootElement.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<GkdApp>();
+                }
             }
-            catch (System.Exception ex)
+            catch (JsonException ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[AdSkipping] Error parsing GKD rules: {ex.Message}");
                 ClearRules(); // Ensure rules are empty on failure

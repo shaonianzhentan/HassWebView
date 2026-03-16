@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace HassWebView.AndroidService.AdSkipping
 {
     /// <summary>
@@ -32,10 +34,9 @@ namespace HassWebView.AndroidService.AdSkipping
         Task<string> GetRulesUrlAsync();
 
         /// <summary>
-        /// Internal method to load rules from local storage into the running service.
+        /// Loads rules from local storage into the running service.
         /// This is typically called on app startup.
         /// </summary>
-        /// <returns></returns>
-        internal Task LoadRulesFromLocalFileAsync();
+        Task LoadRulesFromLocalFileAsync();
     }
 }
