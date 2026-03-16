@@ -539,24 +539,24 @@ public partial class HassPage : ContentPage
         }
     }
 
-    private bool OnFilterKeyDown(object sender, RemoteKeyEventArgs e) => e.KeyName != "VolumeUp" && e.KeyName != "VolumeDown";
+    private bool OnFilterKeyDown(object sender, RemoteKeyEventArgs e) => e.NormalizedKeyName != "VolumeUp" && e.NormalizedKeyName != "VolumeDown";
 
     private async void OnSingleClick(object sender, RemoteKeyEventArgs e)
     {
-        Debug.WriteLine($"单击：{e.KeyName}");
+        Debug.WriteLine($"单击：{e.NormalizedKeyName}");
         if (_cursorControl is null) return;
         
-        switch (e.KeyName)
+        switch (e.NormalizedKeyName)
         {
-            case "Enter": case "DpadCenter": _cursorControl.Click(); break;
-            case "Escape": case "Back": 
+            case "Enter": _cursorControl.Click(); break;
+            case "Back": 
                 if (wv.CanGoBack) 
                     MainThread.BeginInvokeOnMainThread(() => wv.GoBack()); 
                 break;
-            case "Up": case "DpadUp": _cursorControl.MoveUpBy(); break;
-            case "Down": case "DpadDown": _cursorControl.MoveDownBy(); break;
-            case "Left": case "DpadLeft": _cursorControl.MoveLeftBy(); break;
-            case "Right": case "DpadRight": _cursorControl.MoveRightBy(); break;
+            case "Up": _cursorControl.MoveUpBy(); break;
+            case "Down": _cursorControl.MoveDownBy(); break;
+            case "Left": _cursorControl.MoveLeftBy(); break;
+            case "Right": _cursorControl.MoveRightBy(); break;
             case "Menu":
                 await ResourceHelper.ExecuteScriptAsync(wv, "Scripts/VideoPanel.js", "HassVideoPanel.toggle();");
                 break;
@@ -565,36 +565,36 @@ public partial class HassPage : ContentPage
 
     private void OnDoubleClick(object sender, RemoteKeyEventArgs e)
     {
-        Debug.WriteLine($"双击：{e.KeyName}");
+        Debug.WriteLine($"双击：{e.NormalizedKeyName}");
         if (_cursorControl is null) return;
         MainThread.BeginInvokeOnMainThread(async () =>
         {
-            switch (e.KeyName)
+            switch (e.NormalizedKeyName)
             {
-                case "Enter": case "DpadCenter": await _cursorControl.DoubleClick(); break;
-                case "Up": case "DpadUp": _cursorControl.SlideUp(); break;
-                case "Down": case "DpadDown": _cursorControl.SlideDown(); break;
-                case "Left": case "DpadLeft": _cursorControl.SlideLeft(); break;
-                case "Right": case "DpadRight": _cursorControl.SlideRight(); break;
+                case "Enter": await _cursorControl.DoubleClick(); break;
+                case "Up": _cursorControl.SlideUp(); break;
+                case "Down": _cursorControl.SlideDown(); break;
+                case "Left": _cursorControl.SlideLeft(); break;
+                case "Right": _cursorControl.SlideRight(); break;
             }
         });
     }
 
     private async void OnLongClick(object sender, RemoteKeyEventArgs e)
     {
-        Debug.WriteLine($"长按：{e.KeyName}");
+        Debug.WriteLine($"长按：{e.NormalizedKeyName}");
         if (_keyService is null) return;
         var hassUrl = await _authStore.GetHassUrlAsync();
         MainThread.BeginInvokeOnMainThread(() =>
         {
             var repeatInterval = 100;
-            switch (e.KeyName)
+            switch (e.NormalizedKeyName)
             {
-                case "Up": case "DpadUp": _keyService.StartRepeatingAction(() => _cursorControl?.MoveUpBy(), repeatInterval); break;
-                case "Down": case "DpadDown": _keyService.StartRepeatingAction(() => _cursorControl?.MoveDownBy(), repeatInterval); break;
-                case "Left": case "DpadLeft": _keyService.StartRepeatingAction(() => _cursorControl?.MoveLeftBy(), repeatInterval); break;
-                case "Right": case "DpadRight": _keyService.StartRepeatingAction(() => _cursorControl.MoveRightBy(), repeatInterval); break;
-                case "Escape": case "Back":
+                case "Up": _keyService.StartRepeatingAction(() => _cursorControl?.MoveUpBy(), repeatInterval); break;
+                case "Down": _keyService.StartRepeatingAction(() => _cursorControl?.MoveDownBy(), repeatInterval); break;
+                case "Left": _keyService.StartRepeatingAction(() => _cursorControl?.MoveLeftBy(), repeatInterval); break;
+                case "Right": _keyService.StartRepeatingAction(() => _cursorControl.MoveRightBy(), repeatInterval); break;
+                case "Back":
                     if (!string.IsNullOrEmpty(hassUrl)) wv.Source = new HassAuth(hassUrl).RedirectUri;
                     break;
             }

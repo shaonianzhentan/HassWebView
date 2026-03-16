@@ -83,7 +83,7 @@ public partial class HassMediaPage : ContentPage
 
     public bool OnKeyDown(object sender, RemoteKeyEventArgs args)
     {
-        if (args.KeyName == "VolumeUp" || args.KeyName == "VolumeDown")
+        if (args.NormalizedKeyName == "VolumeUp" || args.NormalizedKeyName == "VolumeDown")
         {
             return false;
         }
@@ -92,27 +92,23 @@ public partial class HassMediaPage : ContentPage
 
     public void OnSingleClick(object sender, RemoteKeyEventArgs e)
     {
-        Debug.WriteLine($"[HassMediaPage] Single Click: {e.KeyName}");
+        Debug.WriteLine($"[HassMediaPage] Single Click: {e.NormalizedKeyName}");
         
-        switch (e.KeyName)
+        switch (e.NormalizedKeyName)
         {
             case "Enter":
-            case "DpadCenter":
                 PlayPause();
                 break;
 
-            case "Escape":
             case "Back":
                 MainThread.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PopModalAsync());
                 break;
 
             case "Left":
-            case "DpadLeft":
                 VideoSeek(-5);
                 break;
 
             case "Right":
-            case "DpadRight":
                 VideoSeek(5);
                 break;
         }
@@ -120,16 +116,14 @@ public partial class HassMediaPage : ContentPage
 
     public void OnLongClick(object sender, RemoteKeyEventArgs e)
     {
-        Debug.WriteLine($"[HassMediaPage] Long Click: {e.KeyName}");
+        Debug.WriteLine($"[HassMediaPage] Long Click: {e.NormalizedKeyName}");
         int repeatInterval = 100;
-        switch (e.KeyName)
+        switch (e.NormalizedKeyName)
         {
             case "Left":
-            case "DpadLeft":
                 _keyService.StartRepeatingAction(() => VideoSeek(-15), repeatInterval);
                 break;
             case "Right":
-            case "DpadRight":
                 _keyService.StartRepeatingAction(() => VideoSeek(15), repeatInterval);
                 break;
         }

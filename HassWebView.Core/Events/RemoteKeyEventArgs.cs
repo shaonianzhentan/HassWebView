@@ -11,6 +11,26 @@ public class RemoteKeyEventArgs : EventArgs
     public string KeyName { get; }
 
     /// <summary>
+    /// Gets the normalized name of the key.
+    /// </summary>
+    public string NormalizedKeyName
+    {
+        get
+        {
+            return KeyName switch
+            {
+                "DpadCenter" => "Enter",
+                "DpadUp" => "Up",
+                "DpadDown" => "Down",
+                "DpadLeft" => "Left",
+                "DpadRight" => "Right",
+                "Escape" => "Back",
+                _ => KeyName
+            };
+        }
+    }
+
+    /// <summary>
     /// Gets or sets a value indicating whether the event should be marked as handled.
     /// Set this to false in a KeyDown event handler to prevent the KeyService
     /// from processing it and to allow the system to handle it instead.
