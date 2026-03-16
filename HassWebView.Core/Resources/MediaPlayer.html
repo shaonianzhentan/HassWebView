@@ -18,27 +18,96 @@
         }
     </style>
 </head>
-<body>
-    <video controls autoplay src='__VIDEO_URL__'></video>
+<body tabindex="0">
+    <video id="player" controls autoplay src="__VIDEO_URL__"></video>
 
     <script>
-        const video = document.querySelector('video');
+        const video = document.getElementById('player');
+        const SEEK_SECONDS = 5;
+
+        function clamp(v, min, max) {
+            return Math.max(min, Math.min(max, v));
+        }
 
         function videoSeek(seconds) {
-            if (video) {
-                video.currentTime += seconds;
-            }
+            if (!video || isNaN(video.duration)) return;
+            const newTime = clamp(video.currentTime + seconds, 0, video.duration);
+            video.currentTime = newTime;
         }
 
         function playPause() {
-            if (video) {
-                if (video.paused) {
-                    video.play();
-                } else {
-                    video.pause();
-                }
+            if (!video) return;
+            if (video.paused) {
+                video.play().catch(()=>{}); // 忽略播放异常
+            } else {
+                video.pause();
             }
         }
+
+        // 兼容多种可能的 key 标识（字符串或 keyCode）
+        const PLAY_PAUSE_KEYS = new Set([
+            'Space','Spacebar','MediaPlayPause','MediaPlay','MediaPause','Play','Pause',
+            'Enter','NumpadEnter','OK',
+            32, 13, 85, 179, 126, 127
+        ]);
+        const FORWARD_KEYS = new Set([
+            'ArrowRight','MediaFastForward','FastForward','ChannelUp',
+            39, 22, 90
+        ]);
+        const REWIND_KEYS = new Set([
+            'ArrowLeft','MediaRewind','Rewind','ChannelDown',
+            37, 21, 89
+        ]);
+
+        function keyMatches(e, set) {
+            if (!e) return false;
+            if (set.has(e.code)) return true;
+            if (set.has(e.key)) return true;
+            const kc = e.keyCode || e.which || 0;
+            if (set.has(kc)) return true;
+            // 有些 WebView 会把数字转为字符串
+            if (set.has(String(kc))) return true;
+            return false;
+        }
+
+        function handleKeyDown(e) {
+            // 常见遥控器：DPAD_CENTER / Enter / OK -> 切换播放
+            if (keyMatches(e, PLAY_PAUSE_KEYS)) {
+                e.preventDefault();
+                playPause();
+                return;
+            }
+
+            // 快进
+            if (keyMatches(e, FORWARD_KEYS)) {
+                e.preventDefault();
+                videoSeek(SEEK_SECONDS);
+                return;
+            }
+
+            // 后退
+            if (keyMatches(e, REWIND_KEYS)) {
+                e.preventDefault();
+                videoSeek(-SEEK_SECONDS);
+                return;
+            }
+
+            // 方向键中心确认也可能以 'Enter' 或 keyCode 23 (DPAD_CENTER) 到达：
+            if ((e.keyCode === 23 || e.key === 'OK' || e.key === 'Select') && !keyMatches(e, PLAY_PAUSE_KEYS)) {
+                e.preventDefault();
+                playPause();
+                return;
+            }
+        }
+
+        // 确保 body 可获焦并在加载或点击时 focus
+        window.addEventListener('load', () => {
+            try { document.body.focus(); } catch {}
+        });
+        document.addEventListener('click', () => { try { document.body.focus(); } catch {} });
+
+        // 捕获键盘事件（WebView 上通常能收到）
+        document.addEventListener('keydown', handleKeyDown);
     </script>
 </body>
 </html>
