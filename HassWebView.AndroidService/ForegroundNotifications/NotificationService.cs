@@ -2,6 +2,7 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using AndroidX.Core.App;
+using HassWebView.AndroidService.Notifications;
 using System.Collections.Generic;
 
 namespace HassWebView.AndroidService.ForegroundNotifications
