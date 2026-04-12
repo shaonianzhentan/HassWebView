@@ -38,14 +38,6 @@ namespace HassWebView.Core.Configuration
                         activity.Window.Callback = new KeyCallback(originalCallback, keyService);
                     });
 
-                    android.OnWindowAttachedToWindow(activity =>
-                    {
-                        if (keyService != null && activity.Window.Callback is not KeyCallback)
-                        {
-                            var originalCallback = activity.Window.Callback;
-                            activity.Window.Callback = new KeyCallback(originalCallback, keyService);
-                        }
-                    });
                 });
 #endif
 #if WINDOWS

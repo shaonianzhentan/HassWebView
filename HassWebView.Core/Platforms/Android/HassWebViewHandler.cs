@@ -1,8 +1,10 @@
 using Android.Content;
 using Android.OS;
+using Android.Runtime;
 using Android.Views;
 using Com.Tencent.Smtt.Sdk;
 using HassWebView.Core.Platforms.Android.TencentX5;
+using Java.Interop;
 using Java.Lang;
 using Microsoft.Maui.Handlers;
 using System;
@@ -177,6 +179,8 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
 
         webView.WebChromeClient = new WebChromeClientHandler(VirtualView);
         webView.WebViewClient = new WebViewClientHandler(VirtualView);
+
+        webView.SetOnKeyListener(new WebViewKeyListener());
 
         var x5object = webView.X5WebViewExtension;
         if (x5object != null)
