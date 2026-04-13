@@ -312,6 +312,17 @@ public partial class HassPage : ContentPage, IKeyHandler
                     var origin = msg?["origin"]?.GetValue<string>();
                     if (!string.IsNullOrEmpty(videoUrl)) await DisplayVideoPlayer(videoUrl, origin);
                     break;
+                case "play/video":
+                    var videoUrl = msg?["data"]?.GetValue<string>();
+#if ANDROID
+    var intent = new Android.Content.Intent(Android.Content.Intent.ActionView);
+    intent.SetDataAndType(Android.Net.Uri.Parse(videoUrl), "video/*");
+    intent.SetFlags(Android.Content.ActivityFlags.NewTask);
+    Android.App.Application.Context.StartActivity(intent);
+#else
+    Launcher.Default.OpenAsync(new Uri(videoUrl));
+#endif
+                    break;
                 case "webview/auth":
                     var urlFromForm = msg?["data"]?.GetValue<string>();
                     Debug.WriteLine($"[ExternalBus] Received auth URL: {urlFromForm}");
