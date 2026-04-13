@@ -35,6 +35,11 @@ public static class MauiProgram
                     {
                         pageOptions.SetWebViewSource?.Invoke(new UrlWebViewSource { Url = payload.Message });
                     }
+                    else if (payload.Title == "config" && payload.Message.StartsWith("http"))
+                    {
+                        // 加载远程配置
+                        pageOptions.LoadRemoteConfigsAsync(payload.Message);
+                    }
                     else if (payload.Title == "video")
                     {
                         if (pageOptions.PlayVideo != null)
