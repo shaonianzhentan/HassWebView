@@ -6,8 +6,6 @@ using HassWebView.Core.Interfaces;
 using HassWebView.HassApi;
 using HassWebView.HassApi.Models;
 using System.Diagnostics;
-using System.Net;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Web;
@@ -25,11 +23,14 @@ public partial class HassPage : ContentPage, IKeyHandler
     private readonly CursorControl _cursorControl;
     private readonly IAuthStore _authStore;
     private readonly IHassApiService _hassApiService;
-    private string _defaultUserAgent;
 
     public HassPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService keyService = null, HttpServer httpServer = null)
     {
         InitializeComponent();
+
+        var wv = webView.WebView;
+        var cursor = webView.Cursor;
+        var root = webView.Root;
 
         _ = LoadEmbeddedHtml("loading.html");
 
@@ -39,7 +40,6 @@ public partial class HassPage : ContentPage, IKeyHandler
         _httpServer = httpServer;
         _hassApiService = hassApiService;
 
-        _pageOptions.PlayVideo = DisplayVideoPlayer;
         _pageOptions.SetWebViewSource = (newSource) => MainThread.BeginInvokeOnMainThread(() => wv.Source = newSource);
 
         if (_keyService != null)
@@ -50,7 +50,8 @@ public partial class HassPage : ContentPage, IKeyHandler
 
         if (_httpServer != null)
         {
-            if(string.IsNullOrEmpty(_pageOptions.PushUrl)){
+            if (string.IsNullOrEmpty(_pageOptions.PushUrl))
+            {
                 _pageOptions.PushUrl = _httpServer.BaseUrl;
             }
             _httpServer.Get("/webview/remote", async (req, res) =>
@@ -88,8 +89,6 @@ public partial class HassPage : ContentPage, IKeyHandler
         }
 
         wv.Navigating += OnWebViewNavigating;
-        wv.Navigated += OnWebViewNavigated;
-        wv.ResourceLoading += OnWebViewResourceLoading;
         wv.AuthTokenRequested += OnWebViewAuthTokenRequested;
         wv.LogoutRequested += OnWebViewLogoutRequested;
         wv.ExternalBusMessageReceived += OnExternalBusMessageReceived;
@@ -98,6 +97,8 @@ public partial class HassPage : ContentPage, IKeyHandler
     protected override async void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
+
+        var wv = webView.WebView;
 
         if (_state != PageState.Initializing) return;
 
@@ -134,7 +135,7 @@ public partial class HassPage : ContentPage, IKeyHandler
 
             _state = PageState.Authenticated;
             var hassAuth = new HassAuth(hassUrl);
-            MainThread.BeginInvokeOnMainThread(() => 
+            MainThread.BeginInvokeOnMainThread(() =>
             {
                 wv.Source = new UrlWebViewSource { Url = hassAuth.RedirectUri };
             });
@@ -145,44 +146,13 @@ public partial class HassPage : ContentPage, IKeyHandler
     {
         Debug.WriteLine($"[HassPage] Navigating to: {e.Url}");
 
+        var wv = webView.WebView;
+
         if (_state == PageState.Authenticated && e.NavigationEvent == WebNavigationEvent.Back && e.Url.StartsWith("about:"))
         {
             Debug.WriteLine("[HassPage] Back navigation to initial page blocked.");
             e.Cancel = true;
             return;
-        }
-
-        if (string.IsNullOrEmpty(_defaultUserAgent) && !string.IsNullOrEmpty(wv.UserAgent))
-        {
-            _defaultUserAgent = wv.UserAgent;
-            Debug.WriteLine($"[HassPage] Default User-Agent captured: {_defaultUserAgent}");
-        }
-
-        try
-        {
-            var uri = new Uri(e.Url);
-            var host = uri.Host;
-
-            var config = _pageOptions.DomainConfigs?
-                .FirstOrDefault(kvp => host.EndsWith(kvp.Key, StringComparison.OrdinalIgnoreCase))
-                .Value;
-
-            string targetUserAgent = (config != null && !string.IsNullOrWhiteSpace(config.UserAgent))
-                ? config.UserAgent
-                : _defaultUserAgent;
-
-            if (wv.UserAgent != targetUserAgent && !string.IsNullOrEmpty(targetUserAgent))
-            {
-                Debug.WriteLine($"[HassPage] Applying User-Agent for {host}: {targetUserAgent}");
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    wv.UserAgent = targetUserAgent;
-                });
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[HassPage] Error applying User-Agent: {ex.Message}");
         }
 
         if (_state == PageState.InLoginFlow)
@@ -205,7 +175,8 @@ public partial class HassPage : ContentPage, IKeyHandler
             await _authStore.SetRefreshTokenAsync(tokenResult.RefreshToken);
             await _authStore.SetTokenExpiryUtcAsync(DateTime.UtcNow.AddSeconds(tokenResult.ExpiresIn));
 
-            var hassApi = new HassRestApi(hassUrl, async (force) => {
+            var hassApi = new HassRestApi(hassUrl, async (force) =>
+            {
                 var token = await RefreshAccessTokenAsync(force);
                 return token?.AccessToken;
             });
@@ -244,55 +215,11 @@ public partial class HassPage : ContentPage, IKeyHandler
         }
     }
 
-    private async void OnWebViewNavigated(object sender, WebNavigatedEventArgs e)
-    {
-        if (e.Result != WebNavigationResult.Success || e.Source is not UrlWebViewSource urlSource) return;
-        Debug.WriteLine($"[HassPage] Navigated to: {urlSource.Url}");
-
-        try
-        {
-            var uri = new Uri(urlSource.Url);
-            var host = uri.Host;
-
-            var config = _pageOptions.DomainConfigs?
-                .FirstOrDefault(kvp => host.EndsWith(kvp.Key, StringComparison.OrdinalIgnoreCase))
-                .Value;
-
-            if (config == null) return;
-
-            if (!string.IsNullOrWhiteSpace(config.Css))
-            {
-                string escapedCss = config.Css.Replace("\'", "\\\'").Replace("`", "\\`").Replace("$", "\\$");
-                await ResourceHelper.ExecuteScriptAsync(wv, "Scripts/CssInjector.js", $"HassCssInjector.inject(`{escapedCss}`, '{host}');");
-            }
-
-            if (!string.IsNullOrWhiteSpace(config.Js))
-            {
-                await wv.EvaluateJavaScriptAsync(config.Js);
-                Debug.WriteLine($"[HassWebView] Executed custom JS for {host}.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[HassPage] Error applying domain config (CSS/JS): {ex.Message}");
-        }
-    }
-
-    private async void OnWebViewResourceLoading(object sender, ResourceLoadingEventArgs e)
-    {
-        var urlString = e.Url.ToString();
-        Debug.WriteLine($"ResourceLoading：{urlString}");
-        if (urlString.StartsWith("http", StringComparison.OrdinalIgnoreCase) &&
-            (urlString.Contains(".mp4", StringComparison.OrdinalIgnoreCase) ||
-             urlString.Contains(".m3u8", StringComparison.OrdinalIgnoreCase)))
-        {
-            await ResourceHelper.ExecuteScriptAsync(wv, "Scripts/VideoPanel.js", $"HassVideoPanel.add('{urlString}');");
-        }
-    }
-
     private async void OnExternalBusMessageReceived(object sender, string message)
     {
         if (string.IsNullOrEmpty(message)) return;
+
+        var wv = webView.WebView;
 
         try
         {
@@ -306,22 +233,6 @@ public partial class HassPage : ContentPage, IKeyHandler
                     break;
                 case "config_screen/show":
                     _pageOptions.ShowSettingsScreen?.Invoke();
-                    break;
-                case "video/play":
-                    var videoUrl = msg?["data"]?.GetValue<string>();
-                    var origin = msg?["origin"]?.GetValue<string>();
-                    if (!string.IsNullOrEmpty(videoUrl)) await DisplayVideoPlayer(videoUrl, origin);
-                    break;
-                case "play/video":
-                    var videoUrl = msg?["data"]?.GetValue<string>();
-#if ANDROID
-    var intent = new Android.Content.Intent(Android.Content.Intent.ActionView);
-    intent.SetDataAndType(Android.Net.Uri.Parse(videoUrl), "video/*");
-    intent.SetFlags(Android.Content.ActivityFlags.NewTask);
-    Android.App.Application.Context.StartActivity(intent);
-#else
-    Launcher.Default.OpenAsync(new Uri(videoUrl));
-#endif
                     break;
                 case "webview/auth":
                     var urlFromForm = msg?["data"]?.GetValue<string>();
@@ -350,21 +261,6 @@ public partial class HassPage : ContentPage, IKeyHandler
                     }
                     wv.WindowExternalBus(new { type = "webview/config", data = new { hassUrl, remoteUrl } });
                     break;
-#if ANDROID
-                case "x5/init":
-                    string apkUrl = string.Empty;
-                    if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64) apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm64_046295.tbs.apk";
-                    else if (RuntimeInformation.ProcessArchitecture == Architecture.Arm) apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm_045912_x5.tbs.apk";
-                    if (!string.IsNullOrEmpty(apkUrl))
-                    {
-                        Debug.WriteLine($"[ExternalBus] Initializing Tencent X5 Core with APK: {apkUrl}");
-                        var result = await TencentX5Service.InitializeX5CoreAsync(apkUrl, (progress) => {
-                            wv.WindowExternalBus(new { type = "x5/download", data = progress });
-                        });
-                        if (result) wv.WindowExternalBus(new { type = "x5/init" });
-                    }
-                    break;
-#endif
             }
         }
         catch (JsonException ex)
@@ -373,37 +269,15 @@ public partial class HassPage : ContentPage, IKeyHandler
         }
     }
 
-    private Task DisplayVideoPlayer(string url, string? baseUrl)
-    {
-        return MainThread.InvokeOnMainThreadAsync(() =>
-        {
-            var mediaPage = new HassMediaPage { Url = url };
-
-            if(!string.IsNullOrEmpty(baseUrl)){
-                var uri = new Uri(baseUrl);
-                var host = uri.Host;
-
-                var config = _pageOptions.DomainConfigs?
-                    .FirstOrDefault(kvp => host.EndsWith(kvp.Key, StringComparison.OrdinalIgnoreCase))
-                    .Value;
-
-                if (config != null){
-                    mediaPage.BaseUrl = config.Referer;
-                }
-            }
-
-            return Shell.Current.Navigation.PushModalAsync(mediaPage, true);
-        });
-    }
-
     private async Task LoadEmbeddedHtml(string resourcePath)
     {
+        var wv = webView.WebView;
         try
         {
             var htmlContent = await ResourceHelper.GetResourceAsync(resourcePath);
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                wv.Source = new HtmlWebViewSource 
+                wv.Source = new HtmlWebViewSource
                 {
                     Html = htmlContent
                 };
@@ -432,6 +306,7 @@ public partial class HassPage : ContentPage, IKeyHandler
 
     private async void OnWebViewAuthTokenRequested(object sender, EventArgs e)
     {
+        var wv = webView.WebView;
         var token = await RefreshAccessTokenAsync(forceRefresh: false);
         if (token != null)
         {
@@ -510,7 +385,7 @@ public partial class HassPage : ContentPage, IKeyHandler
                 await LogoutAsync();
                 return null;
             }
-            
+
             await _authStore.SetAccessTokenAsync(result.AccessToken);
             await _authStore.SetTokenExpiryUtcAsync(DateTime.UtcNow.AddSeconds(result.ExpiresIn));
             if (!string.IsNullOrEmpty(result.RefreshToken))
@@ -522,79 +397,43 @@ public partial class HassPage : ContentPage, IKeyHandler
             return result;
         }
         catch (Exception ex)
-        { 
+        {
             Debug.WriteLine($"[Auth] Critical error on refresh: {ex.Message}");
             await LogoutAsync();
             return null;
         }
     }
-    
+
     #region IKeyHandler Implementation
 
     public string[] GetUnhandledKeys() => new string[] { "VolumeUp", "VolumeDown" };
 
-    public async void OnSingleClick(RemoteKeyEventArgs args)
+    public void OnSingleClick(RemoteKeyEventArgs args)
     {
-        Debug.WriteLine($"[HassPage] Single Click: {args.KeyName}");
-        if (_cursorControl is null) return;
-        
-        switch (args.KeyName)
-        {
-            case "Enter": 
-                _cursorControl.Click(); 
-                break;
-            case "Back": 
-                if (wv.CanGoBack) 
-                    MainThread.BeginInvokeOnMainThread(() => wv.GoBack()); 
-                break;
-            case "Up": _cursorControl.MoveUpBy(); break;
-            case "Down": _cursorControl.MoveDownBy(); break;
-            case "Left": _cursorControl.MoveLeftBy(); break;
-            case "Right": _cursorControl.MoveRightBy(); break;
-            case "Menu":
-                await ResourceHelper.ExecuteScriptAsync(wv, "Scripts/VideoPanel.js", "HassVideoPanel.toggle();");
-                break;
-        }
+        webView.OnSingleClick(args.KeyName);
     }
 
     public void OnDoubleClick(RemoteKeyEventArgs args)
     {
-        Debug.WriteLine($"[HassPage] Double Click: {args.KeyName}");
-        if (_cursorControl is null) return;
-        MainThread.BeginInvokeOnMainThread(async () =>
-        {
-            switch (args.KeyName)
-            {
-                case "Enter": await _cursorControl.DoubleClick(); break;
-                case "Up": _cursorControl.SlideUp(); break;
-                case "Down": _cursorControl.SlideDown(); break;
-                case "Left": _cursorControl.SlideLeft(); break;
-                case "Right": _cursorControl.SlideRight(); break;
-            }
-        });
+        webView.OnSingleClick(args.KeyName);
     }
 
     public async void OnLongClick(RemoteKeyEventArgs args)
     {
-        Debug.WriteLine($"[HassPage] Long Click: {args.KeyName}");
-        if (_keyService is null) return; 
-
-        var hassUrl = await _authStore.GetHassUrlAsync();
-        MainThread.BeginInvokeOnMainThread(() =>
+        var result = webView.OnSingleClick(args.KeyName);
+        if (!result)
         {
-            const int repeatInterval = 100;
-            switch (args.KeyName)
+
+            var hassUrl = await _authStore.GetHassUrlAsync();
+            if (args.KeyName == "Back")
             {
-                case "Up": _keyService.StartRepeatingAction(() => _cursorControl?.MoveUpBy(), repeatInterval); break;
-                case "Down": _keyService.StartRepeatingAction(() => _cursorControl?.MoveDownBy(), repeatInterval); break;
-                case "Left": _keyService.StartRepeatingAction(() => _cursorControl?.MoveLeftBy(), repeatInterval); break;
-                case "Right": _keyService.StartRepeatingAction(() => _cursorControl.MoveRightBy(), repeatInterval); break;
-                case "Back":
-                    if (!string.IsNullOrEmpty(hassUrl)) wv.Source = new HassAuth(hassUrl).RedirectUri;
-                    break;
+
+                if (!string.IsNullOrEmpty(hassUrl)) wv.Source = new HassAuth(hassUrl).RedirectUri;
             }
-        });
+        }
+
     }
 
     #endregion
+
 }
