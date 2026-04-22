@@ -80,6 +80,13 @@ namespace HassWebView.Core.Configuration
                     });
                 };
 
+                options.OpenWebPage = async (string url) =>
+                {
+                    var webPage = sp.GetRequiredService<HassWebPage>();
+                    webPage.Url = url;
+                    await Shell.Current.Navigation.PushModalAsync(webPage);
+                };
+
                 // 允许用户覆盖默认实现
                 configureOptions?.Invoke(sp, options);
                 return options;

@@ -13,28 +13,30 @@ namespace HassWebView.Core.Views;
 public partial class HassWebPage : ContentPage, IKeyHandler
 {
     private readonly HttpServer _httpServer;
-    private readonly KeyService _keyService;
+    private readonly IRemoteControlService _remoteControlService; // 修正：注入遥控服务
     private readonly HassPageOptions _pageOptions;
     private string _defaultUserAgent;
 
     public string Url { get; set; }
 
-    public HassWebPage(HassPageOptions pageOptions, KeyService keyService = null, HttpServer httpServer = null)
+    // 构造函数已修正
+    public HassWebPage(HassPageOptions pageOptions, IRemoteControlService remoteControlService, HttpServer httpServer = null)
     {
         InitializeComponent();
 
         _pageOptions = pageOptions;
-        _keyService = keyService;
+        _remoteControlService = remoteControlService; // 修正：保存遥控服务实例
         _httpServer = httpServer;
 
         var wv = webView.WebViewControl;
-
-        _pageOptions.SetWebViewSource = (newSource) => MainThread.BeginInvokeOnMainThread(() => wv.Source = newSource);
 
         wv.Navigating += OnWebViewNavigating;
         wv.Navigated += OnWebViewNavigated;
         wv.ResourceLoading += OnWebViewResourceLoading;
         wv.ExternalBusMessageReceived += OnExternalBusMessageReceived;
+
+        // 新增：默认显示光标
+        webView.CursorControl.IsVisible = true;
     }
 
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
@@ -107,7 +109,7 @@ public partial class HassWebPage : ContentPage, IKeyHandler
 
             if (!string.IsNullOrWhiteSpace(config.Css))
             {
-                string escapedCss = config.Css.Replace("\'", "\\\'").Replace("`", "\`").Replace("$", "\$");
+                string escapedCss = config.Css.Replace("'", "\'").Replace("`", "\`").Replace("$", "\$");
                 await ResourceHelper.ExecuteScriptAsync(wv, "Scripts/CssInjector.js", $"HassCssInjector.inject(`{escapedCss}`, '{host}');");
             }
 
@@ -163,14 +165,17 @@ public partial class HassWebPage : ContentPage, IKeyHandler
         }
     }
 
+    // OnAppearing 已修正
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        _remoteControlService.SetActiveControl(this); // 新增：注册按键处理器
     }
 
+    // OnDisappearing 已修正
     protected override void OnDisappearing()
     {
-        _keyService?.StopRepeatingAction();
+        _remoteControlService.ClearActiveControl(this); // 新增：注销按键处理器
         base.OnDisappearing();
     }
 
@@ -179,16 +184,33 @@ public partial class HassWebPage : ContentPage, IKeyHandler
 
     public string[] GetUnhandledKeys() => new string[] { "VolumeUp", "VolumeDown" };
 
+    // OnSingleClick 已修正，包含智能返回逻辑
     public void OnSingleClick(RemoteKeyEventArgs args)
     {
-        webView.OnSingleClick(args.KeyName);
+        if (args.KeyName == "Back")
+        {
+            if (webView.WebViewControl.CanGoBack)
+            {
+                webView.WebViewControl.GoBack();
+            }
+            else
+            {
+                MainThread.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PopModalAsync());
+            }
+        }
+        else
+        {
+            webView.OnSingleClick(args.KeyName);
+        }
     }
 
+    // OnDoubleClick 保持原样
     public void OnDoubleClick(RemoteKeyEventArgs args)
     {
         webView.OnDoubleClick(args.KeyName);
     }
 
+    // OnLongClick 保持原样
     public void OnLongClick(RemoteKeyEventArgs args)
     {
         if (webView.OnLongClick(args.KeyName)) return;
@@ -200,5 +222,4 @@ public partial class HassWebPage : ContentPage, IKeyHandler
     }
 
     #endregion
-
 }

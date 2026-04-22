@@ -17,8 +17,8 @@ namespace HassWebView.Core.Configuration
         public IAuthStore AuthStore { get; set; }
         public Func<string, string?, Task> PlayVideo { get; set; }
         public Action ShowSettingsScreen { get; set; }
+        public Action<string> OpenWebPage { get; set; }
         public string PushUrl { get; set; }
-        public Action<WebViewSource> SetWebViewSource { get; set; }
 
         private const string DomainConfigsCacheFile = "domain_configs.yaml";
 

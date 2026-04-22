@@ -24,6 +24,7 @@ public partial class HassPage : ContentPage, IKeyHandler
     private readonly IAuthStore _authStore;
     private readonly IHassApiService _hassApiService;
 
+    // 构造函数已修正：移除了不再需要的 IServiceProvider
     public HassPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService keyService = null, HttpServer httpServer = null)
     {
         InitializeComponent();
@@ -35,8 +36,6 @@ public partial class HassPage : ContentPage, IKeyHandler
         _keyService = keyService;
         _httpServer = httpServer;
         _hassApiService = hassApiService;
-
-        _pageOptions.SetWebViewSource = (newSource) => MainThread.BeginInvokeOnMainThread(() => webView.WebViewControl.Source = newSource);
 
         if (_httpServer != null && string.IsNullOrEmpty(_pageOptions.PushUrl))
         {
@@ -99,6 +98,25 @@ public partial class HassPage : ContentPage, IKeyHandler
     private async void OnWebViewNavigating(object? sender, WebNavigatingEventArgs e)
     {
         Debug.WriteLine($"[HassPage] Navigating to: {e.Url}");
+
+        // 只有在完全认证后才应用外部链接逻辑
+        if (_state == PageState.Authenticated && Uri.TryCreate(e.Url, UriKind.Absolute, out var navUri))
+        {
+            var hassUrl = await _authStore.GetHassUrlAsync();
+            if (Uri.TryCreate(hassUrl, UriKind.Absolute, out var hassUri))
+            {
+                // 如果导航目标的主机与Hass实例的主机不同，则调用委托打开新页面
+                if (navUri.Host != hassUri.Host)
+                {
+                    Debug.WriteLine($"[HassPage] External URL detected. Opening with delegate: {e.Url}");
+                    e.Cancel = true; // 取消当前导航
+
+                    // 遵从您的设计，使用您提供的 OpenWebPage 委托
+                    _pageOptions.OpenWebPage?.Invoke(e.Url);
+                    return;
+                }
+            }
+        }
 
         if (_state == PageState.Authenticated && e.NavigationEvent == WebNavigationEvent.Back && e.Url.StartsWith("about:"))
         {
