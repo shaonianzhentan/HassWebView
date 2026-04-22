@@ -15,7 +15,6 @@ public partial class HassWebPage : ContentPage, IKeyHandler
     private readonly HttpServer _httpServer;
     private readonly KeyService _keyService;
     private readonly HassPageOptions _pageOptions;
-    private readonly CursorControl _cursorControl;
     private string _defaultUserAgent;
 
     public string Url { get; set; }
@@ -24,60 +23,13 @@ public partial class HassWebPage : ContentPage, IKeyHandler
     {
         InitializeComponent();
 
-        var wv = webView.WebView;
-        var cursor = webView.Cursor;
-        var root = webView.Root;
-
-        _ = LoadEmbeddedHtml("loading.html");
-
         _pageOptions = pageOptions;
         _keyService = keyService;
         _httpServer = httpServer;
 
-        _pageOptions.PlayVideo = DisplayVideoPlayer;
+        var wv = webView.WebViewControl;
+
         _pageOptions.SetWebViewSource = (newSource) => MainThread.BeginInvokeOnMainThread(() => wv.Source = newSource);
-
-        if (_keyService != null)
-        {
-            cursor.IsVisible = true;
-            _cursorControl = new CursorControl(cursor, root, wv);
-        }
-
-        if (_httpServer != null)
-        {
-            _httpServer.Get("/webview/remote", async (req, res) =>
-            {
-                var htmlContent = await ResourceHelper.GetResourceAsync("remote.html");
-                await res.Html(htmlContent);
-            });
-
-            _httpServer.Get("/webview/config", async (req, res) =>
-            {
-                await res.Json(new { width = wv.Width });
-            });
-
-            _httpServer.Post("/webview/remote", async (req, res) =>
-            {
-                var query = HttpUtility.ParseQueryString(await req.BodyAsync());
-                var type = query["type"];
-
-                switch (type)
-                {
-                    case "move":
-                        _cursorControl.MoveBy(Convert.ToDouble(query["x"]), Convert.ToDouble(query["y"]));
-                        break;
-                    case "click":
-                        _cursorControl.Click();
-                        break;
-                    case "text":
-                        var append = query["append"] == "1";
-                        var text = query["text"];
-                        await ResourceHelper.ExecuteScriptAsync(wv, "Scripts/TextInput.js", $"HassTextInput.insert('{text.Replace("\'", "\\\'")}', {append.ToString().ToLower()});");
-                        break;
-                }
-                await res.Text("");
-            });
-        }
 
         wv.Navigating += OnWebViewNavigating;
         wv.Navigated += OnWebViewNavigated;
@@ -92,14 +44,14 @@ public partial class HassWebPage : ContentPage, IKeyHandler
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                webView.WebView.Source = new UrlWebViewSource { Url = Url };
+                webView.WebViewControl.Source = new UrlWebViewSource { Url = Url };
             });
         }
     }
 
     private void OnWebViewNavigating(object? sender, WebNavigatingEventArgs e)
     {
-        var wv = webView.WebView;
+        var wv = webView.WebViewControl;
         Debug.WriteLine($"[HassWebPage] Navigating to: {e.Url}");
 
         if (string.IsNullOrEmpty(_defaultUserAgent) && !string.IsNullOrEmpty(wv.UserAgent))
@@ -138,7 +90,7 @@ public partial class HassWebPage : ContentPage, IKeyHandler
 
     private async void OnWebViewNavigated(object sender, WebNavigatedEventArgs e)
     {
-        var wv = webView.WebView;
+        var wv = webView.WebViewControl;
         if (e.Result != WebNavigationResult.Success || e.Source is not UrlWebViewSource urlSource) return;
         Debug.WriteLine($"[HassWebPage] Navigated to: {urlSource.Url}");
 
@@ -173,7 +125,7 @@ public partial class HassWebPage : ContentPage, IKeyHandler
 
     private async void OnWebViewResourceLoading(object sender, ResourceLoadingEventArgs e)
     {
-        var wv = webView.WebView;
+        var wv = webView.WebViewControl;
         var urlString = e.Url.ToString();
         Debug.WriteLine($"ResourceLoading：{urlString}");
         if (urlString.StartsWith("http", StringComparison.OrdinalIgnoreCase) &&
@@ -184,11 +136,9 @@ public partial class HassWebPage : ContentPage, IKeyHandler
         }
     }
 
-    private async void OnExternalBusMessageReceived(object sender, string message)
+    private void OnExternalBusMessageReceived(object sender, string message)
     {
         if (string.IsNullOrEmpty(message)) return;
-
-        var wv = webView.WebView;
 
         try
         {
@@ -199,86 +149,17 @@ public partial class HassWebPage : ContentPage, IKeyHandler
                 case "video/play":
                     var videoUrl = msg?["data"]?.GetValue<string>();
                     var origin = msg?["origin"]?.GetValue<string>();
-                    if (!string.IsNullOrEmpty(videoUrl)) await DisplayVideoPlayer(videoUrl, origin);
+                    if (!string.IsNullOrEmpty(videoUrl)) _pageOptions.PlayVideo(videoUrl, origin, false);
                     break;
                 case "play/video":
                     var videoUrl2 = msg?["data"]?.GetValue<string>();
-#if ANDROID
-    var intent = new Android.Content.Intent(Android.Content.Intent.ActionView);
-    intent.SetDataAndType(Android.Net.Uri.Parse(videoUrl2), "video/*");
-    intent.SetFlags(Android.Content.ActivityFlags.NewTask);
-    Android.App.Application.Context.StartActivity(intent);
-#else
-    Launcher.Default.OpenAsync(new Uri(videoUrl2));
-#endif
+                    _pageOptions.PlayVideo(videoUrl2, null, false);
                     break;
-#if ANDROID
-                case "x5/init":
-                    string apkUrl = string.Empty;
-                    if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64) apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm64_046295.tbs.apk";
-                    else if (RuntimeInformation.ProcessArchitecture == Architecture.Arm) apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm_045912_x5.tbs.apk";
-                    if (!string.IsNullOrEmpty(apkUrl))
-                    {
-                        Debug.WriteLine($"[ExternalBus] Initializing Tencent X5 Core with APK: {apkUrl}");
-                        var result = await TencentX5Service.InitializeX5CoreAsync(apkUrl, (progress) => {
-                            wv.WindowExternalBus(new { type = "x5/download", data = progress });
-                        });
-                        if (result) wv.WindowExternalBus(new { type = "x5/init" });
-                    }
-                    break;
-#endif
             }
         }
         catch (JsonException ex)
         {
             Debug.WriteLine($"[ExternalBus] Error parsing JSON: {ex.Message}");
-        }
-    }
-
-    private Task DisplayVideoPlayer(string url, string? baseUrl)
-    {
-        return MainThread.InvokeOnMainThreadAsync(() =>
-        {
-            var mediaPage = new HassMediaPage { Url = url };
-
-            if(!string.IsNullOrEmpty(baseUrl)){
-                var uri = new Uri(baseUrl);
-                var host = uri.Host;
-
-                var config = _pageOptions.DomainConfigs?
-                    .FirstOrDefault(kvp => host.EndsWith(kvp.Key, StringComparison.OrdinalIgnoreCase))
-                    .Value;
-
-                if (config != null){
-                    mediaPage.BaseUrl = config.Referer;
-                }
-            }
-
-            return Shell.Current.Navigation.PushModalAsync(mediaPage, true);
-        });
-    }
-
-    private async Task LoadEmbeddedHtml(string resourcePath)
-    {
-        var wv = webView.WebView;
-        try
-        {
-            var htmlContent = await ResourceHelper.GetResourceAsync(resourcePath);
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                wv.Source = new HtmlWebViewSource
-                {
-                    Html = htmlContent
-                };
-            });
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[HassWebPage] Error loading embedded HTML: {ex.Message}");
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                wv.Source = new HtmlWebViewSource { Html = "<h1>Error: Embedded resource not found.</h1>" };
-            });
         }
     }
 
@@ -305,18 +186,16 @@ public partial class HassWebPage : ContentPage, IKeyHandler
 
     public void OnDoubleClick(RemoteKeyEventArgs args)
     {
-        webView.OnSingleClick(args.KeyName);
+        webView.OnDoubleClick(args.KeyName);
     }
 
-    public async void OnLongClick(RemoteKeyEventArgs args)
+    public void OnLongClick(RemoteKeyEventArgs args)
     {
-        var result = webView.OnSingleClick(args.KeyName);
-        if (!result)
+        if (webView.OnLongClick(args.KeyName)) return;
+
+        if (args.KeyName == "Back")
         {
-            if (args.KeyName == "Back")
-            {
-                Shell.Current.Navigation.PopModalAsync();
-            }
+            MainThread.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PopModalAsync());
         }
     }
 

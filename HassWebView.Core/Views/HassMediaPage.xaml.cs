@@ -12,11 +12,11 @@ public partial class HassMediaPage : ContentPage, IKeyHandler
 
     private readonly KeyService _keyService;
 
-    public HassMediaPage()
+    // 依赖通过构造函数注入，而不是使用服务定位器
+    public HassMediaPage(KeyService keyService)
     {
         InitializeComponent();
-        // The KeyService is still needed for starting/stopping repeating actions.
-        _keyService = IPlatformApplication.Current.Services.GetRequiredService<KeyService>();
+        _keyService = keyService;
     }
 
     protected override void OnAppearing()
@@ -27,7 +27,7 @@ public partial class HassMediaPage : ContentPage, IKeyHandler
 
     protected override void OnDisappearing()
     {
-        // Ensure any running repeating actions are stopped when the page is no longer visible.
+        // 确保任何运行的重复操作在页面不再可见时停止。
         _keyService.StopRepeatingAction();
         base.OnDisappearing();
     }

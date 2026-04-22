@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Web;
+using System.Runtime.InteropServices;
 
 namespace HassWebView.Core.Views;
 
@@ -20,7 +21,6 @@ public partial class HassPage : ContentPage, IKeyHandler
     private readonly HttpServer _httpServer;
     private readonly KeyService _keyService;
     private readonly HassPageOptions _pageOptions;
-    private readonly CursorControl _cursorControl;
     private readonly IAuthStore _authStore;
     private readonly IHassApiService _hassApiService;
 
@@ -28,11 +28,7 @@ public partial class HassPage : ContentPage, IKeyHandler
     {
         InitializeComponent();
 
-        var wv = webView.WebView;
-        var cursor = webView.Cursor;
-        var root = webView.Root;
-
-        _ = LoadEmbeddedHtml("loading.html");
+        _ = webView.LoadEmbeddedHtml("loading.html");
 
         _pageOptions = pageOptions;
         _authStore = pageOptions.AuthStore;
@@ -40,54 +36,14 @@ public partial class HassPage : ContentPage, IKeyHandler
         _httpServer = httpServer;
         _hassApiService = hassApiService;
 
-        _pageOptions.SetWebViewSource = (newSource) => MainThread.BeginInvokeOnMainThread(() => wv.Source = newSource);
+        _pageOptions.SetWebViewSource = (newSource) => MainThread.BeginInvokeOnMainThread(() => webView.WebViewControl.Source = newSource);
 
-        if (_keyService != null)
+        if (_httpServer != null && string.IsNullOrEmpty(_pageOptions.PushUrl))
         {
-            cursor.IsVisible = true;
-            _cursorControl = new CursorControl(cursor, root, wv);
+            _pageOptions.PushUrl = _httpServer.BaseUrl;
         }
 
-        if (_httpServer != null)
-        {
-            if (string.IsNullOrEmpty(_pageOptions.PushUrl))
-            {
-                _pageOptions.PushUrl = _httpServer.BaseUrl;
-            }
-            _httpServer.Get("/webview/remote", async (req, res) =>
-            {
-                var htmlContent = await ResourceHelper.GetResourceAsync("remote.html");
-                await res.Html(htmlContent);
-            });
-
-            _httpServer.Get("/webview/config", async (req, res) =>
-            {
-                await res.Json(new { width = wv.Width });
-            });
-
-            _httpServer.Post("/webview/remote", async (req, res) =>
-            {
-                var query = HttpUtility.ParseQueryString(await req.BodyAsync());
-                var type = query["type"];
-
-                switch (type)
-                {
-                    case "move":
-                        _cursorControl.MoveBy(Convert.ToDouble(query["x"]), Convert.ToDouble(query["y"]));
-                        break;
-                    case "click":
-                        _cursorControl.Click();
-                        break;
-                    case "text":
-                        var append = query["append"] == "1";
-                        var text = query["text"];
-                        await ResourceHelper.ExecuteScriptAsync(wv, "Scripts/TextInput.js", $"HassTextInput.insert('{text.Replace("\'", "\\\'")}', {append.ToString().ToLower()});");
-                        break;
-                }
-                await res.Text("");
-            });
-        }
-
+        var wv = webView.WebViewControl;
         wv.Navigating += OnWebViewNavigating;
         wv.AuthTokenRequested += OnWebViewAuthTokenRequested;
         wv.LogoutRequested += OnWebViewLogoutRequested;
@@ -98,8 +54,6 @@ public partial class HassPage : ContentPage, IKeyHandler
     {
         base.OnNavigatedTo(args);
 
-        var wv = webView.WebView;
-
         if (_state != PageState.Initializing) return;
 
         var hassUrl = await _authStore.GetHassUrlAsync();
@@ -109,7 +63,7 @@ public partial class HassPage : ContentPage, IKeyHandler
         if (string.IsNullOrEmpty(hassUrl) || string.IsNullOrEmpty(refreshToken) || string.IsNullOrEmpty(webhookId))
         {
             _state = PageState.NeedsAuth;
-            await LoadEmbeddedHtml("index.html");
+            await webView.LoadEmbeddedHtml("index.html");
         }
         else
         {
@@ -117,7 +71,7 @@ public partial class HassPage : ContentPage, IKeyHandler
             if (tokenResult == null)
             {
                 _state = PageState.NeedsAuth;
-                await LoadEmbeddedHtml("index.html");
+                await webView.LoadEmbeddedHtml("index.html");
                 return;
             }
 
@@ -137,7 +91,7 @@ public partial class HassPage : ContentPage, IKeyHandler
             var hassAuth = new HassAuth(hassUrl);
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                wv.Source = new UrlWebViewSource { Url = hassAuth.RedirectUri };
+                webView.WebViewControl.Source = new UrlWebViewSource { Url = hassAuth.RedirectUri };
             });
         }
     }
@@ -145,8 +99,6 @@ public partial class HassPage : ContentPage, IKeyHandler
     private async void OnWebViewNavigating(object? sender, WebNavigatingEventArgs e)
     {
         Debug.WriteLine($"[HassPage] Navigating to: {e.Url}");
-
-        var wv = webView.WebView;
 
         if (_state == PageState.Authenticated && e.NavigationEvent == WebNavigationEvent.Back && e.Url.StartsWith("about:"))
         {
@@ -210,7 +162,7 @@ public partial class HassPage : ContentPage, IKeyHandler
             _state = PageState.Authenticated;
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
-                wv.Source = new UrlWebViewSource { Url = hassAuth.RedirectUri };
+                webView.WebViewControl.Source = new UrlWebViewSource { Url = hassAuth.RedirectUri };
             });
         }
     }
@@ -219,7 +171,7 @@ public partial class HassPage : ContentPage, IKeyHandler
     {
         if (string.IsNullOrEmpty(message)) return;
 
-        var wv = webView.WebView;
+        var wv = webView.WebViewControl;
 
         try
         {
@@ -261,6 +213,21 @@ public partial class HassPage : ContentPage, IKeyHandler
                     }
                     wv.WindowExternalBus(new { type = "webview/config", data = new { hassUrl, remoteUrl } });
                     break;
+                case "x5/init":
+#if ANDROID
+                    string apkUrl = string.Empty;
+                    if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64) apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm64_046295.tbs.apk";
+                    else if (RuntimeInformation.ProcessArchitecture == Architecture.Arm) apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm_045912_x5.tbs.apk";
+                    if (!string.IsNullOrEmpty(apkUrl))
+                    {
+                        Debug.WriteLine($"[ExternalBus] Initializing Tencent X5 Core with APK: {apkUrl}");
+                        var result = await TencentX5Service.InitializeX5CoreAsync(apkUrl, (progress) => {
+                            wv.WindowExternalBus(new { type = "x5/download", data = progress });
+                        });
+                        if (result) wv.WindowExternalBus(new { type = "x5/init" });
+                    }
+#endif
+                    break;
             }
         }
         catch (JsonException ex)
@@ -269,29 +236,6 @@ public partial class HassPage : ContentPage, IKeyHandler
         }
     }
 
-    private async Task LoadEmbeddedHtml(string resourcePath)
-    {
-        var wv = webView.WebView;
-        try
-        {
-            var htmlContent = await ResourceHelper.GetResourceAsync(resourcePath);
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                wv.Source = new HtmlWebViewSource
-                {
-                    Html = htmlContent
-                };
-            });
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[HassPage] Error loading embedded HTML: {ex.Message}");
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                wv.Source = new HtmlWebViewSource { Html = "<h1>Error: Embedded resource not found.</h1>" };
-            });
-        }
-    }
 
     protected override void OnAppearing()
     {
@@ -306,7 +250,7 @@ public partial class HassPage : ContentPage, IKeyHandler
 
     private async void OnWebViewAuthTokenRequested(object sender, EventArgs e)
     {
-        var wv = webView.WebView;
+        var wv = webView.WebViewControl;
         var token = await RefreshAccessTokenAsync(forceRefresh: false);
         if (token != null)
         {
@@ -341,7 +285,7 @@ public partial class HassPage : ContentPage, IKeyHandler
         return MainThread.InvokeOnMainThreadAsync(async () =>
         {
             _state = PageState.NeedsAuth;
-            await LoadEmbeddedHtml("index.html");
+            await webView.LoadEmbeddedHtml("index.html");
             if (!string.IsNullOrEmpty(message))
             {
                 ToastService.Show(message);
@@ -415,23 +359,24 @@ public partial class HassPage : ContentPage, IKeyHandler
 
     public void OnDoubleClick(RemoteKeyEventArgs args)
     {
-        webView.OnSingleClick(args.KeyName);
+        webView.OnDoubleClick(args.KeyName);
     }
 
     public async void OnLongClick(RemoteKeyEventArgs args)
     {
-        var result = webView.OnSingleClick(args.KeyName);
-        if (!result)
+        if (webView.OnLongClick(args.KeyName)) return;
+
+        if (args.KeyName == "Back")
         {
-
             var hassUrl = await _authStore.GetHassUrlAsync();
-            if (args.KeyName == "Back")
+            if (!string.IsNullOrEmpty(hassUrl))
             {
-
-                if (!string.IsNullOrEmpty(hassUrl)) wv.Source = new HassAuth(hassUrl).RedirectUri;
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    webView.WebViewControl.Source = new HassAuth(hassUrl).RedirectUri;
+                });
             }
         }
-
     }
 
     #endregion

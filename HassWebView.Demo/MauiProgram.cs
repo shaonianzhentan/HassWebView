@@ -38,7 +38,7 @@ public static class MauiProgram
                     else if (payload.Title == "config" && payload.Message.StartsWith("http"))
                     {
                         // 加载远程配置
-                        pageOptions.LoadRemoteConfigsAsync(payload.Message);
+                        await pageOptions.LoadRemoteConfigsAsync(payload.Message);
                     }
                     else if (payload.Title == "video")
                     {
@@ -46,12 +46,12 @@ public static class MauiProgram
                         {
                             var baseUrl = string.Empty;
                             var data = payload.Data;
-                            // Correctly and safely extract the baseUrl from the dictionary
                             if (data != null && data.TryGetValue("baseUrl", out object baseUrlObject) && baseUrlObject != null)
                             {
                                 baseUrl = baseUrlObject.ToString();
                             }
-                            await pageOptions.PlayVideo(payload.Message, baseUrl);
+                            // 保留修正：添加 'external: false' 参数以匹配委托签名
+                            await pageOptions.PlayVideo(payload.Message, baseUrl, false);
                         }
                     }
                     await res.Text("", System.Net.HttpStatusCode.Created);
@@ -60,9 +60,11 @@ public static class MauiProgram
             .UseHassWebView()
             .UseHassPage((sp, options) =>
             {
-                options.ShowSettingsScreen = async () =>
+                // 遵从您的指示：保持此实现为 Action，不修改接口
+                options.ShowSettingsScreen = () =>
                 {
-                    await Shell.Current.Navigation.PushModalAsync(new MainPage());
+                    // "发后不理" 式调用，符合 Action 委托的定义
+                    Shell.Current.Navigation.PushModalAsync(new MainPage());
                 };
             })
             .UseImmersiveMode()

@@ -24,6 +24,8 @@ namespace HassWebView.Core.Configuration
         {
             builder.Services.AddSingleton(new KeyService(longPressTimeout, doubleClickTimeout));
 
+            builder.Services.AddSingleton<IRemoteControlService, RemoteControlService>();
+
             builder.ConfigureLifecycleEvents(events =>
             {
 #if ANDROID
