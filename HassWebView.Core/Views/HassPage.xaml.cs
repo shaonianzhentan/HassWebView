@@ -118,13 +118,6 @@ public partial class HassPage : ContentPage, IKeyHandler
             }
         }
 
-        if (_state == PageState.Authenticated && e.NavigationEvent == WebNavigationEvent.Back && e.Url.StartsWith("about:"))
-        {
-            Debug.WriteLine("[HassPage] Back navigation to initial page blocked.");
-            e.Cancel = true;
-            return;
-        }
-
         if (_state == PageState.InLoginFlow)
         {
             var uri = new Uri(e.Url);
