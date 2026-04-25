@@ -53,7 +53,7 @@ public class RemoteControlService : IRemoteControlService
         {
             if (_activeControl?._cursorControl is null)
             {
-                await res.Text("No active control available for remote commands.", 404);
+                await res.Text("No active control available for remote commands.");
                 return;
             }
 
