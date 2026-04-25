@@ -20,10 +20,9 @@ public class WebViewClientHandler : WebViewClient
         _webView = webView;
     }
 
-    // Correctly override ShouldOverrideUrlLoading to intercept navigation before it happens.
-    public override bool ShouldOverrideUrlLoading(WebView view, IWebResourceRequest request)
+    // Centralized navigation handling logic.
+    private bool HandleShouldOverrideUrlLoading(string url)
     {
-        var url = request.Url.ToString();
         if (string.IsNullOrEmpty(url))
         {
             return false;
@@ -40,10 +39,22 @@ public class WebViewClientHandler : WebViewClient
             return true;
         }
 
-        // If not canceled, let the WebView handle it.
-        return base.ShouldOverrideUrlLoading(view, request);
+        // Return false to let the WebView handle the navigation.
+        return false;
     }
 
+    // Override the modern version of ShouldOverrideUrlLoading.
+    public override bool ShouldOverrideUrlLoading(WebView view, IWebResourceRequest request)
+    {
+        return HandleShouldOverrideUrlLoading(request?.Url?.ToString());
+    }
+
+    // Override the deprecated version of ShouldOverrideUrlLoading to ensure compatibility.
+    public override bool ShouldOverrideUrlLoading(WebView view, string url)
+    {
+        return HandleShouldOverrideUrlLoading(url);
+    }
+    
     public override WebResourceResponse ShouldInterceptRequest(WebView view, IWebResourceRequest request)
     {
         var url = request.Url.ToString();
@@ -112,7 +123,6 @@ public class WebViewClientHandler : WebViewClient
         base.OnReceivedHttpError(view, request, errorResponse);
     }
 
-    // OnPageStarted is now simplified, as the cancellation logic is no longer needed here.
     public override void OnPageStarted(WebView view, string url, Bitmap p2)
     {
         base.OnPageStarted(view, url, p2);
