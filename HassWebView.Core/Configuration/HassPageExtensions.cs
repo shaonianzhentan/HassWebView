@@ -71,7 +71,7 @@ namespace HassWebView.Core.Configuration
                             }
 
                             // 3. 导航并等待结果
-                            await Shell.Current.Navigation.PushModalAsync(mediaPage, true);
+                            await Shell.Current.Navigation.PushModalAsync(mediaPage);
                         }
                         catch (Exception ex)
                         {
@@ -84,7 +84,7 @@ namespace HassWebView.Core.Configuration
                 {
                     var webPage = sp.GetRequiredService<HassWebPage>();
                     webPage.Url = url;
-                    await Shell.Current.Navigation.PushModalAsync(webPage, false);
+                    await Shell.Current.Navigation.PushModalAsync(webPage);
                 };
 
                 // 允许用户覆盖默认实现

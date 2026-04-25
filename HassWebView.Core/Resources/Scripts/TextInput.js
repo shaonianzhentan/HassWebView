@@ -8,7 +8,8 @@
 
     function inputText(content, append) {
         const el = document.activeElement;
-        if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return;
+        console.log(el.tagName, content)
+        if (!el || (el.tagName !== 'HA-INPUT' && el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return;
 
         // In JavaScript, backslashes and single quotes need to be escaped within a string literal.
         // The original C# code was: text.Replace("\\", "\\\\").Replace("'", "\'");
@@ -16,13 +17,20 @@
         // No extra escaping is needed here as the `content` is already the text to be inserted.
 
         el.value = append ? el.value + content : content;
+        console.log('===InputText===')
+        console.log(el.value)
 
         // Dispatch events to ensure UI frameworks like React/Vue detect the change
-        ['input', 'change', 'compositionstart', 'compositionend', 'blur', 'focus'].forEach(evt => {
-            const event = new Event(evt, { bubbles: true, cancelable: true, view: window });
-            el.dispatchEvent(event);
-        });
+        try {
+            ['input', 'change', 'compositionstart', 'compositionend', 'blur', 'focus'].forEach(evt => {
+                const event = new Event(evt, { bubbles: true, cancelable: true, view: window });
+                el.dispatchEvent(event);
+            });
 
+        } catch (ex) {
+            console.error(ex)
+        }
+        
         // Move cursor to the end
         el.selectionStart = el.selectionEnd = el.value.length;
     }

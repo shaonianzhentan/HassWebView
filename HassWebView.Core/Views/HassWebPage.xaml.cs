@@ -30,7 +30,6 @@ public partial class HassWebPage : ContentPage, IKeyHandler
         _httpServer = httpServer;
 
         var wv = webView.WebViewControl;
-
         wv.Navigating += OnWebViewNavigating;
         wv.Navigated += OnWebViewNavigated;
         wv.ResourceLoading += OnWebViewResourceLoading;
@@ -55,6 +54,7 @@ public partial class HassWebPage : ContentPage, IKeyHandler
     private void OnWebViewNavigating(object? sender, WebNavigatingEventArgs e)
     {
         var wv = webView.WebViewControl;
+        webView.Focus(); // 临时解决问题，还是要找到如果阻止页面接管按键事件的方法
         Debug.WriteLine($"[HassWebPage] Navigating to: {e.Url}");
 
         if (string.IsNullOrEmpty(_defaultUserAgent) && !string.IsNullOrEmpty(wv.UserAgent))
@@ -126,6 +126,13 @@ public partial class HassWebPage : ContentPage, IKeyHandler
         {
             Debug.WriteLine($"[HassWebPage] Error applying domain config (CSS/JS): {ex.Message}");
         }
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await Task.Delay(2000);
+            await wv.EvaluateJavaScriptAsync("document.body.blur()");
+            webView.WebViewControl.Unfocus();
+            webView.CursorControl.Focus();
+        });
     }
 
     private async void OnWebViewResourceLoading(object sender, ResourceLoadingEventArgs e)
@@ -158,7 +165,7 @@ public partial class HassWebPage : ContentPage, IKeyHandler
                     break;
                 case "play/video":
                     var videoUrl2 = msg?["data"]?.GetValue<string>();
-                    _pageOptions.PlayVideo(videoUrl2, null, false);
+                    _pageOptions.PlayVideo(videoUrl2, null, true);
                     break;
             }
         }

@@ -44,9 +44,16 @@ public partial class HassPage : ContentPage, IKeyHandler
 
         var wv = webView.WebViewControl;
         wv.Navigating += OnWebViewNavigating;
+        wv.Navigated += Wv_Navigated;
         wv.AuthTokenRequested += OnWebViewAuthTokenRequested;
         wv.LogoutRequested += OnWebViewLogoutRequested;
         wv.ExternalBusMessageReceived += OnExternalBusMessageReceived;
+    }
+
+    private void Wv_Navigated(object sender, WebNavigatedEventArgs e)
+    {
+        var wv = webView.WebViewControl;
+        _ = wv.EvaluateJavaScriptAsync($"document.body.style.minHeight={this.Height}");
     }
 
     protected override async void OnNavigatedTo(NavigatedToEventArgs args)
