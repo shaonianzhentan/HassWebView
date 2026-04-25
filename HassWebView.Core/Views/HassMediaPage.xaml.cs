@@ -27,7 +27,7 @@ public partial class HassMediaPage : ContentPage, IKeyHandler
     {
         base.OnAppearing();
         // 页面出现时，将自己注册为当前的按键处理器
-        _remoteControlService.SetActiveControl(this);
+        _remoteControlService.SetActiveControl(webViewWithCursor);
         // 默认隐藏光标并进入视频控制模式
         webViewWithCursor.CursorControl.IsVisible = false;
         _isCursorModeActive = false;
@@ -39,7 +39,7 @@ public partial class HassMediaPage : ContentPage, IKeyHandler
     {
         // 页面消失时，停止重复操作并释放按键处理器的控制权
         _keyService.StopRepeatingAction();
-        _remoteControlService.ClearActiveControl(this);
+        _remoteControlService.ClearActiveControl(webViewWithCursor);
         base.OnDisappearing();
     }
 

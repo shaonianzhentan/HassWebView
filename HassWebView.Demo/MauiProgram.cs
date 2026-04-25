@@ -33,7 +33,7 @@ public static class MauiProgram
 
                     if (payload.Title == "url" && payload.Message.StartsWith("http"))
                     {
-                        pageOptions.OpenWebPage?.Invoke(payload);
+                        pageOptions.OpenWebPage?.Invoke(payload.Message);
                     }
                     else if (payload.Title == "config" && payload.Message.StartsWith("http"))
                     {

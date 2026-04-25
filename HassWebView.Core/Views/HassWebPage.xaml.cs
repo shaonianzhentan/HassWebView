@@ -109,7 +109,7 @@ public partial class HassWebPage : ContentPage, IKeyHandler
 
             if (!string.IsNullOrWhiteSpace(config.Css))
             {
-                string escapedCss = config.Css.Replace("'", "\'").Replace("`", "\`").Replace("$", "\$");
+                string escapedCss = config.Css.Replace("'", "\'").Replace("`", "\\`").Replace("$", "\\$");
                 await ResourceHelper.ExecuteScriptAsync(wv, "Scripts/CssInjector.js", $"HassCssInjector.inject(`{escapedCss}`, '{host}');");
             }
 
@@ -169,13 +169,13 @@ public partial class HassWebPage : ContentPage, IKeyHandler
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        _remoteControlService.SetActiveControl(this); // 新增：注册按键处理器
+        _remoteControlService.SetActiveControl(webView); // 新增：注册按键处理器
     }
 
     // OnDisappearing 已修正
     protected override void OnDisappearing()
     {
-        _remoteControlService.ClearActiveControl(this); // 新增：注销按键处理器
+        _remoteControlService.ClearActiveControl(webView); // 新增：注销按键处理器
         base.OnDisappearing();
     }
 
