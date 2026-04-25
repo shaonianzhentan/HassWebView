@@ -126,13 +126,6 @@ public partial class HassWebPage : ContentPage, IKeyHandler
         {
             Debug.WriteLine($"[HassWebPage] Error applying domain config (CSS/JS): {ex.Message}");
         }
-        MainThread.BeginInvokeOnMainThread(async () =>
-        {
-            await Task.Delay(2000);
-            await wv.EvaluateJavaScriptAsync("document.body.blur()");
-            webView.WebViewControl.Unfocus();
-            webView.CursorControl.Focus();
-        });
     }
 
     private async void OnWebViewResourceLoading(object sender, ResourceLoadingEventArgs e)
