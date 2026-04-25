@@ -4,5 +4,7 @@
              xmlns:controls="clr-namespace:HassWebView.Core.Controls"
              x:Class="HassWebView.Core.Views.HassWebPage"
              Shell.NavBarIsVisible="False">
-    <controls:WebViewWithCursor x:Name="webView" />
+    <Grid>
+        <controls:WebViewWithCursor x:Name="webView" />
+    </Grid>
 </ContentPage>

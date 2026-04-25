@@ -81,7 +81,7 @@ public partial class HassMediaPage : ContentPage, IKeyHandler
 
     #region IKeyHandler Implementation
 
-    public string[] GetUnhandledKeys() => new string[] { "VolumeUp", "VolumeDown", "Menu" };
+    public string[] GetUnhandledKeys() => new string[] { "VolumeUp", "VolumeDown" };
 
     public void OnSingleClick(RemoteKeyEventArgs args)
     {

@@ -1,7 +1,8 @@
 using HassWebView.Core.Configuration;
+using HassWebView.Core.Controls;
 using HassWebView.Core.Events;
-using HassWebView.Core.Services;
 using HassWebView.Core.Interfaces;
+using HassWebView.Core.Services;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -93,6 +94,8 @@ public partial class HassWebPage : ContentPage, IKeyHandler
     private async void OnWebViewNavigated(object sender, WebNavigatedEventArgs e)
     {
         var wv = webView.WebViewControl;
+        await wv.EvaluateJavaScriptAsync($"document.body.style.minHeight={this.Height}");
+
         if (e.Result != WebNavigationResult.Success || e.Source is not UrlWebViewSource urlSource) return;
         Debug.WriteLine($"[HassWebPage] Navigated to: {urlSource.Url}");
 
@@ -197,6 +200,10 @@ public partial class HassWebPage : ContentPage, IKeyHandler
             {
                 MainThread.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PopModalAsync());
             }
+        }
+        else if (args.KeyName == "Menu")
+        {
+            _ = ResourceHelper.ExecuteScriptAsync(webView.WebViewControl, "Scripts/VideoPanel.js", $"HassVideoPanel.toggle()");
         }
         else
         {

@@ -84,7 +84,7 @@ namespace HassWebView.Core.Configuration
                 {
                     var webPage = sp.GetRequiredService<HassWebPage>();
                     webPage.Url = url;
-                    await Shell.Current.Navigation.PushModalAsync(webPage);
+                    await Shell.Current.Navigation.PushModalAsync(webPage, false);
                 };
 
                 // 允许用户覆盖默认实现
