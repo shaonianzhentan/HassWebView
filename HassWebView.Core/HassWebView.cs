@@ -1,6 +1,6 @@
 using HassWebView.Core.Bridges;
 using HassWebView.Core.Events;
-using HassWebView.Core.Models; // Added reference to the new models
+using HassWebView.Core.Models;
 using Microsoft.Maui.Controls;
 using System;
 using System.Collections.Generic;
@@ -19,8 +19,15 @@ namespace HassWebView.Core
         public event EventHandler<string> ExternalBusMessageReceived;
         #endregion
 
+        /// <summary>
+        /// Provides access to the injected JavaScript APIs.
+        /// </summary>
+        public HassWebViewApi Web { get; }
+
         public HassWebView()
         {
+            Web = new HassWebViewApi(this);
+
             JsBridges.Add("externalApp", new ExternalApp((type, msg) =>
             {
                 switch (type)

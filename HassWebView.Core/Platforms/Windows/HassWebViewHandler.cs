@@ -176,6 +176,13 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
                 await core.AddScriptToExecuteOnDocumentCreatedAsync(proxyScript);
             }
         }
+
+        var injectedScript = await ResourceHelper.GetResourceAsync("Scripts/injected.js");
+        if (!string.IsNullOrEmpty(injectedScript))
+        {
+            await core.AddScriptToExecuteOnDocumentCreatedAsync(injectedScript);
+        }
+
         LoadSource(VirtualView.Source);
     }
 
