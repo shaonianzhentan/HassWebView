@@ -11,24 +11,35 @@ public partial class HassMediaPage : ContentPage, IKeyHandler
     public string Url { get; set; }
 
     private readonly KeyService _keyService;
+    private readonly IRemoteControlService _remoteControlService;
 
-    public HassMediaPage()
+    // 状态：是否激活了光标控制模式
+    private bool _isCursorModeActive = false;
+
+    public HassMediaPage(KeyService keyService, IRemoteControlService remoteControlService)
     {
         InitializeComponent();
-        // The KeyService is still needed for starting/stopping repeating actions.
-        _keyService = IPlatformApplication.Current.Services.GetRequiredService<KeyService>();
+        _keyService = keyService;
+        _remoteControlService = remoteControlService;
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        // 页面出现时，将自己注册为当前的按键处理器
+        _remoteControlService.SetActiveControl(webViewWithCursor);
+        // 默认隐藏光标并进入视频控制模式
+        webViewWithCursor.CursorControl.IsVisible = false;
+        _isCursorModeActive = false;
+
         _ = LoadUrl(Url, BaseUrl);
     }
 
     protected override void OnDisappearing()
     {
-        // Ensure any running repeating actions are stopped when the page is no longer visible.
+        // 页面消失时，停止重复操作并释放按键处理器的控制权
         _keyService.StopRepeatingAction();
+        _remoteControlService.ClearActiveControl(webViewWithCursor);
         base.OnDisappearing();
     }
 
@@ -39,7 +50,7 @@ public partial class HassMediaPage : ContentPage, IKeyHandler
 
         string htmlContent = await ResourceHelper.GetResourceAsync("MediaPlayer.html");
 
-        var finalHtml = htmlContent.Replace("__HEIGHT__", wv.Height.ToString())
+        var finalHtml = htmlContent.Replace("__HEIGHT__", webViewWithCursor.WebViewControl.Height.ToString())
                                      .Replace("__VIDEO_URL__", videoUrl);
 
         var uri = new Uri(videoUrl);
@@ -55,17 +66,17 @@ public partial class HassMediaPage : ContentPage, IKeyHandler
         };
 
         Debug.WriteLine("Setting WebView source with HTML content from MediaPlayer.html.");
-        wv.Source = htmlSource;
+        webViewWithCursor.WebViewControl.Source = htmlSource;
     }
 
     private void VideoSeek(int second)
     {
-        wv.EvaluateJavaScriptAsync($"videoSeek({second})");
+        webViewWithCursor.WebViewControl.EvaluateJavaScriptAsync($"videoSeek({second})");
     }
 
     private void PlayPause()
     {
-        wv.EvaluateJavaScriptAsync("playPause()");
+        webViewWithCursor.WebViewControl.EvaluateJavaScriptAsync("playPause()");
     }
 
     #region IKeyHandler Implementation
@@ -75,7 +86,24 @@ public partial class HassMediaPage : ContentPage, IKeyHandler
     public void OnSingleClick(RemoteKeyEventArgs args)
     {
         Debug.WriteLine($"[HassMediaPage] Single Click: {args.KeyName}");
-        
+
+        if (args.KeyName == "Menu")
+        {
+            // 遵从您的建议，使用您封装好的方法来切换光标
+            webViewWithCursor.ToggleCursorVisibility();
+            // 然后同步内部状态以匹配光标的实际可见性
+            _isCursorModeActive = webViewWithCursor.CursorControl.IsVisible;
+            return; // Menu键只用于切换模式
+        }
+
+        // 如果处于光标模式，则将事件委托给 WebViewWithCursor 自己的处理器
+        if (_isCursorModeActive)
+        {
+            webViewWithCursor.OnSingleClick(args.KeyName);
+            return;
+        }
+
+        // 否则，在非光标模式下执行视频播放控制
         switch (args.KeyName)
         {
             case "Enter":
@@ -99,6 +127,15 @@ public partial class HassMediaPage : ContentPage, IKeyHandler
     public void OnLongClick(RemoteKeyEventArgs args)
     {
         Debug.WriteLine($"[HassMediaPage] Long Click: {args.KeyName}");
+
+        // 如果处于光标模式，则将事件委托给 WebViewWithCursor 自己的处理器
+        if (_isCursorModeActive)
+        {
+            webViewWithCursor.OnLongClick(args.KeyName);
+            return;
+        }
+        
+        // 否则，在非光标模式下执行视频播放控制
         const int repeatInterval = 100;
         switch (args.KeyName)
         {

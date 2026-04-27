@@ -2,7 +2,9 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:HassWebView.Core.Controls"
-             x:Class="HassWebView.Core.Views.HassPage"
+             x:Class="HassWebView.Core.Views.HassWebPage"
              Shell.NavBarIsVisible="False">
-    <controls:WebViewWithCursor x:Name="webView" />
+    <Grid>
+        <controls:WebViewWithCursor x:Name="webView" />
+    </Grid>
 </ContentPage>
