@@ -1,13 +1,16 @@
 using HassWebView.Core.Bridges;
 using HassWebView.Core.Events;
+using HassWebView.Core.Models;
 using HassWebView.Core.Services;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage.Streams;
@@ -21,6 +24,12 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     private JsBridgeHandler _jsBridgeHandler;
     private string _pendingHtml;
     private string _pendingBaseUrl;
+
+    // --- ADDED: Manual History Tracking for Windows ---
+    private readonly List<WebHistoryItem> _history = new();
+    private int _currentIndex = -1;
+    private CoreWebView2NavigationKind _navigationKind;
+    // --------------------------------------------------
 
     public static PropertyMapper Mapper = new PropertyMapper<HassWebView>()
     {
@@ -66,6 +75,25 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
                 request.TaskCompletionSource.SetException(ex);
             }
         },
+        // --- MODIFIED: To use manual history ---
+        [nameof(HassWebView.GetBackForwardListAsync)] = (handler, _, args) =>
+        {
+            if (args is not TaskCompletionSource<WebBackForwardList> tcs) return;
+            if (handler is not HassWebViewHandler h)
+            {
+                tcs.SetResult(new WebBackForwardList { History = new List<WebHistoryItem>(), CurrentIndex = -1 });
+                return;
+            }
+
+            var result = new WebBackForwardList
+            {
+                History = new List<WebHistoryItem>(h._history),
+                CurrentIndex = h._currentIndex
+            };
+
+            tcs.SetResult(result);
+        },
+        // --------------------------------------
         [nameof(HassWebView.SimulateTouch)] = async (handler, _, args) =>
         {
             if (args is not HassWebView.SimulateTouchRequest request) return;
@@ -189,6 +217,9 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
 
     private void Core_NavigationStarting(CoreWebView2 sender, CoreWebView2NavigationStartingEventArgs args)
     {
+        // --- ADDED: Store navigation kind to correctly update history in NavigationCompleted ---
+        _navigationKind = args.NavigationKind;
+
         var mauiArgs = new WebNavigatingEventArgs(WebNavigationEvent.NewPage, VirtualView.Source, args.Uri);
         VirtualView.SendNavigating(mauiArgs);
         args.Cancel = mauiArgs.Cancel;
@@ -196,11 +227,40 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
 
     private void Core_NavigationCompleted(CoreWebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
     {
+        // --- ADDED: Manual history update logic ---
+        if (args.IsSuccess)
+        {
+            switch (_navigationKind)
+            {
+                case CoreWebView2NavigationKind.BackOrForward:
+                    _currentIndex = _history.FindIndex(item => item.Url == sender.Source);
+                    break;
+
+                case CoreWebView2NavigationKind.Reload:
+                    // Do nothing with history
+                    break;
+
+                default: // New navigation
+                    if (_currentIndex < _history.Count - 1)
+                    {
+                        _history.RemoveRange(_currentIndex + 1, _history.Count - (_currentIndex + 1));
+                    }
+                    
+                    if (_currentIndex == -1 || _history[_currentIndex].Url != sender.Source)
+                    {
+                        _history.Add(new WebHistoryItem { Url = sender.Source, Title = sender.DocumentTitle });
+                        _currentIndex = _history.Count - 1;
+                    }
+                    break;
+            }
+        }
+        // ----------------------------------------
+
         var result = args.IsSuccess ? WebNavigationResult.Success : WebNavigationResult.Failure;
         var mauiArgs = new WebNavigatedEventArgs(WebNavigationEvent.NewPage, VirtualView.Source, sender.Source, result);
         VirtualView.SendNavigated(mauiArgs);
-        VirtualView.CanGoBack = sender.CanGoBack;
-        VirtualView.CanGoForward = sender.CanGoForward;
+        VirtualView.CanGoBack = _currentIndex > 0;
+        VirtualView.CanGoForward = _currentIndex < _history.Count - 1;
     }
 
     void LoadSource(WebViewSource source)
@@ -216,10 +276,8 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         }
         else if (source is HtmlWebViewSource htmlSource)
         {
-            /*
             _pendingHtml = htmlSource.Html;
             _pendingBaseUrl = htmlSource.BaseUrl ?? "http://local.html";
-            */
             PlatformView.CoreWebView2.NavigateToString(htmlSource.Html);
         }
     }
@@ -236,6 +294,12 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             platformView.CoreWebView2.WebResourceRequested -= Core_WebResourceRequested;
         }
         _jsBridgeHandler = null;
+
+        // --- ADDED: Cleanup for manual history ---
+        _history.Clear();
+        _currentIndex = -1;
+        // --------------------------------------
+
         base.DisconnectHandler(platformView);
     }
 }
