@@ -4,6 +4,7 @@ using HassWebView.Core.Models;
 using HassWebView.Core.Services;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
 using System;
@@ -60,6 +61,14 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         {
             if (handler.PlatformView is WebView wv && wv.CanGoForward)
                 wv.GoForward();
+        },
+        [nameof(HassWebView.Focus)] = (handler, view, args) =>
+        {
+            handler.PlatformView?.Focus(FocusState.Programmatic);
+        },
+        [nameof(HassWebView.Unfocus)] = (handler, view, args) =>
+        {
+            handler.PlatformView?.Focus(FocusState.Unfocused);
         },
         [nameof(HassWebView.EvaluateJavaScriptAsync)] = async (handler, _, args) =>
         {

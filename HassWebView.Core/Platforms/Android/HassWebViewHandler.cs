@@ -59,6 +59,14 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
                 wv.GoForward();
             }
         },
+        [nameof(HassWebView.Focus)] = (handler, view, args) =>
+        {
+            handler.PlatformView?.RequestFocus();
+        },
+        [nameof(HassWebView.Unfocus)] = (handler, view, args) =>
+        {
+            handler.PlatformView?.ClearFocus();
+        },
         [nameof(HassWebView.ExitFullscreen)] = (handler, view, args) =>
         {
             if (handler.PlatformView is WebView wv)

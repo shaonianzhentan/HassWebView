@@ -45,6 +45,19 @@ namespace HassWebView.Core
             }));
         }
 
+        // --- Focus and Unfocus Methods ---
+        public new void Focus()
+        {
+            if (Handler == null) return;
+            Handler.Invoke(nameof(Focus));
+        }
+
+        public new void Unfocus()
+        {
+            if (Handler == null) return;
+            Handler.Invoke(nameof(Unfocus));
+        }
+
         // --- The user's original code remains untouched --- 
 
         public static readonly BindableProperty JsBridgesProperty =
