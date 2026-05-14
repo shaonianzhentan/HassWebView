@@ -27,7 +27,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     private string _pendingBaseUrl;
 
     // --- ADDED: Manual History Tracking for Windows ---
-    private readonly List<WebHistoryItem> _history = new();
+    private readonly List<HassWebHistoryItem> _history = new();
     private int _currentIndex = -1;
     private CoreWebView2NavigationKind _navigationKind;
     // --------------------------------------------------
@@ -64,11 +64,17 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         },
         [nameof(HassWebView.Focus)] = (handler, view, args) =>
         {
-            handler.PlatformView?.Focus(FocusState.Programmatic);
+            if (handler.PlatformView is WebView wv)
+            {
+                wv.Focus(FocusState.Programmatic);
+            }
         },
         [nameof(HassWebView.Unfocus)] = (handler, view, args) =>
         {
-            handler.PlatformView?.Focus(FocusState.Unfocused);
+            if (handler.PlatformView is WebView wv)
+            {
+                wv.Focus(FocusState.Unfocused);
+            }
         },
         [nameof(HassWebView.EvaluateJavaScriptAsync)] = async (handler, _, args) =>
         {
@@ -87,16 +93,16 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         // --- MODIFIED: To use manual history ---
         [nameof(HassWebView.GetBackForwardListAsync)] = (handler, _, args) =>
         {
-            if (args is not TaskCompletionSource<WebBackForwardList> tcs) return;
+            if (args is not TaskCompletionSource<HassWebBackForwardList> tcs) return;
             if (handler is not HassWebViewHandler h)
             {
-                tcs.SetResult(new WebBackForwardList { History = new List<WebHistoryItem>(), CurrentIndex = -1 });
+                tcs.SetResult(new HassWebBackForwardList { History = new List<HassWebHistoryItem>(), CurrentIndex = -1 });
                 return;
             }
 
-            var result = new WebBackForwardList
+            var result = new HassWebBackForwardList
             {
-                History = new List<WebHistoryItem>(h._history),
+                History = new List<HassWebHistoryItem>(h._history),
                 CurrentIndex = h._currentIndex
             };
 
@@ -264,7 +270,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
                     
                     if (_currentIndex == -1 || _history[_currentIndex].Url != sender.Source)
                     {
-                        _history.Add(new WebHistoryItem { Url = sender.Source, Title = sender.DocumentTitle });
+                        _history.Add(new HassWebHistoryItem { Url = sender.Source, Title = sender.DocumentTitle });
                         _currentIndex = _history.Count - 1;
                     }
                     break;

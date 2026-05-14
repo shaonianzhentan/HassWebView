@@ -150,9 +150,9 @@ namespace HassWebView.Core
         /// <summary>
         /// Asynchronously retrieves a snapshot of the WebView's navigation history.
         /// </summary>
-        public Task<WebBackForwardList> GetBackForwardListAsync()
+        public Task<HassWebBackForwardList> GetBackForwardListAsync()
         {
-            var tcs = new TaskCompletionSource<WebBackForwardList>();
+            var tcs = new TaskCompletionSource<HassWebBackForwardList>();
 
             if (Handler == null)
             {
