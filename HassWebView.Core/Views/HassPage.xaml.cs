@@ -6,16 +6,15 @@ using HassWebView.Core.Interfaces;
 using HassWebView.HassApi;
 using HassWebView.HassApi.Models;
 using System.Diagnostics;
-using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Web;
 using System.Runtime.InteropServices;
 
 namespace HassWebView.Core.Views;
 
 public partial class HassPage : ContentPage, IKeyHandler
 {
-    private enum PageState { Initializing, NeedsAuth, InLoginFlow, Authenticated }
+    // Page state is now simpler: just initializing or fully authenticated.
+    private enum PageState { Initializing, Authenticated }
     private PageState _state = PageState.Initializing;
 
     private readonly HttpServer _httpServer;
@@ -24,12 +23,11 @@ public partial class HassPage : ContentPage, IKeyHandler
     private readonly IAuthStore _authStore;
     private readonly IHassApiService _hassApiService;
     private DateTime? _lastBackPressTime;
+    private bool _isAuthPagePresented = false; // Prevents re-entrant navigation
 
     public HassPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService keyService = null, HttpServer httpServer = null)
     {
         InitializeComponent();
-
-        _ = webView.LoadEmbeddedHtml("loading.html");
 
         _pageOptions = pageOptions;
         _authStore = pageOptions.AuthStore;
@@ -50,17 +48,18 @@ public partial class HassPage : ContentPage, IKeyHandler
         wv.ExternalBusMessageReceived += OnExternalBusMessageReceived;
     }
 
-    private void Wv_Navigated(object sender, WebNavigatedEventArgs e)
+    protected override async void OnAppearing()
     {
-        var wv = webView.WebViewControl;
-        _ = wv.EvaluateJavaScriptAsync($"document.body.style.minHeight={this.Height}");
+        base.OnAppearing();
+
+        // The core logic now resides here to be executed every time the page appears.
+        await CheckAuthAndLoadAsync();
     }
 
-    protected override async void OnNavigatedTo(NavigatedToEventArgs args)
+    private async Task CheckAuthAndLoadAsync()
     {
-        base.OnNavigatedTo(args);
-
-        if (_state != PageState.Initializing) return;
+        // If auth page is already shown, do nothing.
+        if (_isAuthPagePresented) return;
 
         var hassUrl = await _authStore.GetHassUrlAsync();
         var refreshToken = await _authStore.GetRefreshTokenAsync();
@@ -68,192 +67,90 @@ public partial class HassPage : ContentPage, IKeyHandler
 
         if (string.IsNullOrEmpty(hassUrl) || string.IsNullOrEmpty(refreshToken) || string.IsNullOrEmpty(webhookId))
         {
-            _state = PageState.NeedsAuth;
-            await webView.LoadEmbeddedHtml("index.html");
+            await NavigateToAuthPage("请登录到您的Home Assistant实例。");
+            return;
         }
-        else
+
+        var tokenResult = await RefreshAccessTokenAsync(forceRefresh: false);
+        if (tokenResult == null)
         {
-            var tokenResult = await RefreshAccessTokenAsync(forceRefresh: false);
-            if (tokenResult == null)
-            {
-                _state = PageState.NeedsAuth;
-                await webView.LoadEmbeddedHtml("index.html");
-                return;
-            }
-
-            var deviceId = await _authStore.GetDeviceIdAsync();
-            var mobileApp = new MobileApp(hassUrl, webhookId);
-            await mobileApp.UpdateRegistrationAsync(new UpdateRegistrationRequest
-            {
-                AppVersion = AppInfo.Current.VersionString,
-                DeviceName = $"{DeviceInfo.Current.Platform} {DeviceInfo.Name}",
-                Model = DeviceInfo.Current.Model,
-                Manufacturer = DeviceInfo.Current.Manufacturer,
-                OsVersion = DeviceInfo.Current.VersionString,
-                AppData = new MobileAppData(deviceId, _pageOptions.PushUrl)
-            });
-
-            _state = PageState.Authenticated;
-            var hassAuth = new HassAuth(hassUrl);
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                webView.WebViewControl.Source = new UrlWebViewSource { Url = hassAuth.RedirectUri };
-            });
+            await NavigateToAuthPage("会话已过期，请重新登录。");
+            return;
         }
+
+        // If we are already authenticated and the page is loaded, don't reload.
+        if (_state == PageState.Authenticated) return;
+
+        await UpdateDeviceRegistration();
+
+        _state = PageState.Authenticated;
+        var hassAuth = new HassAuth(hassUrl);
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            webView.WebViewControl.Source = new UrlWebViewSource { Url = hassAuth.RedirectUri };
+        });
+    }
+
+    private async Task UpdateDeviceRegistration()
+    {
+        var hassUrl = await _authStore.GetHassUrlAsync();
+        var webhookId = await _authStore.GetWebhookIdAsync();
+        var deviceId = await _authStore.GetDeviceIdAsync();
+        var pushUrl = string.IsNullOrEmpty(_pageOptions.PushUrl) && _httpServer != null ? _httpServer.BaseUrl : _pageOptions.PushUrl;
+
+        var mobileApp = new MobileApp(hassUrl, webhookId);
+        await mobileApp.UpdateRegistrationAsync(new UpdateRegistrationRequest
+        {
+            AppVersion = AppInfo.Current.VersionString,
+            DeviceName = $"{DeviceInfo.Current.Platform} {DeviceInfo.Name}",
+            Model = DeviceInfo.Current.Model,
+            Manufacturer = DeviceInfo.Current.Manufacturer,
+            OsVersion = DeviceInfo.Current.VersionString,
+            AppData = new MobileAppData(deviceId, pushUrl)
+        });
+    }
+
+    private void Wv_Navigated(object sender, WebNavigatedEventArgs e)
+    {
+        var wv = webView.WebViewControl;
+        _ = wv.EvaluateJavaScriptAsync($"document.body.style.minHeight={this.Height}");
     }
 
     private async void OnWebViewNavigating(object? sender, WebNavigatingEventArgs e)
     {
-        Debug.WriteLine($"[HassPage] Navigating to: {e.Url}");
-
         if (_state == PageState.Authenticated && Uri.TryCreate(e.Url, UriKind.Absolute, out var navUri))
         {
             var hassUrl = await _authStore.GetHassUrlAsync();
-            if (Uri.TryCreate(hassUrl, UriKind.Absolute, out var hassUri))
+            if (Uri.TryCreate(hassUrl, UriKind.Absolute, out var hassUri) && navUri.Host != hassUri.Host)
             {
-                if (navUri.Host != hassUri.Host)
-                {
-                    Debug.WriteLine($"[HassPage] External URL detected. Opening with delegate: {e.Url}");
-                    e.Cancel = true;
-                    _pageOptions.OpenWebPage?.Invoke(e.Url);
-                    return;
-                }
+                e.Cancel = true;
+                _pageOptions.OpenWebPage?.Invoke(e.Url);
             }
-        }
-
-        if (_state == PageState.InLoginFlow)
-        {
-            var uri = new Uri(e.Url);
-            var query = HttpUtility.ParseQueryString(uri.Query);
-            var code = query["code"];
-            if (string.IsNullOrEmpty(code)) return;
-
-            var hassUrl = await _authStore.GetHassUrlAsync();
-            var hassAuth = new HassAuth(hassUrl);
-            var tokenResult = await hassAuth.GetRefreshTokenAsync(code);
-            if (tokenResult == null)
-            {
-                await GoToAuthModeWithError("无法获取凭据，请重试。");
-                return;
-            }
-
-            await _authStore.SetAccessTokenAsync(tokenResult.AccessToken);
-            await _authStore.SetRefreshTokenAsync(tokenResult.RefreshToken);
-            await _authStore.SetTokenExpiryUtcAsync(DateTime.UtcNow.AddSeconds(tokenResult.ExpiresIn));
-
-            var hassApi = new HassRestApi(hassUrl, async (force) =>
-            {
-                var token = await RefreshAccessTokenAsync(force);
-                return token?.AccessToken;
-            });
-
-            _hassApiService.Initialize(hassApi);
-
-            var deviceId = await _authStore.GetDeviceIdAsync();
-            var registrationRequest = new MobileAppRegistrationRequest
-            {
-                AppId = AppInfo.Current.PackageName,
-                AppName = AppInfo.Current.Name,
-                AppVersion = AppInfo.Current.VersionString,
-                DeviceId = deviceId,
-                DeviceName = $"{DeviceInfo.Current.Platform} {DeviceInfo.Name}",
-                Model = DeviceInfo.Current.Model,
-                Manufacturer = DeviceInfo.Current.Manufacturer,
-                OsName = DeviceInfo.Current.Platform.ToString(),
-                OsVersion = DeviceInfo.Current.VersionString,
-                SupportsEncryption = false,
-                AppData = new MobileAppData(deviceId, _pageOptions.PushUrl)
-            };
-
-            var registrationResult = await hassApi.RegisterMobileAppAsync(registrationRequest);
-            if (registrationResult?.WebhookId == null)
-            {
-                await GoToAuthModeWithError("注册应用失败，请检查您的Home Assistant配置。");
-                return;
-            }
-
-            await _authStore.SetWebhookIdAsync(registrationResult.WebhookId);
-            _state = PageState.Authenticated;
-            await MainThread.InvokeOnMainThreadAsync(() =>
-            {
-                webView.WebViewControl.Source = new UrlWebViewSource { Url = hassAuth.RedirectUri };
-            });
         }
     }
 
     private async void OnExternalBusMessageReceived(object sender, string message)
     {
         if (string.IsNullOrEmpty(message)) return;
-
         var wv = webView.WebViewControl;
+        var msg = JsonNode.Parse(message);
+        var type = msg?["type"]?.GetValue<string>();
 
-        try
+        switch (type)
         {
-            var msg = JsonNode.Parse(message);
-            var type = msg?["type"]?.GetValue<string>();
-            switch (type)
-            {
-                case "config/get":
-                    var id = msg?["id"]?.GetValue<int>();
-                    wv.WindowExternalBus(new { id, type = "result", success = true, result = new { hasSettingsScreen = true, canWriteTag = false } });
-                    break;
-                case "config_screen/show":
-                    _pageOptions.ShowSettingsScreen?.Invoke();
-                    break;
-                case "webview/auth":
-                    var urlFromForm = msg?["data"]?.GetValue<string>();
-                    Debug.WriteLine($"[ExternalBus] Received auth URL: {urlFromForm}");
-                    var auth = new HassAuth(urlFromForm);
-                    if (await auth.CheckApiStatusAsync())
-                    {
-                        await _authStore.SetHassUrlAsync(auth.BaseUrl);
-                        await MainThread.InvokeOnMainThreadAsync(() =>
-                        {
-                            _state = PageState.InLoginFlow;
-                            wv.Source = auth.AuthorizeUri;
-                        });
-                    }
-                    else
-                    {
-                        wv.WindowExternalBus(new { type = "webview/auth", message = "无法访问提供的URL，请确保它是正确的Home Assistant实例地址，并且设备能够访问它。" });
-                    }
-                    break;
-                case "webview/config":
-                    var hassUrl = await _authStore.GetHassUrlAsync();
-                    string remoteUrl = null;
-                    if (_httpServer != null)
-                    {
-                        remoteUrl = _httpServer.BaseUrl + "webview/remote";
-                    }
-                    wv.WindowExternalBus(new { type = "webview/config", data = new { hassUrl, remoteUrl } });
-                    break;
-                case "x5/init":
-#if ANDROID
-                    string apkUrl = string.Empty;
-                    if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64) apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm64_046295.tbs.apk";
-                    else if (RuntimeInformation.ProcessArchitecture == Architecture.Arm) apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm_045912_x5.tbs.apk";
-                    if (!string.IsNullOrEmpty(apkUrl))
-                    {
-                        Debug.WriteLine($"[ExternalBus] Initializing Tencent X5 Core with APK: {apkUrl}");
-                        var result = await TencentX5Service.InitializeX5CoreAsync(apkUrl, (progress) => {
-                            wv.WindowExternalBus(new { type = "x5/download", data = progress });
-                        });
-                        if (result) wv.WindowExternalBus(new { type = "x5/init" });
-                    }
-#endif
-                    break;
-            }
+            case "config/get":
+                var id = msg?["id"]?.GetValue<int>();
+                wv.WindowExternalBus(new { id, type = "result", success = true, result = new { hasSettingsScreen = true, canWriteTag = false } });
+                break;
+            case "config_screen/show":
+                _pageOptions.ShowSettingsScreen?.Invoke();
+                break;
+            case "webview/config":
+                var hassUrl = await _authStore.GetHassUrlAsync();
+                string remoteUrl = _httpServer != null ? _httpServer.BaseUrl + "webview/remote" : null;
+                wv.WindowExternalBus(new { type = "webview/config", data = new { hassUrl, remoteUrl } });
+                break;
         }
-        catch (JsonException ex)
-        {
-            Debug.WriteLine($"[ExternalBus] Error parsing JSON: {ex.Message}");
-        }
-    }
-
-
-    protected override void OnAppearing()
-    {
-        base.OnAppearing();
     }
 
     protected override void OnDisappearing()
@@ -264,47 +161,40 @@ public partial class HassPage : ContentPage, IKeyHandler
 
     private async void OnWebViewAuthTokenRequested(object sender, EventArgs e)
     {
-        var wv = webView.WebViewControl;
         var token = await RefreshAccessTokenAsync(forceRefresh: false);
         if (token != null)
         {
-            Debug.WriteLine("授权请求");
             var tokenExpiry = await _authStore.GetTokenExpiryUtcAsync();
             var expiresIn = (int)(tokenExpiry - DateTime.UtcNow).TotalSeconds;
-            var js = $"window.externalAuthSetToken(true, {{ access_token: '{token.AccessToken}', expires_in: {expiresIn} }});";
-            await wv.EvaluateJavaScriptAsync(js);
+            await webView.WebViewControl.EvaluateJavaScriptAsync($"window.externalAuthSetToken(true, {{ access_token: '{token.AccessToken}', expires_in: {expiresIn} }});");
         }
         else
         {
-            Debug.WriteLine("会话已过期");
-            await wv.EvaluateJavaScriptAsync("window.externalAuthSetToken(false);");
-            await GoToAuthModeWithError("会话已过期，请重新登录。");
+            await webView.WebViewControl.EvaluateJavaScriptAsync("window.externalAuthSetToken(false);");
+            await NavigateToAuthPage("会话已过期，请重新登录。");
         }
-    }
-
-    public async Task LogoutAsync()
-    {
-        await _authStore.ClearTokensAsync();
-        Debug.WriteLine("[Auth] All authentication data has been cleared.");
     }
 
     private async void OnWebViewLogoutRequested(object? sender, EventArgs e)
     {
-        await LogoutAsync();
-        await GoToAuthModeWithError("已成功登出。");
+        await _authStore.ClearTokensAsync();
+        _state = PageState.Initializing; // Reset state
+        await NavigateToAuthPage("已成功登出。");
     }
 
-    private Task GoToAuthModeWithError(string message)
+    private async Task NavigateToAuthPage(string message)
     {
-        return MainThread.InvokeOnMainThreadAsync(async () =>
-        {
-            _state = PageState.NeedsAuth;
-            await webView.LoadEmbeddedHtml("index.html");
-            if (!string.IsNullOrEmpty(message))
-            {
-                ToastService.Show(message);
-            }
-        });
+        if (_isAuthPagePresented) return;
+        _isAuthPagePresented = true;
+
+        if (!string.IsNullOrEmpty(message)) ToastService.Show(message);
+
+        // Create the auth page, passing all necessary dependencies.
+        var authPage = new HassAuthPage(_pageOptions, _hassApiService, _keyService, _httpServer);
+        
+        await MainThread.InvokeOnMainThreadAsync(() => Navigation.PushModalAsync(authPage));
+        
+        _isAuthPagePresented = false; // Reset after navigation
     }
 
     public async Task<AuthorizationResult> RefreshAccessTokenAsync(bool forceRefresh = false)
@@ -312,53 +202,32 @@ public partial class HassPage : ContentPage, IKeyHandler
         var accessToken = await _authStore.GetAccessTokenAsync();
         var tokenExpiry = await _authStore.GetTokenExpiryUtcAsync();
 
-        if (!forceRefresh && !string.IsNullOrEmpty(accessToken) && tokenExpiry != DateTime.MinValue && DateTime.UtcNow < tokenExpiry.AddSeconds(-60))
+        if (!forceRefresh && !string.IsNullOrEmpty(accessToken) && DateTime.UtcNow < tokenExpiry.AddSeconds(-60))
         {
-            Debug.WriteLine("[Auth] Using cached access token.");
-            var refreshToken = await _authStore.GetRefreshTokenAsync();
             return new AuthorizationResult(accessToken, (int)(tokenExpiry - DateTime.UtcNow).TotalSeconds, "Bearer")
-            {
-                RefreshToken = refreshToken
-            };
+            { RefreshToken = await _authStore.GetRefreshTokenAsync() };
         }
 
-        Debug.WriteLine(forceRefresh ? "[Auth] Forcing token refresh." : "[Auth] Token expired/invalid, refreshing.");
         try
         {
             var refreshToken = await _authStore.GetRefreshTokenAsync();
             var hassUrl = await _authStore.GetHassUrlAsync();
-
-            if (string.IsNullOrEmpty(refreshToken) || string.IsNullOrEmpty(hassUrl))
-            {
-                Debug.WriteLine("[Auth] Refresh failed: Missing RefreshToken or HassUrl.");
-                await LogoutAsync();
-                return null;
-            }
+            if (string.IsNullOrEmpty(refreshToken) || string.IsNullOrEmpty(hassUrl)) return null;
 
             var hassAuth = new HassAuth(hassUrl);
             var result = await hassAuth.GetAccessTokenAsync(refreshToken);
-            if (result == null)
-            {
-                Debug.WriteLine("[Auth] Refresh failed: GetAccessTokenAsync returned null.");
-                await LogoutAsync();
-                return null;
-            }
+            if (result == null) return null;
 
             await _authStore.SetAccessTokenAsync(result.AccessToken);
             await _authStore.SetTokenExpiryUtcAsync(DateTime.UtcNow.AddSeconds(result.ExpiresIn));
-            if (!string.IsNullOrEmpty(result.RefreshToken))
-            {
-                await _authStore.SetRefreshTokenAsync(result.RefreshToken);
-            }
+            if (!string.IsNullOrEmpty(result.RefreshToken)) await _authStore.SetRefreshTokenAsync(result.RefreshToken);
 
-            Debug.WriteLine("[Auth] Token refreshed successfully.");
             return result;
         }
         catch (Exception ex)
-        {
-            Debug.WriteLine($"[Auth] Critical error on refresh: {ex.Message}");
-            await LogoutAsync();
-            return null;
+        { 
+            Debug.WriteLine($"[Auth] Critical error on refresh: {ex.Message}"); 
+            return null; 
         }
     }
 
@@ -370,38 +239,20 @@ public partial class HassPage : ContentPage, IKeyHandler
     {
         if (args.KeyName == "Back")
         {
-            var wv = webView.WebViewControl;
-
-            bool isAboutToExit = false;
-            if (!wv.CanGoBack)
+            if (webView.WebViewControl.CanGoBack)
             {
-                isAboutToExit = true;
+                _lastBackPressTime = null;
+                webView.WebViewControl.GoBack();
             }
             else
             {
-                var backForwardList = await wv.GetBackForwardListAsync();
-                if (backForwardList?.CurrentIndex == 1)
-                {
-                    isAboutToExit = true;
-                }
-            }
-
-            if (isAboutToExit)
-            {
                 if (_lastBackPressTime.HasValue && (DateTime.UtcNow - _lastBackPressTime.Value).TotalSeconds < 2)
-                {
                     Application.Current.Quit();
-                }
                 else
                 {
                     _lastBackPressTime = DateTime.UtcNow;
                     ToastService.Show("再按一次退出应用");
                 }
-            }
-            else
-            {
-                _lastBackPressTime = null;
-                wv.GoBack();
             }
         }
         else
@@ -411,30 +262,12 @@ public partial class HassPage : ContentPage, IKeyHandler
         }
     }
 
-    public void OnDoubleClick(RemoteKeyEventArgs args)
-    {
-        _lastBackPressTime = null;
-        webView.OnDoubleClick(args.KeyName);
-    }
+    public void OnDoubleClick(RemoteKeyEventArgs args) => webView.OnDoubleClick(args.KeyName);
 
     public async void OnLongClick(RemoteKeyEventArgs args)
     {
         _lastBackPressTime = null;
-        if (webView.OnLongClick(args.KeyName)) return;
-
-        if (args.KeyName == "Back")
-        {
-            var hassUrl = await _authStore.GetHassUrlAsync();
-            if (!string.IsNullOrEmpty(hassUrl))
-            {
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    webView.WebViewControl.Source = new HassAuth(hassUrl).RedirectUri;
-                });
-            }
-        }
     }
 
     #endregion
-
 }
