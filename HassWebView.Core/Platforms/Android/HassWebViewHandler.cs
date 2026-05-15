@@ -95,27 +95,27 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         // New command mapping for GetBackForwardListAsync
         [nameof(HassWebView.GetBackForwardListAsync)] = (handler, _, args) =>
         {
-            if (args is not TaskCompletionSource<HassWebBackForwardList> tcs) return;
+            if (args is not TaskCompletionSource<WebViewBackForwardList> tcs) return;
             if (handler.PlatformView is not WebView platformView) 
             {
-                tcs.SetResult(new HassWebBackForwardList { History = new List<HassWebHistoryItem>() });
+                tcs.SetResult(new WebViewBackForwardList { History = new List<WebViewHistoryItem>() });
                 return;
             }
 
             var nativeList = platformView.CopyBackForwardList();
             if (nativeList == null)
             {
-                tcs.SetResult(new HassWebBackForwardList { History = new List<HassWebHistoryItem>() });
+                tcs.SetResult(new WebViewBackForwardList { History = new List<WebViewHistoryItem>() });
                 return;
             }
 
-            var historyItems = new List<HassWebHistoryItem>();
+            var historyItems = new List<WebViewHistoryItem>();
             for (int i = 0; i < nativeList.Size; i++)
             {
                 var nativeItem = nativeList.GetItemAtIndex(i);
                 if (nativeItem != null)
                 {
-                    historyItems.Add(new HassWebHistoryItem
+                    historyItems.Add(new WebViewHistoryItem
                     {
                         Url = nativeItem.Url,
                         Title = nativeItem.Title
@@ -123,7 +123,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
                 }
             }
 
-            var result = new HassWebBackForwardList
+            var result = new WebViewBackForwardList
             {
                 History = historyItems,
                 CurrentIndex = nativeList.CurrentIndex

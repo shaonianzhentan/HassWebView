@@ -27,7 +27,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     private string _pendingBaseUrl;
 
     // --- ADDED: Manual History Tracking for Windows ---
-    private readonly List<HassWebHistoryItem> _history = new();
+    private readonly List<WebViewHistoryItem> _history = new();
     private int _currentIndex = -1;
     private CoreWebView2NavigationKind _navigationKind;
     // --------------------------------------------------
@@ -93,16 +93,16 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         // --- MODIFIED: To use manual history ---
         [nameof(HassWebView.GetBackForwardListAsync)] = (handler, _, args) =>
         {
-            if (args is not TaskCompletionSource<HassWebBackForwardList> tcs) return;
+            if (args is not TaskCompletionSource<WebViewBackForwardList> tcs) return;
             if (handler is not HassWebViewHandler h)
             {
-                tcs.SetResult(new HassWebBackForwardList { History = new List<HassWebHistoryItem>(), CurrentIndex = -1 });
+                tcs.SetResult(new WebViewBackForwardList { History = new List<WebViewHistoryItem>(), CurrentIndex = -1 });
                 return;
             }
 
-            var result = new HassWebBackForwardList
+            var result = new WebViewBackForwardList
             {
-                History = new List<HassWebHistoryItem>(h._history),
+                History = new List<WebViewHistoryItem>(h._history),
                 CurrentIndex = h._currentIndex
             };
 
@@ -270,7 +270,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
                     
                     if (_currentIndex == -1 || _history[_currentIndex].Url != sender.Source)
                     {
-                        _history.Add(new HassWebHistoryItem { Url = sender.Source, Title = sender.DocumentTitle });
+                        _history.Add(new WebViewHistoryItem { Url = sender.Source, Title = sender.DocumentTitle });
                         _currentIndex = _history.Count - 1;
                     }
                     break;
