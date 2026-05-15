@@ -1,6 +1,7 @@
 using HassWebView.Core.Bridges;
 using HassWebView.Core.Events;
-using Microsoft.Maui.Controls; // Added for MainThread
+using HassWebView.Core.Models;
+using Microsoft.Maui.Controls;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,47 +14,51 @@ namespace HassWebView.Core
     public class HassWebView : WebView
     {
         #region Events for Home Assistant Authentication
-        /// <summary>
-        /// Raised when the web content requests a new authentication token.
-        /// The page hosting this WebView should handle this event, retrieve a new token,
-        /// </summary>
         public event EventHandler AuthTokenRequested;
-
-        /// <summary>
-        /// Raised when the web content requests to log out.
-        /// </summary>
         public event EventHandler LogoutRequested;
-
-        /// <summary>
-        /// Raised when the web content sends a message via the external bus.
-        /// </summary>
         public event EventHandler<string> ExternalBusMessageReceived;
         #endregion
 
+        /// <summary>
+        /// Provides access to the injected JavaScript APIs.
+        /// </summary>
+        public HassWebViewApi Web { get; }
+
         public HassWebView()
         {
-            // The JS bridge for Home Assistant communication is now built-in.
+            Web = new HassWebViewApi(this);
+
             JsBridges.Add("externalApp", new ExternalApp((type, msg) =>
             {
                 switch (type)
                 {
                     case "getExternalAuth":
-                        // The web page is asking for a token. Raise the event to notify the host page.
                         AuthTokenRequested?.Invoke(this, EventArgs.Empty);
                         break;
                     case "revokeExternalAuth":
-                        // The web page wants to log out. Raise the event.
                         LogoutRequested?.Invoke(this, EventArgs.Empty);
                         break;
                     case "externalBus":
-                        // Pass the message to the host page
                         ExternalBusMessageReceived?.Invoke(this, msg as string);
                         break;
                 }
             }));
         }
 
-        // --- The rest of your original code remains untouched --- 
+        // --- Focus and Unfocus Methods ---
+        public new void Focus()
+        {
+            if (Handler == null) return;
+            Handler.Invoke(nameof(Focus));
+        }
+
+        public new void Unfocus()
+        {
+            if (Handler == null) return;
+            Handler.Invoke(nameof(Unfocus));
+        }
+
+        // --- The user's original code remains untouched --- 
 
         public static readonly BindableProperty JsBridgesProperty =
             BindableProperty.Create(nameof(JsBridges), typeof(IDictionary<string, object>), typeof(HassWebView),
@@ -108,7 +113,7 @@ namespace HassWebView.Core
         }
 
         internal void SendNavigated(WebNavigatedEventArgs args)
-        { 
+        {
             Navigated?.Invoke(this, args);
         }
 
@@ -135,12 +140,40 @@ namespace HassWebView.Core
                 }
                 catch (Exception ex)
                 {
-                    // 防止异常导致 Task 无法完成
                     tcs.TrySetException(ex);
                 }
             });
             return tcs.Task;
         }
+
+        #region New Method for Getting BackForwardList
+        /// <summary>
+        /// Asynchronously retrieves a snapshot of the WebView's navigation history.
+        /// </summary>
+        public Task<HassWebBackForwardList> GetBackForwardListAsync()
+        {
+            var tcs = new TaskCompletionSource<HassWebBackForwardList>();
+
+            if (Handler == null)
+            {
+                tcs.SetException(new InvalidOperationException("Handler is not initialized."));
+                return tcs.Task;
+            }
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                try
+                {
+                    Handler.Invoke(nameof(GetBackForwardListAsync), tcs);
+                }
+                catch (Exception ex)
+                { 
+                    tcs.TrySetException(ex);
+                }
+            });
+            return tcs.Task;
+        }
+        #endregion
 
         public void WindowExternalBus<T>(T message)
         {
@@ -151,11 +184,7 @@ namespace HassWebView.Core
 
         public void SimulateTouch(int x, int y)
         {
-            if (Handler == null)
-            {
-                return;
-            }
-
+            if (Handler == null) return;
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 Handler.Invoke(nameof(SimulateTouch), new SimulateTouchRequest(x, y));
@@ -164,11 +193,7 @@ namespace HassWebView.Core
 
         public void SimulateTouchSlide(int x1, int y1, int x2, int y2, int duration)
         {
-            if (Handler == null)
-            {
-                return;
-            }
-
+            if (Handler == null) return;
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 Handler.Invoke(nameof(SimulateTouchSlide), new SimulateTouchSlideRequest(x1, y1, x2, y2, duration));

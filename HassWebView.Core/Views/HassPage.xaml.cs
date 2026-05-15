@@ -23,8 +23,8 @@ public partial class HassPage : ContentPage, IKeyHandler
     private readonly HassPageOptions _pageOptions;
     private readonly IAuthStore _authStore;
     private readonly IHassApiService _hassApiService;
+    private DateTime? _lastBackPressTime;
 
-    // 构造函数已修正：移除了不再需要的 IServiceProvider
     public HassPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService keyService = null, HttpServer httpServer = null)
     {
         InitializeComponent();
@@ -106,19 +106,15 @@ public partial class HassPage : ContentPage, IKeyHandler
     {
         Debug.WriteLine($"[HassPage] Navigating to: {e.Url}");
 
-        // 只有在完全认证后才应用外部链接逻辑
         if (_state == PageState.Authenticated && Uri.TryCreate(e.Url, UriKind.Absolute, out var navUri))
         {
             var hassUrl = await _authStore.GetHassUrlAsync();
             if (Uri.TryCreate(hassUrl, UriKind.Absolute, out var hassUri))
             {
-                // 如果导航目标的主机与Hass实例的主机不同，则调用委托打开新页面
                 if (navUri.Host != hassUri.Host)
                 {
                     Debug.WriteLine($"[HassPage] External URL detected. Opening with delegate: {e.Url}");
-                    e.Cancel = true; // 取消当前导航
-
-                    // 遵从您的设计，使用您提供的 OpenWebPage 委托
+                    e.Cancel = true;
                     _pageOptions.OpenWebPage?.Invoke(e.Url);
                     return;
                 }
@@ -370,18 +366,60 @@ public partial class HassPage : ContentPage, IKeyHandler
 
     public string[] GetUnhandledKeys() => new string[] { "VolumeUp", "VolumeDown" };
 
-    public void OnSingleClick(RemoteKeyEventArgs args)
+    public async void OnSingleClick(RemoteKeyEventArgs args)
     {
-        webView.OnSingleClick(args.KeyName);
+        if (args.KeyName == "Back")
+        {
+            var wv = webView.WebViewControl;
+
+            bool isAboutToExit = false;
+            if (!wv.CanGoBack)
+            {
+                isAboutToExit = true;
+            }
+            else
+            {
+                var backForwardList = await wv.GetBackForwardListAsync();
+                if (backForwardList?.CurrentIndex == 1)
+                {
+                    isAboutToExit = true;
+                }
+            }
+
+            if (isAboutToExit)
+            {
+                if (_lastBackPressTime.HasValue && (DateTime.UtcNow - _lastBackPressTime.Value).TotalSeconds < 2)
+                {
+                    Application.Current.Quit();
+                }
+                else
+                {
+                    _lastBackPressTime = DateTime.UtcNow;
+                    ToastService.Show("再按一次退出应用");
+                }
+            }
+            else
+            {
+                _lastBackPressTime = null;
+                wv.GoBack();
+            }
+        }
+        else
+        {
+            _lastBackPressTime = null;
+            webView.OnSingleClick(args.KeyName);
+        }
     }
 
     public void OnDoubleClick(RemoteKeyEventArgs args)
     {
+        _lastBackPressTime = null;
         webView.OnDoubleClick(args.KeyName);
     }
 
     public async void OnLongClick(RemoteKeyEventArgs args)
     {
+        _lastBackPressTime = null;
         if (webView.OnLongClick(args.KeyName)) return;
 
         if (args.KeyName == "Back")

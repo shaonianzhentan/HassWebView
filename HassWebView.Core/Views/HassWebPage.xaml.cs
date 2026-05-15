@@ -112,8 +112,8 @@ public partial class HassWebPage : ContentPage, IKeyHandler
 
             if (!string.IsNullOrWhiteSpace(config.Css))
             {
-                string escapedCss = config.Css.Replace("'", "\'").Replace("`", "\\`").Replace("$", "\\$");
-                await ResourceHelper.ExecuteScriptAsync(wv, "Scripts/CssInjector.js", $"HassCssInjector.inject(`{escapedCss}`, '{host}');");
+                await wv.Web.InjectCssAsync(config.Css, host);
+                Debug.WriteLine($"[HassWebPage] Injected custom CSS for {host}.");
             }
 
             if (!string.IsNullOrWhiteSpace(config.Js))

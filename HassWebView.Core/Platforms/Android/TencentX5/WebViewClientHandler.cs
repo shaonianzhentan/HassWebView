@@ -2,6 +2,7 @@ using Android.Graphics;
 using Com.Tencent.Smtt.Export.External.Interfaces;
 using Com.Tencent.Smtt.Sdk;
 using HassWebView.Core.Events;
+using HassWebView.Core.Services;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
@@ -128,17 +129,31 @@ public class WebViewClientHandler : WebViewClient
         base.OnPageStarted(view, url, p2);
     }
 
-    public override void OnPageFinished(WebView view, string url)
+    public override async void OnPageFinished(WebView view, string url)
     {
         base.OnPageFinished(view, url);
         _webView.SendNavigated(new WebNavigatedEventArgs(WebNavigationEvent.NewPage, new UrlWebViewSource { Url = url }, url, WebNavigationResult.Success));
+
+        try
+        {
+            var injectedScript = await ResourceHelper.GetResourceAsync("Scripts/injected.js");
+            if (!string.IsNullOrEmpty(injectedScript))
+            {
+                view.Post(() => view.EvaluateJavascript(injectedScript, null));
+            }
+        }
+        catch (Exception ex)
+        { 
+            Debug.WriteLine($"[WebViewClientHandler] Error injecting script 'injected.js': {ex.Message}");
+        }
     }
 
-    public override void DoUpdateVisitedHistory(WebView view, string url, bool isReload)
+    public override async void DoUpdateVisitedHistory(WebView view, string url, bool isReload)
     {
         base.DoUpdateVisitedHistory(view, url, isReload);
-        _webView.CanGoBack = view.CanGoBack();
-        _webView.CanGoForward = view.CanGoForward();
+        var list = await _webView.GetBackForwardListAsync();
+        _webView.CanGoBack = list.CurrentIndex > 0;
+        _webView.CanGoForward = list.CurrentIndex < list.History.Count - 1;
     }
 
     public override void OnReceivedSslError(WebView p0, ISslErrorHandler p1, ISslError p2)

@@ -3,12 +3,14 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Com.Tencent.Smtt.Sdk;
+using HassWebView.Core.Models; // Add model namespace
 using HassWebView.Core.Platforms.Android.TencentX5;
 using Java.Interop;
 using Java.Lang;
 using Microsoft.Maui.Handlers;
 using System;
 using System.Collections.Generic;
+using System.Linq; // Add for LINQ operations
 using System.Threading.Tasks;
 
 namespace HassWebView.Core.Platforms.Android;
@@ -57,6 +59,21 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
                 wv.GoForward();
             }
         },
+        [nameof(HassWebView.Focus)] = (handler, view, args) =>
+        {
+
+            if (handler.PlatformView is WebView wv)
+            {
+                wv.RequestFocus();
+            }
+        },
+        [nameof(HassWebView.Unfocus)] = (handler, view, args) =>
+        {
+            if (handler.PlatformView is WebView wv)
+            {
+                wv.ClearFocus();
+            }
+        },
         [nameof(HassWebView.ExitFullscreen)] = (handler, view, args) =>
         {
             if (handler.PlatformView is WebView wv)
@@ -74,6 +91,45 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
                     request.TaskCompletionSource.SetResult(result);
                 }));
             }
+        },
+        // New command mapping for GetBackForwardListAsync
+        [nameof(HassWebView.GetBackForwardListAsync)] = (handler, _, args) =>
+        {
+            if (args is not TaskCompletionSource<HassWebBackForwardList> tcs) return;
+            if (handler.PlatformView is not WebView platformView) 
+            {
+                tcs.SetResult(new HassWebBackForwardList { History = new List<HassWebHistoryItem>() });
+                return;
+            }
+
+            var nativeList = platformView.CopyBackForwardList();
+            if (nativeList == null)
+            {
+                tcs.SetResult(new HassWebBackForwardList { History = new List<HassWebHistoryItem>() });
+                return;
+            }
+
+            var historyItems = new List<HassWebHistoryItem>();
+            for (int i = 0; i < nativeList.Size; i++)
+            {
+                var nativeItem = nativeList.GetItemAtIndex(i);
+                if (nativeItem != null)
+                {
+                    historyItems.Add(new HassWebHistoryItem
+                    {
+                        Url = nativeItem.Url,
+                        Title = nativeItem.Title
+                    });
+                }
+            }
+
+            var result = new HassWebBackForwardList
+            {
+                History = historyItems,
+                CurrentIndex = nativeList.CurrentIndex
+            };
+
+            tcs.SetResult(result);
         },
         [nameof(HassWebView.SimulateTouch)] = (handler, _, args) =>
         {

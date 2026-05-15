@@ -5,25 +5,25 @@ using System.Web;
 namespace HassWebView.Core.Services;
 
 /// <summary>
-/// 定义远程控制服务的接口，用于注册和清除活动的 WebView 控件。
+/// Defines the interface for the remote control service, which manages the active WebView control for remote commands.
 /// </summary>
 public interface IRemoteControlService
 {
     /// <summary>
-    /// 设置当前活动的、可被远程控制的 WebViewWithCursor 实例。
+    /// Sets the currently active WebViewWithCursor instance that can be controlled remotely.
     /// </summary>
-    /// <param name="control">当前在界面上可见的控件实例。</param>
+    /// <param name="control">The control instance that is currently visible on the screen.</param>
     void SetActiveControl(WebViewWithCursor control);
 
     /// <summary>
-    /// 当控件从界面移除时，清除对它的引用。
+    /// Clears the reference to the control when it is no longer visible or active.
     /// </summary>
-    /// <param name="control">不再可见的控件实例。</param>
+    /// <param name="control">The control instance that is no longer active.</param>
     void ClearActiveControl(WebViewWithCursor control);
 }
 
 /// <summary>
-/// 远程控制服务的实现类。这是一个单例服务。
+/// Implementation of the remote control service. This is a singleton service.
 /// </summary>
 public class RemoteControlService : IRemoteControlService
 {
@@ -71,7 +71,10 @@ public class RemoteControlService : IRemoteControlService
                 case "text":
                     var append = query["append"] == "1";
                     var text = query["text"];
-                    await ResourceHelper.ExecuteScriptAsync(_activeControl.WebViewControl, "Scripts/TextInput.js", $"HassTextInput.insert(\'{text.Replace("\'", "\\\'")}\', {append.ToString().ToLower()});");
+                    if (_activeControl.WebViewControl != null)
+                    {
+                        await _activeControl.WebViewControl.Web.InsertTextAsync(text, append);
+                    }
                     break;
                 default:
                     Debug.WriteLine($"[RemoteControlService] Unknown remote command type: {type}");
