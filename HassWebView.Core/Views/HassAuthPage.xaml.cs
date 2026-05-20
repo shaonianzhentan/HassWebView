@@ -4,6 +4,7 @@ using HassWebView.Core.Interfaces;
 using HassWebView.HassApi;
 using HassWebView.HassApi.Models;
 using System.Diagnostics;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Web;
 using System.Runtime.InteropServices;
@@ -75,7 +76,6 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
             _hassApiService.Initialize(hassApi);
 
             var deviceId = await _authStore.GetDeviceIdAsync();
-            var pushUrl = string.IsNullOrEmpty(_pageOptions.PushUrl) && _httpServer != null ? _httpServer.BaseUrl : _pageOptions.PushUrl;
             var registrationRequest = new MobileAppRegistrationRequest
             {
                 AppId = AppInfo.Current.PackageName,
@@ -88,7 +88,7 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
                 OsName = DeviceInfo.Current.Platform.ToString(),
                 OsVersion = DeviceInfo.Current.VersionString,
                 SupportsEncryption = false,
-                AppData = new MobileAppData(deviceId, pushUrl)
+                AppData = new MobileAppData(deviceId, _pageOptions.PushUrl)
             };
 
             var registrationResult = await hassApi.RegisterMobileAppAsync(registrationRequest);
@@ -110,42 +110,44 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
         if (string.IsNullOrEmpty(message)) return;
         var wv = webView.WebViewControl;
 
-        var msg = JsonNode.Parse(message);
-        var type = msg?["type"]?.GetValue<string>();
-
-        switch (type)
+        try
         {
-            case "webview/auth":
-                var urlFromForm = msg?["data"]?.GetValue<string>();
-                var auth = new HassAuth(urlFromForm);
-                if (await auth.CheckApiStatusAsync())
-                {
-                    await _authStore.SetHassUrlAsync(auth.BaseUrl);
-                    await MainThread.InvokeOnMainThreadAsync(() =>
-                    {
-                        _state = PageState.InLoginFlow;
-                        wv.Source = auth.AuthorizeUri;
-                    });
-                }
-                else
-                {
-                    wv.WindowExternalBus(new { type = "webview/auth", message = "无法访问提供的URL，请确保它是正确的Home Assistant实例地址。" });
-                }
-                break;
-            
-            case "webview/config":
-                 var hassUrl = await _authStore.GetHassUrlAsync();
-                 wv.WindowExternalBus(new { type = "webview/config", data = new { hassUrl, remoteUrl = (string)null } });
-                 break;
+            var msg = JsonNode.Parse(message);
+            var type = msg?["type"]?.GetValue<string>();
 
-            case "x5/init":
+            switch (type)
+            {
+                case "webview/auth":
+                    var urlFromForm = msg?["data"]?.GetValue<string>();
+                    var auth = new HassAuth(urlFromForm);
+                    if (await auth.CheckApiStatusAsync())
+                    {
+                        await _authStore.SetHassUrlAsync(auth.BaseUrl);
+                        await MainThread.InvokeOnMainThreadAsync(() =>
+                        {
+                            _state = PageState.InLoginFlow;
+                            wv.Source = auth.AuthorizeUri;
+                        });
+                    }
+                    else
+                    {
+                        wv.WindowExternalBus(new { type = "webview/auth", message = "无法访问提供的URL，请确保它是正确的Home Assistant实例地址。" });
+                    }
+                    break;
+                
+                case "webview/config":
+                     var hassUrl = await _authStore.GetHassUrlAsync();
+                     wv.WindowExternalBus(new { type = "webview/config", data = new { hassUrl, remoteUrl = (string)null } });
+                     break;
+
+                case "x5/init": // RESTORED X5 INITIALIZATION LOGIC
 #if ANDROID
                     string apkUrl = string.Empty;
                     if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64) apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm64_046295.tbs.apk";
                     else if (RuntimeInformation.ProcessArchitecture == Architecture.Arm) apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm_045912_x5.tbs.apk";
                     if (!string.IsNullOrEmpty(apkUrl))
                     {
-                        Debug.WriteLine($"[ExternalBus] Initializing Tencent X5 Core with APK: {apkUrl}");
+                        Debug.WriteLine($"[HassAuthPage] Initializing Tencent X5 Core with APK: {apkUrl}");
                         var result = await TencentX5Service.InitializeX5CoreAsync(apkUrl, (progress) => {
                             wv.WindowExternalBus(new { type = "x5/download", data = progress });
                         });
@@ -153,6 +155,11 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
                     }
 #endif
                     break;
+            }
+        }
+        catch (JsonException ex)
+        {
+            Debug.WriteLine($"[HassAuthPage] Error parsing JSON: {ex.Message}");
         }
     }
 
