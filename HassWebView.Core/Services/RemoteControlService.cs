@@ -9,16 +9,7 @@ namespace HassWebView.Core.Services;
 /// </summary>
 public interface IRemoteControlService
 {
-    /// <summary>
-    /// Sets the currently active WebViewWithCursor instance that can be controlled remotely.
-    /// </summary>
-    /// <param name="control">The control instance that is currently visible on the screen.</param>
     void SetActiveControl(WebViewWithCursor control);
-
-    /// <summary>
-    /// Clears the reference to the control when it is no longer visible or active.
-    /// </summary>
-    /// <param name="control">The control instance that is no longer active.</param>
     void ClearActiveControl(WebViewWithCursor control);
 }
 
@@ -65,9 +56,27 @@ public class RemoteControlService : IRemoteControlService
                 case "move":
                     _activeControl._cursorControl.MoveBy(Convert.ToDouble(query["x"]), Convert.ToDouble(query["y"]));
                     break;
+
                 case "click":
                     _activeControl._cursorControl.Click();
                     break;
+
+                case "slideup":
+                    _activeControl._cursorControl.SlideUp();
+                    break;
+
+                case "slidedown":
+                    _activeControl._cursorControl.SlideDown();
+                    break;
+
+                case "slideleft":
+                    _activeControl._cursorControl.SlideLeft();
+                    break;
+
+                case "slideright":
+                    _activeControl._cursorControl.SlideRight();
+                    break;
+
                 case "text":
                     var append = query["append"] == "1";
                     var text = query["text"];
@@ -76,6 +85,14 @@ public class RemoteControlService : IRemoteControlService
                         await _activeControl.WebViewControl.Web.InsertTextAsync(text, append);
                     }
                     break;
+                case "key":
+                    var key = query["key"];
+                    if (_activeControl.WebViewControl != null)
+                    {
+                        await _activeControl.WebViewControl.Web.SimulateKeyPressAsync(key);
+                    }
+                    break;
+
                 default:
                     Debug.WriteLine($"[RemoteControlService] Unknown remote command type: {type}");
                     break;

@@ -51,4 +51,15 @@ public class HassWebViewApi
         var script = $"window.HassWebView.insertText({textJson}, {append.ToString().ToLower()});";
         return _webView.EvaluateJavaScriptAsync(script);
     }
+
+    /// <summary>
+    /// Simulates a key press event by calling the injected JavaScript function.
+    /// </summary>
+    /// <param name="key">The key to simulate (e.g., 'Tab', 'Enter').</param>
+    public Task SimulateKeyPressAsync(string key)
+    {
+        var keyJson = JsonSerializer.Serialize(key);
+        var script = $"window.HassWebView.simulateKeyPress({keyJson});";
+        return _webView.EvaluateJavaScriptAsync(script);
+    }
 }
