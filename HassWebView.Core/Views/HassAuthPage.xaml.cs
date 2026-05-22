@@ -17,6 +17,11 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
     private enum PageState { NeedsAuth, InLoginFlow }
     private PageState _state = PageState.NeedsAuth;
 
+    /// <summary>
+    /// 标记授权是否成功完成，供外部判断 Modal 关闭原因。
+    /// </summary>
+    public bool IsAuthenticated { get; private set; } = false;
+
     private readonly HassPageOptions _pageOptions;
     private readonly IAuthStore _authStore;
     private readonly IHassApiService _hassApiService;
@@ -101,6 +106,7 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
             await _authStore.SetWebhookIdAsync(registrationResult.WebhookId);
 
             // Authentication successful, close the modal page.
+            IsAuthenticated = true;
             await MainThread.InvokeOnMainThreadAsync(() => Navigation.PopModalAsync());
         }
     }
@@ -178,7 +184,7 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
 
     public string[] GetUnhandledKeys() => new string[] { "VolumeUp", "VolumeDown" };
 
-    // Handle back press: go back in WebView if possible, otherwise do nothing.
+    // Handle back press: go back in WebView if possible, otherwise close the modal.
     public void OnSingleClick(RemoteKeyEventArgs args)
     {
         if (args.KeyName == "Back")
@@ -187,7 +193,11 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
             {
                 webView.WebViewControl.GoBack();
             }
-            // If we can't go back, do nothing. The user can close the modal page manually.
+            else
+            {
+                // 无法继续返回，关闭 Modal 让用户回到主页面
+                MainThread.BeginInvokeOnMainThread(() => Navigation.PopModalAsync());
+            }
         }
         else
         {

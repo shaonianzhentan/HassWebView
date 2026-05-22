@@ -19,13 +19,15 @@ public partial class HassPage : ContentPage, IKeyHandler
 
     private readonly HttpServer _httpServer;
     private readonly KeyService _keyService;
+    private readonly IRemoteControlService _remoteControlService;
     private readonly HassPageOptions _pageOptions;
     private readonly IAuthStore _authStore;
     private readonly IHassApiService _hassApiService;
     private DateTime? _lastBackPressTime;
     private bool _isAuthPagePresented = false; // Prevents re-entrant navigation
+    private bool _authDismissed = false; // Prevents re-showing auth after user dismissed it
 
-    public HassPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService keyService = null, HttpServer httpServer = null)
+    public HassPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService keyService = null, HttpServer httpServer = null, IRemoteControlService remoteControlService = null)
     {
         InitializeComponent();
 
@@ -34,6 +36,7 @@ public partial class HassPage : ContentPage, IKeyHandler
         _keyService = keyService;
         _httpServer = httpServer;
         _hassApiService = hassApiService;
+        _remoteControlService = remoteControlService;
 
         if (_httpServer != null && string.IsNullOrEmpty(_pageOptions.PushUrl))
         {
@@ -52,6 +55,8 @@ public partial class HassPage : ContentPage, IKeyHandler
     {
         base.OnAppearing();
 
+        _remoteControlService?.SetActiveControl(webView);
+
         // The core logic now resides here to be executed every time the page appears.
         await CheckAuthAndLoadAsync();
     }
@@ -60,6 +65,9 @@ public partial class HassPage : ContentPage, IKeyHandler
     {
         // If auth page is already shown, do nothing.
         if (_isAuthPagePresented) return;
+
+        // If user explicitly dismissed auth, don't re-show it.
+        if (_authDismissed) return;
 
         var hassUrl = await _authStore.GetHassUrlAsync();
         var refreshToken = await _authStore.GetRefreshTokenAsync();
@@ -156,6 +164,7 @@ public partial class HassPage : ContentPage, IKeyHandler
     protected override void OnDisappearing()
     {
         _keyService?.StopRepeatingAction();
+        _remoteControlService?.ClearActiveControl(webView);
         base.OnDisappearing();
     }
 
@@ -186,12 +195,21 @@ public partial class HassPage : ContentPage, IKeyHandler
     {
         if (_isAuthPagePresented) return;
         _isAuthPagePresented = true;
+        _authDismissed = false; // Reset when explicitly navigating to auth
 
         if (!string.IsNullOrEmpty(message)) ToastService.Show(message);
 
         // Create the auth page, passing all necessary dependencies.
         var authPage = new HassAuthPage(_pageOptions, _hassApiService, _keyService, _httpServer);
-        
+
+        // When auth page is closed, check if authentication was successful.
+        // If not, mark as dismissed to prevent re-showing auth in OnAppearing.
+        authPage.Disappearing += (s, e) =>
+        {
+            if (!authPage.IsAuthenticated)
+                _authDismissed = true;
+        };
+
         await MainThread.InvokeOnMainThreadAsync(() => Navigation.PushModalAsync(authPage));
         
         _isAuthPagePresented = false; // Reset after navigation

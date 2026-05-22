@@ -54,7 +54,6 @@ public partial class HassWebPage : ContentPage, IKeyHandler
     private void OnWebViewNavigating(object? sender, WebNavigatingEventArgs e)
     {
         var wv = webView.WebViewControl;
-        webView.Focus(); // 临时解决问题，还是要找到如果阻止页面接管按键事件的方法
         Debug.WriteLine($"[HassWebPage] Navigating to: {e.Url}");
 
         if (string.IsNullOrEmpty(_defaultUserAgent) && !string.IsNullOrEmpty(wv.UserAgent))
