@@ -1,44 +1,42 @@
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace HassWebView.AndroidService.AdSkipping
+namespace HassWebView.AndroidService.AdSkipping;
+
+/// <summary>Represents a single application entry in a GKD subscription file.</summary>
+public class GkdApp
 {
-    // Represents a single application in the subscription file
-    public class GkdApp
-    {
-        [JsonPropertyName("id")]
-        public string Id { get; set; }
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
 
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
 
-        [JsonPropertyName("groups")]
-        public List<GkdGroup> Groups { get; set; }
-    }
+    [JsonPropertyName("groups")]
+    public List<GkdGroup> Groups { get; set; } = [];
+}
 
-    // Represents a group of rules for a specific scenario (e.g., "Splash Ad")
-    public class GkdGroup
-    {
-        [JsonPropertyName("key")]
-        public int Key { get; set; }
+/// <summary>A group of rules for a specific scenario (e.g. "Splash Ad").</summary>
+public class GkdGroup
+{
+    [JsonPropertyName("key")]
+    public int Key { get; set; }
 
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
 
-        [JsonPropertyName("rules")]
-        public List<GkdRule> Rules { get; set; }
-    }
+    [JsonPropertyName("rules")]
+    public List<GkdRule> Rules { get; set; } = [];
+}
 
-    // Represents a single rule that identifies a UI element
-    public class GkdRule
-    {
-        [JsonPropertyName("matches")]
-        public string Matches { get; set; }
+/// <summary>A single rule that identifies a UI element to click.</summary>
+public class GkdRule
+{
+    [JsonPropertyName("matches")]
+    public string Matches { get; set; } = string.Empty;
 
-        [JsonPropertyName("excludeMatches")]
-        public string ExcludeMatches { get; set; }
+    [JsonPropertyName("excludeMatches")]
+    public string? ExcludeMatches { get; set; }
 
-        [JsonPropertyName("action")]
-        public string Action { get; set; }
-    }
+    [JsonPropertyName("action")]
+    public string? Action { get; set; }
 }

@@ -9,33 +9,22 @@ namespace HassWebView.AndroidService.NotificationForwarding
     /// </summary>
     public interface INotificationForwardingManager
     {
-        /// <summary>
-        /// Checks if the notification listener permission is granted for the service.
-        /// </summary>
-        /// <returns>True if permission is granted, otherwise false.</returns>
+        /// <summary>Checks if the notification listener permission is granted.</summary>
         bool IsPermissionEnabled();
 
-        /// <summary>
-        /// Opens the system's security settings screen to let the user grant notification access.
-        /// </summary>
+        /// <summary>Opens the system notification access settings screen.</summary>
         void RequestPermission();
 
         /// <summary>
-        /// Gets a list of all user-installed applications that can be launched.
+        /// Returns all user-installed apps (excludes system apps).
+        /// Each item may carry a Base64 icon for display in selection UI.
         /// </summary>
-        /// <returns>A list of ForwardingAppInfo objects.</returns>
-        Task<IEnumerable<ForwardingAppInfo>> GetInstalledApps();
+        Task<IEnumerable<InstalledAppInfo>> GetInstalledApps();
 
-        /// <summary>
-        /// Retrieves the list of package names for the apps selected by the user for notification forwarding.
-        /// </summary>
-        /// <returns>A list of package names.</returns>
+        /// <summary>Returns the persisted list of selected package names.</summary>
         Task<IEnumerable<string>> GetSelectedApps();
 
-        /// <summary>
-        /// Saves the user's selection of apps for notification forwarding.
-        /// </summary>
-        /// <param name="selectedApps">A list of package names to save.</param>
+        /// <summary>Persists the user’s app selection.</summary>
         Task SaveSelectedApps(IEnumerable<string> selectedApps);
     }
 }

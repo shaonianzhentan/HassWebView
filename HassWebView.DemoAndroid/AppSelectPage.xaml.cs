@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Text.Json;
-using HassWebView.AndroidService;
 using HassWebView.AndroidService.Models;
+using HassWebView.AndroidService.NotificationForwarding;
 
 namespace HassWebView.DemoAndroid;
 
@@ -71,7 +71,7 @@ public partial class AppSelectPage : ContentPage
         LoadingIndicator.IsRunning = true;
         AppList.IsVisible = false;
 
-        _allApps = await Task.Run(InstalledAppService.GetInstalledApps);
+        _allApps = await Task.Run(NotificationForwardingManager.GetLauncherApps);
 
         // Restore saved selections and sort selected items to top
         var savedPackages = LoadSelectedPackages().ToHashSet();

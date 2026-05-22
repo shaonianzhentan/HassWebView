@@ -1,26 +1,18 @@
-using System;
 using Microsoft.Maui;
-using System.Threading.Tasks;
-using HassWebView.AndroidService.AdSkipping;
 
-namespace HassWebView.AndroidService.AdSkipping
+namespace HassWebView.AndroidService.AdSkipping;
+
+/// <summary>
+/// Initializes the ad-skipping rules when the application starts.
+/// </summary>
+public class AdSkippingInitializeService : IMauiInitializeService
 {
-    /// <summary>
-    /// Initializes the ad skipping rules when the application starts.
-    /// </summary>
-    public class AdSkippingInitializeService : IMauiInitializeService
-    {
-        private readonly IAdSkippingManager _adSkippingManager;
+    private readonly IAdSkippingManager _adSkippingManager;
 
-        public AdSkippingInitializeService(IAdSkippingManager adSkippingManager)
-        {
-            _adSkippingManager = adSkippingManager;
-        }
+    public AdSkippingInitializeService(IAdSkippingManager adSkippingManager)
+        => _adSkippingManager = adSkippingManager;
 
-        public void Initialize(IServiceProvider services)
-        {
-            // Load rules from the locally saved file on startup without blocking.
-            Task.Run(() => _adSkippingManager.LoadRulesFromLocalFileAsync());
-        }
-    }
+    public void Initialize(IServiceProvider services)
+        // Load rules from the locally saved file on startup without blocking the UI.
+        => Task.Run(() => _adSkippingManager.LoadRulesFromLocalFileAsync());
 }
