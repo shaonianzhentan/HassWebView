@@ -12,6 +12,11 @@ public partial class WebViewWithCursor : ContentView
     public readonly CursorControl _cursorControl;
     private readonly IRemoteControlService _remoteControlService;
 
+    // Toast 相关
+    private CancellationTokenSource _toastCts;
+    private const int ToastDurationMs = 2500;
+    private const uint ToastFadeMs = 200;
+
     public WebViewWithCursor()
     {
         InitializeComponent();
@@ -37,6 +42,44 @@ public partial class WebViewWithCursor : ContentView
     private void OnUnloaded(object sender, EventArgs e)
     {
         _remoteControlService?.ClearActiveControl(this);
+    }
+
+    /// <summary>
+    /// 显示 Toast 提示，自动在指定时间后淡出消失。
+    /// 连续调用会取消上一次并立即显示新内容。
+    /// </summary>
+    public void ShowToast(string message, int durationMs = ToastDurationMs)
+    {
+        if (string.IsNullOrEmpty(message)) return;
+
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            // 取消上一个 Toast
+            _toastCts?.Cancel();
+            _toastCts = new CancellationTokenSource();
+            var token = _toastCts.Token;
+
+            toastLabel.Text = message;
+            toastPanel.IsVisible = true;
+
+            // 淡入
+            toastPanel.Opacity = 0;
+            await toastPanel.FadeTo(1, ToastFadeMs);
+
+            try
+            {
+                // 等待指定时间
+                await Task.Delay(durationMs, token);
+
+                // 淡出
+                await toastPanel.FadeTo(0, ToastFadeMs);
+                toastPanel.IsVisible = false;
+            }
+            catch (TaskCanceledException)
+            {
+                // 被新 Toast 取消，不做清理（新 Toast 会接管 UI）
+            }
+        });
     }
 
     public async Task LoadEmbeddedHtml(string resourcePath)

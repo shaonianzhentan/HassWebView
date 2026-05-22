@@ -1,58 +1,63 @@
-#if ANDROID
-using Android.Widget;
-#elif IOS
-using UIKit;
-#elif WINDOWS
-using Microsoft.Windows.AppNotifications;
-using Microsoft.Windows.AppNotifications.Builder;
-#endif
+using HassWebView.Core.Controls;
 
 namespace HassWebView.Core.Services
 {
     public static class ToastService
     {
-        public static void Show(string message)
+        /// <summary>
+        /// 显示 Toast 提示。
+        /// 通过当前活跃的 WebViewWithCursor 内嵌 Toast 显示，跨平台统一体验。
+        /// </summary>
+        public static void Show(string message, int durationMs = 2500)
         {
-#if ANDROID
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                Toast.MakeText(Platform.AppContext, message, ToastLength.Long).Show();
-            });
-#elif IOS
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                ShowAlert(message, 2.0);
-            });
-#elif WINDOWS
-            var notificationBuilder = new AppNotificationBuilder()
-                .AddText(message);
-            var notification = notificationBuilder.BuildNotification();
-            AppNotificationManager.Default.Show(notification);
-#else
-            System.Diagnostics.Debug.WriteLine($"Toast Request: {message}");
-#endif
+            var control = FindActiveWebViewWithCursor();
+            control?.ShowToast(message, durationMs);
         }
 
-#if IOS
-        private static void ShowAlert(string message, double seconds)
+        private static WebViewWithCursor FindActiveWebViewWithCursor()
         {
-            var alert = UIAlertController.Create(null, message, UIAlertControllerStyle.Alert);
-            var alertDelay = Foundation.NSTimer.CreateScheduledTimer(seconds, (ignore) =>
-            {
-                alert.DismissViewController(true, null);
-            });
+            var navigation = Shell.Current?.Navigation;
+            if (navigation == null) return null;
 
-            var rootController = UIApplication.SharedApplication.KeyWindow?.RootViewController;
-            if (rootController != null)
+            // 优先从 Modal 栈查找
+            if (navigation.ModalStack.Count > 0)
             {
-                var topController = rootController;
-                while (topController.PresentedViewController != null)
+                if (navigation.ModalStack.Last() is ContentPage page)
                 {
-                    topController = topController.PresentedViewController;
+                    var control = FindWebViewWithCursorInPage(page);
+                    if (control != null) return control;
                 }
-                topController.PresentViewController(alert, true, null);
             }
+
+            // 再从当前页查找
+            if (Shell.Current.CurrentPage is ContentPage currentPage)
+            {
+                return FindWebViewWithCursorInPage(currentPage);
+            }
+
+            return null;
         }
-#endif
+
+        private static WebViewWithCursor FindWebViewWithCursorInPage(ContentPage page)
+        {
+            return FindInChildren(page.Content);
+        }
+
+        private static WebViewWithCursor FindInChildren(Microsoft.Maui.IView view)
+        {
+            if (view is WebViewWithCursor wvc) return wvc;
+            if (view is ILayout layout)
+            {
+                foreach (var child in layout.Children)
+                {
+                    if (child is Microsoft.Maui.IView childView)
+                    {
+                        var found = FindInChildren(childView);
+                        if (found != null) return found;
+                    }
+                }
+            }
+            return null;
+        }
     }
 }
