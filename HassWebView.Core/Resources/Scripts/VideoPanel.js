@@ -79,7 +79,15 @@
             borderRadius: '0 10px 10px 0',
             boxSizing: 'border-box',
             zIndex: '2147483647',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            pointerEvents: 'auto'
+        });
+
+        // 阻止所有触摸/鼠标/指针事件穿透到下层页面元素
+        ['touchstart', 'touchmove', 'touchend', 'mousedown', 'mousemove', 'mouseup', 'click', 'pointerdown', 'pointermove', 'pointerup'].forEach(function(evt) {
+            container.addEventListener(evt, function(e) {
+                e.stopPropagation();
+            }, true);
         });
 
         const tabsContainer = document.createElement('div');

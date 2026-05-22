@@ -16,8 +16,8 @@ public partial class WebViewWithCursor : ContentView
     {
         InitializeComponent();
 
-        _keyService = IPlatformApplication.Current.Services.GetRequiredService<KeyService>();
-        _remoteControlService = IPlatformApplication.Current.Services.GetRequiredService<IRemoteControlService>();
+        _keyService = IPlatformApplication.Current.Services.GetService<KeyService>();
+        _remoteControlService = IPlatformApplication.Current.Services.GetService<IRemoteControlService>();
 
         if (_keyService != null)
         {
