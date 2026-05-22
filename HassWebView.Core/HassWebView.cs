@@ -1,6 +1,7 @@
 using HassWebView.Core.Bridges;
 using HassWebView.Core.Events;
 using HassWebView.Core.Models;
+using HassWebView.Core.Services;
 using Microsoft.Maui.Controls;
 using System;
 using System.Collections.Generic;
@@ -41,6 +42,9 @@ namespace HassWebView.Core
                     case "externalBus":
                         ExternalBusMessageReceived?.Invoke(this, msg as string);
                         break;
+                    case "onKeyEvent":
+                        HandleJsKeyEvent(msg as string);
+                        break;
                 }
             }));
         }
@@ -56,6 +60,34 @@ namespace HassWebView.Core
         {
             if (Handler == null) return;
             Handler.Invoke(nameof(Unfocus));
+        }
+
+        // --- Internal JS Key Event Handling ---
+        /// <summary>
+        /// 处理从 JS 透传过来的按键事件，直接路由到 KeyService。
+        /// 消息格式: "down:DpadUp" 或 "up:DpadCenter"
+        /// </summary>
+        private void HandleJsKeyEvent(string keyInfo)
+        {
+            if (string.IsNullOrEmpty(keyInfo)) return;
+
+            var keyService = IPlatformApplication.Current?.Services?.GetService<KeyService>();
+            if (keyService == null) return;
+
+            var separatorIndex = keyInfo.IndexOf(':');
+            if (separatorIndex < 0) return;
+
+            var eventType = keyInfo.Substring(0, separatorIndex);
+            var keyName = keyInfo.Substring(separatorIndex + 1);
+
+            if (eventType == "down")
+            {
+                keyService.OnPressedFromJs(keyName);
+            }
+            else if (eventType == "up")
+            {
+                keyService.OnReleasedFromJs();
+            }
         }
 
         // --- The user's original code remains untouched --- 

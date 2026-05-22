@@ -22,5 +22,10 @@ namespace HassWebView.Core.Bridges
         {
             _authAction?.Invoke("externalBus", message);
         }
+
+        public void onKeyEvent(string eventType, string key)
+        {
+            _authAction?.Invoke("onKeyEvent", $"{eventType}:{key}");
+        }
     }
 }

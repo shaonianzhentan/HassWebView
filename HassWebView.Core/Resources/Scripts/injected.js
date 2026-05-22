@@ -135,40 +135,65 @@
     console.log('[HassWebView] Injected script and API are ready.');
 
     /**
-     * 移除页面所有键盘监听事件
-     * 支持：keydown / keyup / keypress
+     * 按键事件拦截与透传
+     * 在 capture 阶段拦截导航按键（方向键/Enter/Escape），
+     * 透传到原生 Bridge -> KeyService 处理，避免被网页元素消费。
      */
-    function removeAllKeyListeners() {
-        // 定义要清除的键盘事件类型
-        const keyEvents = ['keydown', 'keyup', 'keypress'];
+    var _hwv_keyMap = {
+        'ArrowUp': 'DpadUp',
+        'ArrowDown': 'DpadDown',
+        'ArrowLeft': 'DpadLeft',
+        'ArrowRight': 'DpadRight',
+        'Enter': 'DpadCenter',
+        'Escape': 'Escape'
+    };
 
-        // 遍历清除 window / document / body 上的所有监听
-        [window, document, document.body].forEach(target => {
-            if (!target) return;
-            keyEvents.forEach(event => {
-                // 方案1：移除内联事件（onkeydown="" 这种）
-                target[`on${event}`] = null;
+    function _hwv_forwardKeyEvent(eventType, jsKey) {
+        var nativeKey = _hwv_keyMap[jsKey];
+        if (!nativeKey) return false;
 
-                // 方案2：覆盖 addEventListener，阻止后续新注册的键盘事件
-                const originalAdd = target.addEventListener;
-                target.addEventListener = function (type, listener, options) {
-                    if (!keyEvents.includes(type)) {
-                        // 非键盘事件正常注册
-                        return originalAdd.call(this, type, listener, options);
-                    }
-                    // 键盘事件直接拦截，不注册
-                    return undefined;
-                };
+        try {
+            // Android: 通过 AddJavascriptInterface 调用
+            if (window.externalApp && window.externalApp.onKeyEvent) {
+                window.externalApp.onKeyEvent(eventType, nativeKey);
+                return true;
+            }
+        } catch (e) { /* ignore */ }
 
-                // 方案3：暴力清空当前已注册的所有该事件（最有效）
-                target.cloneNode(true).replaceWith(target);
-            });
-        });
+        try {
+            // Windows: 通过 WebView2 WebMessage 调用
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage({
+                    BridgeName: 'externalApp',
+                    MethodName: 'onKeyEvent',
+                    Arguments: [eventType, nativeKey]
+                });
+                return true;
+            }
+        } catch (e) { /* ignore */ }
 
-        console.log('✅ 已移除页面所有键盘按键监听');
+        return false;
     }
 
-    // 执行：一键移除所有按键监听
-    window.addEventListener('load', removeAllKeyListeners);
+    function _hwv_handleKeyEvent(e, eventType) {
+        if (!_hwv_keyMap[e.key]) return; // 非导航按键，放行给网页正常处理
+
+        if (_hwv_forwardKeyEvent(eventType, e.key)) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+        }
+    }
+
+    // 使用 capture 阶段拦截，确保在所有其他监听器之前执行
+    document.addEventListener('keydown', function(e) {
+        _hwv_handleKeyEvent(e, 'down');
+    }, true);
+
+    document.addEventListener('keyup', function(e) {
+        _hwv_handleKeyEvent(e, 'up');
+    }, true);
+
+    console.log('[HassWebView] Key event forwarding initialized.');
 
 })(window);
