@@ -2,23 +2,19 @@
 {
     public partial class MainPage : ContentPage
     {
-        int count = 0;
-
         public MainPage()
         {
             InitializeComponent();
         }
 
-        private void OnCounterClicked(object? sender, EventArgs e)
+        private void OnViewAllTapped(object? sender, EventArgs e)
         {
-            count++;
+            // TODO: navigate to full device list
+        }
 
-            if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
-
-            SemanticScreenReader.Announce(CounterBtn.Text);
+        private void OnBrightnessChanged(object? sender, ValueChangedEventArgs e)
+        {
+            // e.NewValue contains the snapped brightness value
         }
     }
 }

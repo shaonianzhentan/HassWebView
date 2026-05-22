@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using HassWebView.Component;
+using Microsoft.Extensions.Logging;
 
 namespace HassWebView.DemoAndroid
 {
@@ -9,6 +10,7 @@ namespace HassWebView.DemoAndroid
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseHassComponents()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

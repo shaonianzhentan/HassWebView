@@ -4,11 +4,50 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:HassWebView.DemoAndroid"
-    Title="HassWebView.DemoAndroid">
+    Title="HassWebView Demo"
+    FlyoutBehavior="Flyout"
+    FlyoutBackgroundColor="{AppThemeBinding Light='#FFFFFF', Dark='#1C1C1E'}">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <!-- Flyout header -->
+    <Shell.FlyoutHeader>
+        <Grid HeightRequest="140"
+              BackgroundColor="{AppThemeBinding Light='#039BE5', Dark='#0277BD'}"
+              Padding="20,40,20,16">
+            <VerticalStackLayout VerticalOptions="End" Spacing="2">
+                <Label Text="HassWebView"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="White" />
+                <Label Text="Demo Android"
+                       FontSize="13"
+                       TextColor="#CCE5FF" />
+            </VerticalStackLayout>
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <!-- Main demo page -->
+    <FlyoutItem Title="组件演示" Icon="dotnet_bot.png" Route="MainPage">
+        <ShellContent ContentTemplate="{DataTemplate local:MainPage}" />
+    </FlyoutItem>
+
+    <!-- App selector page -->
+    <FlyoutItem Title="选择应用" Route="AppSelectPage">
+        <FlyoutItem.Icon>
+            <FontImageSource Glyph="&#x2637;"
+                             FontFamily="OpenSansRegular"
+                             Color="{AppThemeBinding Light='#039BE5', Dark='#03A9F4'}" />
+        </FlyoutItem.Icon>
+        <ShellContent ContentTemplate="{DataTemplate local:AppSelectPage}" />
+    </FlyoutItem>
+
+    <!-- Settings page -->
+    <FlyoutItem Title="设置" Route="SettingsPage">
+        <FlyoutItem.Icon>
+            <FontImageSource Glyph="&#x2699;"
+                             FontFamily="OpenSansRegular"
+                             Color="{AppThemeBinding Light='#039BE5', Dark='#03A9F4'}" />
+        </FlyoutItem.Icon>
+        <ShellContent ContentTemplate="{DataTemplate local:SettingsPage}" />
+    </FlyoutItem>
 
 </Shell>

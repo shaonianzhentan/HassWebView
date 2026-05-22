@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:hass="clr-namespace:HassWebView.Component;assembly=HassWebView.Component"
+             xmlns:models="clr-namespace:HassWebView.AndroidService.Models;assembly=HassWebView.AndroidService"
+             x:Class="HassWebView.DemoAndroid.AppSelectPage"
+             Title="选择应用"
+             BackgroundColor="{AppThemeBinding Light='#F5F5F7', Dark='#1C1C1E'}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="确定" Clicked="OnConfirmClicked" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Search bar -->
+        <Border Grid.Row="0"
+                StrokeThickness="0"
+                BackgroundColor="{AppThemeBinding Light='#FFFFFF', Dark='#2C2C2E'}"
+                Margin="16,12,16,4"
+                Padding="12,0">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12" />
+            </Border.StrokeShape>
+            <SearchBar x:Name="SearchBar"
+                       Placeholder="搜索应用名称或包名"
+                       BackgroundColor="Transparent"
+                       TextChanged="OnSearchTextChanged" />
+        </Border>
+
+        <!-- Selection summary -->
+        <Label x:Name="SummaryLabel"
+               Grid.Row="0"
+               VerticalOptions="End"
+               HorizontalOptions="End"
+               Margin="0,0,24,6"
+               FontSize="12"
+               TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}" />
+
+        <!-- App list -->
+        <CollectionView x:Name="AppList"
+                        Grid.Row="1"
+                        Margin="16,8,16,0"
+                        ItemsSource="{Binding FilteredApps}"
+                        SelectionMode="None">
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:InstalledAppInfo">
+                    <Border StrokeThickness="0"
+                            BackgroundColor="Transparent"
+                            Padding="0">
+
+                        <Grid ColumnDefinitions="56,*,Auto"
+                              ColumnSpacing="0"
+                              Padding="0,10">
+
+                            <!-- App icon -->
+                            <Border Grid.Column="0"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    StrokeThickness="0"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10" />
+                                </Border.StrokeShape>
+                                <Image Source="{Binding Icon}"
+                                       Aspect="AspectFit"
+                                       HorizontalOptions="Fill"
+                                       VerticalOptions="Fill" />
+                            </Border>
+
+                            <!-- App name + package -->
+                            <VerticalStackLayout Grid.Column="1"
+                                                 VerticalOptions="Center"
+                                                 Spacing="2">
+                                <Label Text="{Binding Name}"
+                                       FontSize="15"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}"
+                                       LineBreakMode="TailTruncation" />
+                                <Label Text="{Binding PackageName}"
+                                       FontSize="12"
+                                       TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}"
+                                       LineBreakMode="TailTruncation" />
+                            </VerticalStackLayout>
+
+                            <!-- Checkbox -->
+                            <CheckBox Grid.Column="2"
+                                      IsChecked="{Binding IsSelected}"
+                                      VerticalOptions="Center"
+                                      CheckedChanged="OnCheckBoxCheckedChanged" />
+
+                        </Grid>
+
+                        <!-- Bottom divider (drawn after each row inside a card-like wrapper) -->
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer CommandParameter="{Binding .}"
+                                                  Tapped="OnRowTapped" />
+                        </Border.GestureRecognizers>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <!-- Empty state -->
+            <CollectionView.EmptyView>
+                <VerticalStackLayout HorizontalOptions="Center"
+                                     VerticalOptions="Center"
+                                     Spacing="8"
+                                     Margin="0,60,0,0">
+                    <Label Text="没有找到匹配的应用"
+                           FontSize="15"
+                           HorizontalOptions="Center"
+                           TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+        </CollectionView>
+
+        <!-- Loading indicator -->
+        <ActivityIndicator x:Name="LoadingIndicator"
+                           Grid.Row="1"
+                           IsRunning="True"
+                           IsVisible="True"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           Color="{AppThemeBinding Light='#039BE5', Dark='#03A9F4'}" />
+
+        <!-- Bottom action bar -->
+        <Border Grid.Row="2"
+                StrokeThickness="0"
+                BackgroundColor="{AppThemeBinding Light='#FFFFFF', Dark='#2C2C2E'}">
+            <Border.Shadow>
+                <Shadow Brush="#000000" Offset="0,-2" Radius="8" Opacity="0.06" />
+            </Border.Shadow>
+            <Grid ColumnDefinitions="*,*"
+                  ColumnSpacing="12"
+                  Padding="16,12">
+                <Button Grid.Column="0"
+                        Text="取消全选"
+                        BackgroundColor="{AppThemeBinding Light='#EBEBEB', Dark='#3A3A3C'}"
+                        TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}"
+                        CornerRadius="10"
+                        Clicked="OnClearAllClicked" />
+                <Button Grid.Column="1"
+                        x:Name="ConfirmButton"
+                        Text="确定 (0)"
+                        BackgroundColor="{AppThemeBinding Light='#039BE5', Dark='#03A9F4'}"
+                        TextColor="White"
+                        CornerRadius="10"
+                        Clicked="OnConfirmClicked" />
+            </Grid>
+        </Border>
+
+    </Grid>
+
+</ContentPage>
