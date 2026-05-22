@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:HassWebView.Component"
+             x:Class="HassWebView.Component.DetailCard"
+             x:Name="this">
+
+    <Border StrokeThickness="0"
+            BackgroundColor="{AppThemeBinding Light='#FFFFFF', Dark='#2C2C2E'}">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="16" />
+        </Border.StrokeShape>
+        <Border.Shadow>
+            <Shadow Brush="#000000" Offset="0,2" Radius="8" Opacity="0.08" />
+        </Border.Shadow>
+
+        <VerticalStackLayout Spacing="0">
+
+            <!-- Header: Title + Subtitle + StateBadge -->
+            <Grid ColumnDefinitions="*,Auto"
+                  Padding="16,16,16,12">
+
+                <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
+
+                    <Label x:Name="TitleLabel"
+                           Text="{Binding Source={x:Reference this}, Path=Title}"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
+
+                    <Label x:Name="SubtitleLabel"
+                           Text="{Binding Source={x:Reference this}, Path=Subtitle}"
+                           Style="{StaticResource ListItemDescriptionLabelStyle}"
+                           IsVisible="False">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding Source={x:Reference this}, Path=Subtitle}"
+                                         Value="{x:Null}">
+                                <Setter Property="IsVisible" Value="False" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding Source={x:Reference this}, Path=Subtitle}"
+                                         Value="">
+                                <Setter Property="IsVisible" Value="False" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+
+                </VerticalStackLayout>
+
+                <!-- Right: State badge -->
+                <local:StateBadge x:Name="MainBadge"
+                                  Grid.Column="1"
+                                  Size="Large"
+                                  State="{Binding Source={x:Reference this}, Path=State}"
+                                  VerticalOptions="Center"
+                                  Margin="8,0,0,0" />
+
+            </Grid>
+
+            <!-- Divider -->
+            <BoxView HeightRequest="0.5"
+                     HorizontalOptions="Fill"
+                     Margin="16,0"
+                     Color="{AppThemeBinding Light='#E5E5EA', Dark='#38383A'}" />
+
+            <!-- InfoRow area (built in code-behind) -->
+            <VerticalStackLayout x:Name="InfoContainer"
+                                 Spacing="0"
+                                 Padding="16,0" />
+
+            <!-- Optional action area -->
+            <ContentView x:Name="ActionPresenter"
+                         Padding="16"
+                         IsVisible="False" />
+
+        </VerticalStackLayout>
+    </Border>
+
+</ContentView>
