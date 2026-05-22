@@ -26,11 +26,13 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     private string _pendingHtml;
     private string _pendingBaseUrl;
 
-    // --- ADDED: Manual History Tracking for Windows ---
+    // --- Manual History Tracking (for GetBackForwardListAsync only) ---
+    // 注意：此栈仅追踪真实页面导航，不含 SPA pushState 条目。
+    // CanGoBack/CanGoForward 由 Core_HistoryChanged 统一更新。
     private readonly List<WebViewHistoryItem> _history = new();
     private int _currentIndex = -1;
     private CoreWebView2NavigationKind _navigationKind;
-    // --------------------------------------------------
+    // --------------------------------------------------------------------
 
     public static PropertyMapper Mapper = new PropertyMapper<HassWebView>()
     {
@@ -90,7 +92,9 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
                 request.TaskCompletionSource.SetException(ex);
             }
         },
-        // --- MODIFIED: To use manual history ---
+        // 注意：WebView2 不提供遍历历史栈的原生 API（如 Android 的 CopyBackForwardList）。
+        // 此处使用 NavigationCompleted 中手动追踪的 _history，仅包含真实页面导航，
+        // 不包含 SPA pushState 条目。CanGoBack/CanGoForward 由 HistoryChanged 统一更新。
         [nameof(HassWebView.GetBackForwardListAsync)] = (handler, _, args) =>
         {
             if (args is not TaskCompletionSource<WebViewBackForwardList> tcs) return;
@@ -100,15 +104,12 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
                 return;
             }
 
-            var result = new WebViewBackForwardList
+            tcs.SetResult(new WebViewBackForwardList
             {
                 History = new List<WebViewHistoryItem>(h._history),
                 CurrentIndex = h._currentIndex
-            };
-
-            tcs.SetResult(result);
+            });
         },
-        // --------------------------------------
         [nameof(HassWebView.SimulateTouch)] = async (handler, _, args) =>
         {
             if (args is not HassWebView.SimulateTouchRequest request) return;
@@ -180,6 +181,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         core.NavigationStarting += Core_NavigationStarting;
         core.NavigationCompleted += Core_NavigationCompleted;
         core.NewWindowRequested += Core_NewWindowRequested;
+        core.HistoryChanged += Core_HistoryChanged;
         core.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All);
         core.WebResourceRequested += Core_WebResourceRequested;
 
@@ -249,13 +251,36 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
 
     private void Core_NavigationCompleted(CoreWebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
     {
-        // --- ADDED: Manual history update logic ---
+        // --- Manual history update logic (for GetBackForwardListAsync only) ---
+        // 注意：此手动栈仅追踪真实页面导航，不含 SPA pushState 条目。
+        // CanGoBack/CanGoForward 由 Core_HistoryChanged 统一更新，不依赖此栈。
         if (args.IsSuccess)
         {
             switch (_navigationKind)
             {
                 case CoreWebView2NavigationKind.BackOrForward:
-                    _currentIndex = _history.FindIndex(item => item.Url == sender.Source);
+                    // 从当前位置向前后搜索，避免同一 URL 多次出现时 FindIndex 始终返回第一个
+                    var targetUrl = sender.Source;
+                    var found = -1;
+                    // 先向前（索引减小方向）搜索
+                    for (int i = _currentIndex - 1; i >= 0; i--)
+                    {
+                        if (_history[i].Url == targetUrl) { found = i; break; }
+                    }
+                    // 再向后（索引增大方向）搜索
+                    if (found < 0)
+                    {
+                        for (int i = _currentIndex + 1; i < _history.Count; i++)
+                        {
+                            if (_history[i].Url == targetUrl) { found = i; break; }
+                        }
+                    }
+                    if (found >= 0)
+                    {
+                        _currentIndex = found;
+                        // 更新 Title（首次加载时可能为空）
+                        _history[_currentIndex].Title = sender.DocumentTitle;
+                    }
                     break;
 
                 case CoreWebView2NavigationKind.Reload:
@@ -276,13 +301,22 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
                     break;
             }
         }
-        // ----------------------------------------
+        // -----------------------------------------------------------------------
 
         var result = args.IsSuccess ? WebNavigationResult.Success : WebNavigationResult.Failure;
         var mauiArgs = new WebNavigatedEventArgs(WebNavigationEvent.NewPage, VirtualView.Source, sender.Source, result);
         VirtualView.SendNavigated(mauiArgs);
-        VirtualView.CanGoBack = _currentIndex > 0;
-        VirtualView.CanGoForward = _currentIndex < _history.Count - 1;
+        // CanGoBack/CanGoForward 由 Core_HistoryChanged 统一更新，
+        // 这里不再手动覆盖，避免遗漏 SPA pushState 历史
+    }
+
+    private void Core_HistoryChanged(CoreWebView2 sender, object args)
+    {
+        // WebView2 原生 CanGoBack/CanGoForward 已包含 SPA pushState 历史，
+        // 直接同步到跨平台层即可
+        if (PlatformView == null) return;
+        VirtualView.CanGoBack = PlatformView.CanGoBack;
+        VirtualView.CanGoForward = PlatformView.CanGoForward;
     }
 
     void LoadSource(WebViewSource source)
@@ -313,11 +347,12 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             platformView.CoreWebView2.NavigationStarting -= Core_NavigationStarting;
             platformView.CoreWebView2.NavigationCompleted -= Core_NavigationCompleted;
             platformView.CoreWebView2.NewWindowRequested -= Core_NewWindowRequested;
+            platformView.CoreWebView2.HistoryChanged -= Core_HistoryChanged;
             platformView.CoreWebView2.WebResourceRequested -= Core_WebResourceRequested;
         }
         _jsBridgeHandler = null;
 
-        // --- ADDED: Cleanup for manual history ---
+        // --- Cleanup for manual history ---
         _history.Clear();
         _currentIndex = -1;
         // --------------------------------------

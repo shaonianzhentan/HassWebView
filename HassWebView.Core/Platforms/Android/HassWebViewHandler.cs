@@ -210,7 +210,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
 
     protected override WebView CreatePlatformView()
     {
-        var webView = new WebView(MauiApplication.Current.ApplicationContext);
+        var webView = new BackInterceptWebView(MauiApplication.Current.ApplicationContext);
         webView.Settings.JavaScriptEnabled = true;
         webView.Settings.JavaScriptCanOpenWindowsAutomatically = false;
         webView.Settings.MixedContentMode = 1;
@@ -316,5 +316,25 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         }
 
         base.DisconnectHandler(platformView);
+    }
+
+    /// <summary>
+    /// 自定义 WebView，重写 onKeyDown 拦截 Back 键，
+    /// 阻止 WebView 默认的 GoBack() 行为，统一由 KeyService 体系处理。
+    /// </summary>
+    private class BackInterceptWebView : WebView
+    {
+        public BackInterceptWebView(Android.Content.Context context) : base(context) { }
+
+        public override bool OnKeyDown(Keycode keyCode, KeyEvent e)
+        {
+            // 拦截 Back 键，阻止 WebView/X5 默认的 GoBack() 行为
+            // Back 键的导航返回由 KeyService -> IKeyHandler.OnSingleClick 统一处理
+            if (keyCode == Keycode.Back && e.Action == KeyEventActions.Down)
+            {
+                return true;
+            }
+            return base.OnKeyDown(keyCode, e);
+        }
     }
 }
