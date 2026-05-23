@@ -3,125 +3,109 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Views.Accessibility;
-using HassWebView.AndroidService.AdSkipping;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using Action = Android.Views.Accessibility.Action;
 
-namespace HassWebView.AndroidService.AdSkipping
+namespace HassWebView.AndroidService.AdSkipping;
+
+[Service(Label = "HassWebView Ad Skipping Service",
+         Permission = "android.permission.BIND_ACCESSIBILITY_SERVICE",
+         Exported = false)]
+[IntentFilter(new[] { "android.accessibilityservice.AccessibilityService" })]
+public class AdSkippingService : AccessibilityService
 {
-    [Service(Label = "HassWebView Ad Skipping Service", Permission = "android.permission.BIND_ACCESSIBILITY_SERVICE", Exported = false)]
-    [IntentFilter(new[] { "android.accessibilityservice.AccessibilityService" })]
-    public class AdSkippingService : AccessibilityService
+    public static GkdRuleManager RuleManager { get; } = new();
+
+    public override void OnAccessibilityEvent(AccessibilityEvent e)
     {
-        public static GkdRuleManager RuleManager { get; } = new GkdRuleManager();
+        if (e.Source == null || string.IsNullOrEmpty(e.PackageName)) return;
 
-        public override void OnAccessibilityEvent(AccessibilityEvent e)
+        var appRules = RuleManager.GetRulesForApp(e.PackageName);
+        if (appRules == null || appRules.Groups.Count == 0)
         {
-            if (e.Source == null || string.IsNullOrEmpty(e.PackageName))
-            {
-                return;
-            }
+            e.Source.Recycle();
+            return;
+        }
 
-            var appRules = RuleManager.GetRulesForApp(e.PackageName);
-            if (appRules == null || !appRules.Groups.Any())
-            {
-                e.Source.Recycle();
-                return;
-            }
+        var rootNode = FindRootNode(e.Source); // e.Source is recycled inside
+        if (rootNode == null) return;
 
-            var rootNode = FindRootNode(e.Source); // e.Source will be recycled inside
-            if (rootNode == null) return;
-
-            foreach (var group in appRules.Groups)
+        foreach (var group in appRules.Groups)
+        {
+            foreach (var rule in group.Rules)
             {
-                foreach (var rule in group.Rules)
+                var nodes = FindNodesBySelector(rootNode, rule.Matches);
+                if (nodes.Count > 0)
                 {
-                    var nodes = FindNodesBySelector(rootNode, rule.Matches);
-                    if (nodes.Any())
-                    {                        
-                        var nodeToClick = nodes.First();
-                        nodeToClick.PerformAction(Action.Click);
-                        nodeToClick.Recycle();
-                        // Recycle other nodes that were found but not clicked
-                        foreach (var node in nodes.Skip(1)) { node.Recycle(); }
-                        rootNode.Recycle();
-                        return; // Action taken
-                    }
+                    var nodeToClick = nodes[0];
+                    nodeToClick.PerformAction(Action.Click);
+                    nodeToClick.Recycle();
+                    foreach (var node in nodes.Skip(1)) node.Recycle();
+                    rootNode.Recycle();
+                    return;
                 }
             }
-            rootNode.Recycle(); // Recycle root if no rules matched
         }
+        rootNode.Recycle();
+    }
 
-        private List<AccessibilityNodeInfo> FindNodesBySelector(AccessibilityNodeInfo root, string selector)
+    private static List<AccessibilityNodeInfo> FindNodesBySelector(AccessibilityNodeInfo root, string selector)
+    {
+        var nodes = new List<AccessibilityNodeInfo>();
+        if (string.IsNullOrWhiteSpace(selector)) return nodes;
+
+        var textMatch = Regex.Match(selector, @"text='([^']*)'" );
+        var descMatch = Regex.Match(selector, @"desc='([^']*)'" );
+        var idMatch   = Regex.Match(selector, @"id='([^']*)'"  );
+
+        var queue = new Queue<AccessibilityNodeInfo>();
+        queue.Enqueue(AccessibilityNodeInfo.Obtain(root));
+
+        while (queue.Count > 0)
         {
-            var nodes = new List<AccessibilityNodeInfo>();
-            if (root == null || string.IsNullOrWhiteSpace(selector)) return nodes;
+            var node = queue.Dequeue();
+            if (node == null) continue;
 
-            var textMatch = Regex.Match(selector, @"text=\'([^\']*)\'");
-            var descMatch = Regex.Match(selector, @"desc=\'([^\']*)\'");
-            var idMatch = Regex.Match(selector, @"id=\'([^\']*)\'");
+            bool matches = true;
+            if (textMatch.Success && node.Text              != textMatch.Groups[1].Value) matches = false;
+            if (descMatch.Success && node.ContentDescription != descMatch.Groups[1].Value) matches = false;
+            if (idMatch.Success   && node.ViewIdResourceName  != idMatch.Groups[1].Value)   matches = false;
 
-            var queue = new Queue<AccessibilityNodeInfo>();
-            queue.Enqueue(AccessibilityNodeInfo.Obtain(root)); // Start with a copy
+            if (matches)
+                nodes.Add(AccessibilityNodeInfo.Obtain(node));
 
-            while (queue.Count > 0)
+            for (int i = 0; i < node.ChildCount; i++)
             {
-                var node = queue.Dequeue();
-                if (node == null) continue;
-
-                bool matches = true;
-                if (textMatch.Success && node.Text != textMatch.Groups[1].Value) matches = false;
-                if (descMatch.Success && node.ContentDescription != descMatch.Groups[1].Value) matches = false;
-                if (idMatch.Success && node.ViewIdResourceName != idMatch.Groups[1].Value) matches = false;
-
-                if (matches)
-                {
-                    nodes.Add(AccessibilityNodeInfo.Obtain(node)); // Add a copy to the list
-                }
-
-                for (int i = 0; i < node.ChildCount; i++)
-                {
-                    var child = node.GetChild(i);
-                    if (child != null) 
-                    {
-                        queue.Enqueue(child); // The queue now owns the child node
-                    } else {
-                        // It's good practice to check for null children, though GetChild should handle it
-                    }
-                }
-                node.Recycle(); // Recycle the node we processed
+                var child = node.GetChild(i);
+                if (child != null) queue.Enqueue(child);
             }
-            return nodes;
+            node.Recycle();
         }
+        return nodes;
+    }
 
-        private AccessibilityNodeInfo FindRootNode(AccessibilityNodeInfo node)
+    private static AccessibilityNodeInfo? FindRootNode(AccessibilityNodeInfo node)
+    {
+        var current = AccessibilityNodeInfo.Obtain(node);
+        while (current.Parent is { } parent)
         {
-            if(node == null) return null;
-            var current = AccessibilityNodeInfo.Obtain(node);
-            while (current.Parent != null)
-            {
-                var parent = current.Parent;
-                current.Recycle();
-                current = parent;
-            }
-            return current;
+            current.Recycle();
+            current = parent;
         }
+        return current;
+    }
 
-        public override void OnInterrupt() { }
+    public override void OnInterrupt() { }
 
-        protected override void OnServiceConnected()
+    protected override void OnServiceConnected()
+    {
+        base.OnServiceConnected();
+        SetServiceInfo(new AccessibilityServiceInfo
         {
-            base.OnServiceConnected();
-            var serviceInfo = new AccessibilityServiceInfo
-            {
-                EventTypes = EventTypes.WindowStateChanged | EventTypes.WindowContentChanged,
-                FeedbackType = FeedbackFlags.Generic,
-                Flags = AccessibilityServiceFlags.Default | AccessibilityServiceFlags.RetrieveWindowContent,
-                NotificationTimeout = 100
-            };
-            SetServiceInfo(serviceInfo);
-        }
+            EventTypes        = EventTypes.WindowStateChanged | EventTypes.WindowContentChanged,
+            FeedbackType      = FeedbackFlags.Generic,
+            Flags             = AccessibilityServiceFlags.Default | AccessibilityServiceFlags.RetrieveWindowContent,
+            NotificationTimeout = 100,
+        });
     }
 }

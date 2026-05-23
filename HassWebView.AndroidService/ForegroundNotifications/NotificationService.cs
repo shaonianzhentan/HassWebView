@@ -9,15 +9,15 @@ namespace HassWebView.AndroidService.ForegroundNotifications
 {
     public class NotificationService : INotificationService
     {
-        private const string ChannelId = "HassWebView_Channel";
-
         public void ShowNotification(string title, string content, int notificationId, List<NotificationAction> actions)
         {
             var context = global::Android.App.Application.Context;
+            NotificationChannelHelper.EnsureChannel(context);
+
             var intent = context.PackageManager.GetLaunchIntentForPackage(context.PackageName);
             var pendingIntent = PendingIntent.GetActivity(context, 0, intent, PendingIntentFlags.Immutable);
 
-            var builder = new NotificationCompat.Builder(context, ChannelId)
+            var builder = new NotificationCompat.Builder(context, NotificationChannelHelper.ChannelId)
                 .SetContentTitle(title)
                 .SetContentText(content)
                 .SetSmallIcon(context.ApplicationInfo.Icon)
@@ -29,26 +29,17 @@ namespace HassWebView.AndroidService.ForegroundNotifications
             {
                 var actionIntent = new Intent(context, typeof(NotificationActionReceiver));
                 actionIntent.SetAction(action.ActionId);
-                // Use a unique request code for each action
                 var actionPendingIntent = PendingIntent.GetBroadcast(context, requestCode++, actionIntent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
                 builder.AddAction(new NotificationCompat.Action.Builder(0, action.Title, actionPendingIntent).Build());
             }
 
-            var notificationManager = NotificationManagerCompat.From(context);
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
-            {
-                var channel = new NotificationChannel(ChannelId, "HassWebView", NotificationImportance.Default);
-                notificationManager.CreateNotificationChannel(channel);
-            }
-
-            notificationManager.Notify(notificationId, builder.Build());
+            NotificationManagerCompat.From(context).Notify(notificationId, builder.Build());
         }
 
         public void CancelNotification(int notificationId)
         {
             var context = global::Android.App.Application.Context;
-            var notificationManager = NotificationManagerCompat.From(context);
-            notificationManager.Cancel(notificationId);
+            NotificationManagerCompat.From(context).Cancel(notificationId);
         }
     }
 }

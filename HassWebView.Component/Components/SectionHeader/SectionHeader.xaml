@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HassWebView.Component.SectionHeader"
+             x:Name="this">
+
+    <Grid ColumnDefinitions="*,Auto"
+          Padding="16,8,16,4">
+
+        <!-- Section title -->
+        <Label Grid.Column="0"
+               Text="{Binding Source={x:Reference this}, Path=Title}"
+               Style="{StaticResource SectionHeaderLabelStyle}"
+               VerticalOptions="Center" />
+
+        <!-- Optional action link -->
+        <Label x:Name="ActionLabel"
+               Grid.Column="1"
+               Text="{Binding Source={x:Reference this}, Path=Action}"
+               Style="{StaticResource AccentLinkLabelStyle}"
+               VerticalOptions="Center"
+               IsVisible="False">
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnActionTapped" />
+            </Label.GestureRecognizers>
+        </Label>
+
+    </Grid>
+
+</ContentView>

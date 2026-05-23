@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:hass="clr-namespace:HassWebView.Component;assembly=HassWebView.Component"
+             x:Class="HassWebView.DemoAndroid.SettingsPage"
+             Title="设置"
+             BackgroundColor="{AppThemeBinding Light='#F5F5F7', Dark='#1C1C1E'}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
+
+            <!-- ═══════════════════════════════════════ -->
+            <!-- 分组 1: GPS 定位                        -->
+            <!-- ═══════════════════════════════════════ -->
+            <hass:SettingsGroup Title="GPS 定位">
+
+                <!-- 权限状态行（点击打开系统权限页） -->
+                <hass:InfoRow x:Name="GpsPermissionRow"
+                              Title="定位权限"
+                              Value="{Binding GpsPermissionStatus}">
+                    <hass:InfoRow.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnOpenSystemPermissionTapped"
+                                              CommandParameter="Location" />
+                    </hass:InfoRow.GestureRecognizers>
+                </hass:InfoRow>
+
+                <!-- 前往授权按钮（未授权时显示） -->
+                <Border x:Name="GpsAuthBorder"
+                        StrokeThickness="0"
+                        BackgroundColor="Transparent"
+                        IsVisible="{Binding GpsNotGranted}"
+                        Padding="0,4">
+                    <Button Text="前往授权"
+                            BackgroundColor="{AppThemeBinding Light='#FF9800', Dark='#FB8C00'}"
+                            TextColor="White"
+                            CornerRadius="10"
+                            HeightRequest="44"
+                            Clicked="OnGpsAuthClicked" />
+                </Border>
+
+                <!-- 系统权限设置按钮（已授权时显示，方便去精确位置等设置） -->
+                <Border x:Name="GpsSettingsBorder"
+                        StrokeThickness="0"
+                        BackgroundColor="Transparent"
+                        IsVisible="{Binding GpsGranted}"
+                        Padding="0,4">
+                    <Button Text="系统权限设置"
+                            BackgroundColor="{AppThemeBinding Light='#EBEBEB', Dark='#3A3A3C'}"
+                            TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}"
+                            CornerRadius="10"
+                            HeightRequest="44"
+                            Clicked="OnOpenGpsSystemSettingsClicked" />
+                </Border>
+
+                <!-- 上报间隔 -->
+                <hass:SliderCard x:Name="GpsIntervalSlider"
+                                 Title="上报间隔"
+                                 Min="5"
+                                 Max="300"
+                                 Step="5"
+                                 Unit="秒"
+                                 ValueChanged="OnGpsIntervalChanged" />
+
+                <!-- WiFi 时停止定位 -->
+                <hass:SwitchCard x:Name="GpsWifiSwitch"
+                                 Title="WiFi 连接时停止定位"
+                                 Description="接入 WiFi 后暂停 GPS 定位上报"
+                                 Toggled="OnGpsWifiSwitchToggled" />
+
+            </hass:SettingsGroup>
+
+            <!-- ═══════════════════════════════════════ -->
+            <!-- 分组 2: 通知转发                        -->
+            <!-- ═══════════════════════════════════════ -->
+            <hass:SettingsGroup Title="通知转发">
+
+                <!-- 转发应用列表（点击跳转选择页） -->
+                <hass:InfoRow Title="转发应用"
+                              Value="{Binding NotifyAppCount}">
+                    <hass:InfoRow.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnNotifyAppsTapped" />
+                    </hass:InfoRow.GestureRecognizers>
+                </hass:InfoRow>
+
+                <!-- 通知监听权限 -->
+                <hass:InfoRow Title="通知监听权限"
+                              Value="{Binding NotifyPermissionStatus}">
+                    <hass:InfoRow.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnOpenSystemPermissionTapped"
+                                              CommandParameter="Notification" />
+                    </hass:InfoRow.GestureRecognizers>
+                </hass:InfoRow>
+
+                <!-- 前往通知访问设置 -->
+                <Border StrokeThickness="0"
+                        BackgroundColor="Transparent"
+                        Padding="0,4">
+                    <Button Text="前往通知访问设置"
+                            BackgroundColor="{AppThemeBinding Light='#EBEBEB', Dark='#3A3A3C'}"
+                            TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}"
+                            CornerRadius="10"
+                            HeightRequest="44"
+                            Clicked="OnOpenNotifyAccessSettingsClicked" />
+                </Border>
+
+                <!-- 屏幕事件推送 -->
+                <hass:SwitchCard x:Name="ScreenEventSwitch"
+                                 Title="屏幕事件推送"
+                                 Description="屏幕亮起/熄灭时向 HA 上报状态"
+                                 Toggled="OnScreenEventSwitchToggled" />
+
+            </hass:SettingsGroup>
+
+            <!-- ═══════════════════════════════════════ -->
+            <!-- 分组 3: 短信转发                        -->
+            <!-- ═══════════════════════════════════════ -->
+            <hass:SettingsGroup Title="短信转发">
+
+                <!-- 短信权限状态 -->
+                <hass:InfoRow Title="短信读取权限"
+                              Value="{Binding SmsPermissionStatus}">
+                    <hass:InfoRow.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnOpenSystemPermissionTapped"
+                                              CommandParameter="Sms" />
+                    </hass:InfoRow.GestureRecognizers>
+                </hass:InfoRow>
+
+                <!-- 前往授权（未授权时显示） -->
+                <Border StrokeThickness="0"
+                        BackgroundColor="Transparent"
+                        IsVisible="{Binding SmsNotGranted}"
+                        Padding="0,4">
+                    <Button Text="前往授权"
+                            BackgroundColor="{AppThemeBinding Light='#FF9800', Dark='#FB8C00'}"
+                            TextColor="White"
+                            CornerRadius="10"
+                            HeightRequest="44"
+                            Clicked="OnSmsAuthClicked" />
+                </Border>
+
+                <!-- 启用短信转发 -->
+                <hass:SwitchCard x:Name="SmsForwardSwitch"
+                                 Title="启用短信转发"
+                                 Description="收到短信后转发至 HA Webhook"
+                                 Toggled="OnSmsForwardSwitchToggled" />
+
+                <!-- 转发目标 -->
+                <hass:InfoRow Title="转发目标"
+                              Value="Home Assistant Webhook" />
+
+            </hass:SettingsGroup>
+
+            <!-- ═══════════════════════════════════════ -->
+            <!-- 分组 4: 桌面小组件                      -->
+            <!-- ═══════════════════════════════════════ -->
+            <hass:SettingsGroup Title="桌面小组件">
+
+                <!-- 已添加数量 -->
+                <hass:InfoRow Title="已添加小组件"
+                              Value="{Binding WidgetCount}" />
+
+                <!-- 管理按钮 -->
+                <Border StrokeThickness="0"
+                        BackgroundColor="Transparent"
+                        Padding="0,4">
+                    <Button Text="管理小组件"
+                            BackgroundColor="{AppThemeBinding Light='#039BE5', Dark='#03A9F4'}"
+                            TextColor="White"
+                            CornerRadius="10"
+                            HeightRequest="44"
+                            Clicked="OnManageWidgetsClicked" />
+                </Border>
+
+                <!-- 自动刷新 -->
+                <hass:SwitchCard x:Name="WidgetAutoRefreshSwitch"
+                                 Title="小组件自动刷新"
+                                 Description="按固定间隔自动更新小组件数据"
+                                 Toggled="OnWidgetAutoRefreshToggled" />
+
+                <!-- 刷新间隔 -->
+                <hass:SliderCard x:Name="WidgetRefreshIntervalSlider"
+                                 Title="刷新间隔"
+                                 Min="5"
+                                 Max="60"
+                                 Step="5"
+                                 Unit="分钟"
+                                 ValueChanged="OnWidgetRefreshIntervalChanged" />
+
+            </hass:SettingsGroup>
+
+            <!-- ═══════════════════════════════════════ -->
+            <!-- 分组 5: 功能开关                        -->
+            <!-- ═══════════════════════════════════════ -->
+            <hass:SettingsGroup Title="功能开关">
+
+                <hass:SwitchCard x:Name="ScreenEventGlobalSwitch"
+                                 Title="屏幕事件推送"
+                                 Description="屏幕亮起/熄灭时上报状态至 HA"
+                                 Toggled="OnScreenEventGlobalToggled" />
+
+                <hass:SwitchCard x:Name="WifiStopGpsSwitch"
+                                 Title="WiFi 连接停止定位"
+                                 Description="连接 WiFi 后暂停 GPS 上报"
+                                 Toggled="OnWifiStopGpsToggled" />
+
+                <hass:SwitchCard x:Name="KeyControlSwitch"
+                                 Title="按键控制"
+                                 Description="硬件音量键控制 HA 设备"
+                                 Toggled="OnKeyControlToggled" />
+
+                <hass:SwitchCard x:Name="LanAutoSwitchCard"
+                                 Title="局域网自动切换"
+                                 Description="局域网内自动切换至本地 HA 地址"
+                                 Toggled="OnLanAutoSwitchToggled" />
+
+            </hass:SettingsGroup>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

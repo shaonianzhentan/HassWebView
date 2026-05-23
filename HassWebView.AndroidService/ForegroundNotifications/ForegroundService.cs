@@ -9,11 +9,10 @@ namespace HassWebView.AndroidService.ForegroundNotifications
     public class ForegroundService : Service
     {
         public const string ActionStart = "START";
-        public const string ActionStop = "STOP";
-        public const string ExtraTitle = "TITLE";
-        public const string ExtraText = "TEXT";
+        public const string ActionStop  = "STOP";
+        public const string ExtraTitle  = "TITLE";
+        public const string ExtraText   = "TEXT";
 
-        private const string ChannelId = "HassWebView_Channel";
         private const int NotificationId = 1;
 
         public override IBinder OnBind(Intent intent) => null;
@@ -23,11 +22,11 @@ namespace HassWebView.AndroidService.ForegroundNotifications
             if (intent?.Action == ActionStart)
             {
                 var title = intent.GetStringExtra(ExtraTitle) ?? "HassWebView is running";
-                var text = intent.GetStringExtra(ExtraText) ?? "The foreground service is active.";
+                var text  = intent.GetStringExtra(ExtraText)  ?? "The foreground service is active.";
 
-                CreateNotificationChannel();
+                NotificationChannelHelper.EnsureChannel(this);
 
-                var notification = new NotificationCompat.Builder(this, ChannelId)
+                var notification = new NotificationCompat.Builder(this, NotificationChannelHelper.ChannelId)
                     .SetContentTitle(title)
                     .SetContentText(text)
                     .SetSmallIcon(Application.Context.ApplicationInfo.Icon)
@@ -42,16 +41,6 @@ namespace HassWebView.AndroidService.ForegroundNotifications
             }
 
             return StartCommandResult.Sticky;
-        }
-
-        private void CreateNotificationChannel()
-        {
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
-            {
-                var channel = new NotificationChannel(ChannelId, "HassWebView", NotificationImportance.Default);
-                var notificationManager = (NotificationManager)GetSystemService(NotificationService);
-                notificationManager.CreateNotificationChannel(channel);
-            }
         }
     }
 }

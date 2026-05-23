@@ -1,92 +1,83 @@
 using Android.Content;
 using Android.Provider;
-using HassWebView.AndroidService.AdSkipping;
 using Microsoft.Maui.ApplicationModel;
 using System.Net.Http;
 
-namespace HassWebView.AndroidService.AdSkipping
+namespace HassWebView.AndroidService.AdSkipping;
+
+public class AdSkippingManager : IAdSkippingManager
 {
-    public class AdSkippingManager : IAdSkippingManager
+    private const string LocalRulesFileName    = "ad_skip_rules.json5";
+    private const string RulesUrlPreferenceKey = "AdSkipRulesUrl";
+
+    private static string LocalRulesPath => Path.Combine(FileSystem.AppDataDirectory, LocalRulesFileName);
+    private readonly HttpClient _httpClient = new();
+
+    // ── Permission ────────────────────────────────
+
+    public bool IsPermissionEnabled()
     {
-        private const string LocalRulesFileName = "ad_skip_rules.json5";
-        private const string RulesUrlPreferenceKey = "AdSkipRulesUrl";
-
-        private static string LocalRulesPath => Path.Combine(FileSystem.AppDataDirectory, LocalRulesFileName);
-        private readonly HttpClient _httpClient = new();
-
-        // Permission Logic
-        public bool IsPermissionEnabled()
+        var context     = Platform.AppContext;
+        var serviceName = $"{context.PackageName}/{typeof(AdSkippingService).FullName}";
+        try
         {
-            var context = Platform.AppContext;
-            // Use the full name of the service type to avoid ambiguity
-            var serviceName = $"{context.PackageName}/{typeof(AdSkippingService).FullName}";
-
-            try
-            {
-                string settingValue = Settings.Secure.GetString(context.ContentResolver, Settings.Secure.EnabledAccessibilityServices);
-                return settingValue?.Contains(serviceName) ?? false;
-            }
-            catch (Settings.SettingNotFoundException)
-            { 
-                return false;
-            }
+            var settingValue = Settings.Secure.GetString(context.ContentResolver, Settings.Secure.EnabledAccessibilityServices);
+            return settingValue?.Contains(serviceName) ?? false;
         }
-
-        public void RequestPermission()
+        catch (Settings.SettingNotFoundException)
         {
-            var intent = new Intent(Settings.ActionAccessibilitySettings);
-            intent.AddFlags(ActivityFlags.NewTask);
-            Platform.AppContext.StartActivity(intent);
+            return false;
         }
+    }
 
-        // Rules Logic
-        public async Task UpdateRulesUrlAsync(string url)
+    public void RequestPermission()
+    {
+        var intent = new Intent(Settings.ActionAccessibilitySettings);
+        intent.AddFlags(ActivityFlags.NewTask);
+        Platform.AppContext.StartActivity(intent);
+    }
+
+    // ── Rules ─────────────────────────────────────
+
+    public async Task UpdateRulesUrlAsync(string url)
+    {
+        Preferences.Set(RulesUrlPreferenceKey, url);
+
+        if (string.IsNullOrWhiteSpace(url))
         {
-            // Save the URL for future reference
-            Preferences.Set(RulesUrlPreferenceKey, url);
-
-            if (string.IsNullOrWhiteSpace(url))
-            {
-                // If URL is cleared, delete the local file and clear rules in the service
-                if (File.Exists(LocalRulesPath))
-                {
-                    File.Delete(LocalRulesPath);
-                }
-                AdSkippingService.RuleManager.ClearRules();
-                return;
-            }
-
-            try
-            {
-                var rulesContent = await _httpClient.GetStringAsync(url);
-                if (!string.IsNullOrWhiteSpace(rulesContent))
-                {
-                    await File.WriteAllTextAsync(LocalRulesPath, rulesContent);
-                    await LoadRulesFromLocalFileAsync(); // Reload rules after updating
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[AdSkippingManager] Error updating rules: {ex.Message}");
-            }
+            if (File.Exists(LocalRulesPath))
+                File.Delete(LocalRulesPath);
+            AdSkippingService.RuleManager.ClearRules();
+            return;
         }
 
-        public Task<string> GetRulesUrlAsync()
+        try
         {
-            return Task.FromResult(Preferences.Get(RulesUrlPreferenceKey, string.Empty));
-        }
-
-        public async Task LoadRulesFromLocalFileAsync()
-        {            
-            if (!File.Exists(LocalRulesPath))
+            var rulesContent = await _httpClient.GetStringAsync(url);
+            if (!string.IsNullOrWhiteSpace(rulesContent))
             {
-                // Ensure rules are cleared if the file doesn't exist
-                AdSkippingService.RuleManager.ClearRules();
-                return;
+                await File.WriteAllTextAsync(LocalRulesPath, rulesContent);
+                await LoadRulesFromLocalFileAsync();
             }
-
-            var rulesContent = await File.ReadAllTextAsync(LocalRulesPath);
-            AdSkippingService.RuleManager.LoadRulesFromString(rulesContent);
         }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[AdSkippingManager] Error updating rules: {ex.Message}");
+        }
+    }
+
+    public Task<string> GetRulesUrlAsync()
+        => Task.FromResult(Preferences.Get(RulesUrlPreferenceKey, string.Empty));
+
+    public async Task LoadRulesFromLocalFileAsync()
+    {
+        if (!File.Exists(LocalRulesPath))
+        {
+            AdSkippingService.RuleManager.ClearRules();
+            return;
+        }
+
+        var rulesContent = await File.ReadAllTextAsync(LocalRulesPath);
+        AdSkippingService.RuleManager.LoadRulesFromString(rulesContent);
     }
 }
