@@ -322,16 +322,27 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     /// <summary>
     /// 自定义 WebView，重写 dispatchKeyEvent 在 X5 内核消费之前拦截导航按键，
     /// 统一由 KeyService 体系处理。
+    /// 重写 OnMeasure 强制以父容器尺寸填满，修复 MAUI WebView WRAP_CONTENT 不铺满问题。
     /// </summary>
     private class BackInterceptWebView : WebView
     {
         public BackInterceptWebView(global::Android.Content.Context context) : base(context) { }
 
+        protected override void OnMeasure(int widthMeasureSpec, int heightMeasureSpec)
+        {
+            // 将测量模式强制改为 EXACTLY，使用父容器给定的尺寸，而不是内容尺寸
+            int width = MeasureSpec.GetSize(widthMeasureSpec);
+            int height = MeasureSpec.GetSize(heightMeasureSpec);
+            widthMeasureSpec  = MeasureSpec.MakeMeasureSpec(width,  MeasureSpecMode.Exactly);
+            heightMeasureSpec = MeasureSpec.MakeMeasureSpec(height, MeasureSpecMode.Exactly);
+            base.OnMeasure(widthMeasureSpec, heightMeasureSpec);
+        }
+
         public override bool DispatchKeyEvent(KeyEvent e)
         {
             if (e == null) return base.DispatchKeyEvent(e);
 
-            string keyName = KeyHelper.GetNavKeyName(e.KeyCode);
+            string keyName = KeyHelper.GetKeyName(e.KeyCode);
             if (keyName != null)
             {
                 var keyService = IPlatformApplication.Current?.Services?.GetService<KeyService>();

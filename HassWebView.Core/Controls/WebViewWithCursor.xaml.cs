@@ -30,8 +30,78 @@ public partial class WebViewWithCursor : ContentView
             _cursorControl = new CursorControl(cursor, root, wv);
         }
 
+        wv.Navigating += OnNavigating;
+        wv.Navigated += OnNavigated;
+
         this.Loaded += OnLoaded;
         this.Unloaded += OnUnloaded;
+    }
+
+    // Loading 进度条相关
+    private CancellationTokenSource _loadingCts;
+
+    private void OnNavigating(object sender, WebNavigatingEventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            _loadingCts?.Cancel();
+            _loadingCts = new CancellationTokenSource();
+            _ = RunLoadingBarAsync(_loadingCts.Token);
+        });
+    }
+
+    private void OnNavigated(object sender, WebNavigatedEventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            _loadingCts?.Cancel();
+            _ = FinishLoadingBarAsync();
+        });
+    }
+
+    private async Task RunLoadingBarAsync(CancellationToken token)
+    {
+        try
+        {
+            loadingBar.IsVisible = true;
+            loadingBar.Opacity = 1;
+
+            // 重置宽度为 0
+            AbsoluteLayout.SetLayoutBounds(loadingBar, new Rect(0, 0, 0, 3));
+
+            // 快速增长到 70%，然后缓慢爬到 90%（模拟等待响应）
+            await GrowBarAsync(0.7, 300, token);
+            await GrowBarAsync(0.9, 8000, token);
+        }
+        catch (OperationCanceledException) { /* 导航完成，由 FinishLoadingBarAsync 接管 */ }
+    }
+
+    private async Task GrowBarAsync(double targetRatio, uint durationMs, CancellationToken token)
+    {
+        const int steps = 30;
+        var bounds = AbsoluteLayout.GetLayoutBounds(loadingBar);
+        double startRatio = bounds.Width;
+        double delta = targetRatio - startRatio;
+        int stepDelay = (int)(durationMs / steps);
+
+        for (int i = 1; i <= steps; i++)
+        {
+            token.ThrowIfCancellationRequested();
+            double ratio = startRatio + delta * i / steps;
+            AbsoluteLayout.SetLayoutBounds(loadingBar, new Rect(0, 0, ratio, 3));
+            await Task.Delay(stepDelay, token);
+        }
+    }
+
+    private async Task FinishLoadingBarAsync()
+    {
+        // 迅速填满到 100%
+        AbsoluteLayout.SetLayoutBounds(loadingBar, new Rect(0, 0, 1, 3));
+        await Task.Delay(150);
+        // 淡出消失
+        await loadingBar.FadeTo(0, 200);
+        loadingBar.IsVisible = false;
+        loadingBar.Opacity = 1;
     }
 
     private void OnLoaded(object sender, EventArgs e)

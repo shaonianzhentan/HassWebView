@@ -120,8 +120,6 @@ public partial class HassPage : ContentPage, IKeyHandler
 
     private void Wv_Navigated(object sender, WebNavigatedEventArgs e)
     {
-        var wv = webView.WebViewControl;
-        _ = wv.EvaluateJavaScriptAsync($"document.body.style.minHeight={this.Height}");
     }
 
     private async void OnWebViewNavigating(object? sender, WebNavigatingEventArgs e)

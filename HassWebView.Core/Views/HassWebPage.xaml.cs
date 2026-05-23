@@ -93,8 +93,6 @@ public partial class HassWebPage : ContentPage, IKeyHandler
     private async void OnWebViewNavigated(object sender, WebNavigatedEventArgs e)
     {
         var wv = webView.WebViewControl;
-        await wv.EvaluateJavaScriptAsync($"document.body.style.minHeight={this.Height}");
-
         if (e.Result != WebNavigationResult.Success || e.Source is not UrlWebViewSource urlSource) return;
         Debug.WriteLine($"[HassWebPage] Navigated to: {urlSource.Url}");
 

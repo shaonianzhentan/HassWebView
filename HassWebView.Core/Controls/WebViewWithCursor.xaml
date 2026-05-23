@@ -23,6 +23,13 @@
                 <RoundRectangle CornerRadius="10" />
             </Border.StrokeShape>
         </Border>
+        <!-- 顶部加载进度条 -->
+        <BoxView x:Name="loadingBar"
+                 BackgroundColor="{StaticResource Primary}"
+                 HeightRequest="3"
+                 IsVisible="False"
+                 AbsoluteLayout.LayoutFlags="WidthProportional"
+                 AbsoluteLayout.LayoutBounds="0,0,0,3" />
         <Border x:Name="toastPanel"
                 IsVisible="False"
                 BackgroundColor="#E0323232"
