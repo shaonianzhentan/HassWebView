@@ -22,11 +22,6 @@ public class KeyService
     private Timer _repeatingActionTimer;
     private Action _repeatingAction;
 
-    // 防抖：记录原生层最近处理按键的时间，避免 JS 透传导致双重处理
-    private long _lastNativePressTicks = 0;
-    private long _lastNativeReleaseTicks = 0;
-    private const long JsDebounceMs = 80;
-
     public KeyService(int longPressTimeout = 750, int doubleClickTimeout = 300)
     {
         _longPressTimeout = longPressTimeout;
@@ -76,8 +71,6 @@ public class KeyService
 
     public bool OnPressed(string sourceKeyName)
     {
-        _lastNativePressTicks = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
         var handler = GetCurrentHandler();
         if (handler == null)
         {
@@ -119,8 +112,6 @@ public class KeyService
 
     public bool OnReleased()
     {
-        _lastNativeReleaseTicks = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
         StopRepeatingAction();
 
         if (_lastSourceKey == null && !_longPressHasFired)
@@ -175,30 +166,6 @@ public class KeyService
             handler?.OnSingleClick(new RemoteKeyEventArgs((string)state));
             ResetDoubleClickState();
         });
-    }
-
-    /// <summary>
-    /// 供 JS 按键透传调用的 OnPressed 方法。
-    /// 如果原生层最近刚处理过同一按键，则跳过以避免双重处理。
-    /// </summary>
-    public bool OnPressedFromJs(string sourceKeyName)
-    {
-        var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        if (now - _lastNativePressTicks < JsDebounceMs)
-            return true; // 原生层已处理，视为已消费
-        return OnPressed(sourceKeyName);
-    }
-
-    /// <summary>
-    /// 供 JS 按键透传调用的 OnReleased 方法。
-    /// 如果原生层最近刚处理过释放事件，则跳过以避免双重处理。
-    /// </summary>
-    public bool OnReleasedFromJs()
-    {
-        var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        if (now - _lastNativeReleaseTicks < JsDebounceMs)
-            return true;
-        return OnReleased();
     }
 
     private void ResetDoubleClickState()

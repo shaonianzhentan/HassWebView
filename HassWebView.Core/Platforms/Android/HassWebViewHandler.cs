@@ -5,6 +5,7 @@ using Android.Views;
 using Com.Tencent.Smtt.Sdk;
 using HassWebView.Core.Models; // Add model namespace
 using HassWebView.Core.Platforms.Android.TencentX5;
+using HassWebView.Core.Services;
 using Java.Interop;
 using Java.Lang;
 using Microsoft.Maui.Handlers;
@@ -319,22 +320,31 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     }
 
     /// <summary>
-    /// 自定义 WebView，重写 onKeyDown 拦截 Back 键，
-    /// 阻止 WebView 默认的 GoBack() 行为，统一由 KeyService 体系处理。
+    /// 自定义 WebView，重写 dispatchKeyEvent 在 X5 内核消费之前拦截导航按键，
+    /// 统一由 KeyService 体系处理。
     /// </summary>
     private class BackInterceptWebView : WebView
     {
         public BackInterceptWebView(global::Android.Content.Context context) : base(context) { }
 
-        public override bool OnKeyDown(Keycode keyCode, KeyEvent e)
+        public override bool DispatchKeyEvent(KeyEvent e)
         {
-            // 拦截 Back 键，阻止 WebView/X5 默认的 GoBack() 行为
-            // Back 键的导航返回由 KeyService -> IKeyHandler.OnSingleClick 统一处理
-            if (keyCode == Keycode.Back && e.Action == KeyEventActions.Down)
+            if (e == null) return base.DispatchKeyEvent(e);
+
+            string keyName = KeyHelper.GetNavKeyName(e.KeyCode);
+            if (keyName != null)
             {
-                return true;
+                var keyService = IPlatformApplication.Current?.Services?.GetService<KeyService>();
+                if (keyService != null)
+                {
+                    if (e.Action == KeyEventActions.Down && keyService.OnPressed(keyName))
+                        return true;
+                    if (e.Action == KeyEventActions.Up && keyService.OnReleased())
+                        return true;
+                }
             }
-            return base.OnKeyDown(keyCode, e);
+
+            return base.DispatchKeyEvent(e);
         }
     }
 }
