@@ -6,92 +6,123 @@
     <title>HTTP 电视遥控器</title>
     <style>
         body {
-            font-family: sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             margin: 0;
             background: #121212;
             color: white;
             touch-action: none;
+            -webkit-user-select: none; 
+            user-select: none;
         }
 
         #touchpad {
             width: 100vw;
-            height: 50vh;
-            background: #2c2c2c;
+            height: 35vh; 
+            background: #2c2c2e;
             display: flex;
             align-items: center;
             justify-content: center;
             border-bottom: 2px solid #3d3d3d;
             color: #aaa;
+            box-sizing: border-box;
         }
 
         .controls {
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
 
-        input {
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #444;
-            background: #333;
-            color: white;
+        input, button {
+            border-radius: 12px;
             font-size: 16px;
-        }
-
-        button {
-            padding: 15px;
-            border-radius: 8px;
+            box-sizing: border-box;
+            width: 100%;
             border: none;
             font-weight: bold;
             cursor: pointer;
+            -webkit-tap-highlight-color: rgba(0,0,0,0.2);
         }
 
-        .btn-blue {
-            background: #007bff;
+        input {
+            padding: 14px;
+            background: #333;
+            border: 1px solid #444;
             color: white;
         }
 
-        .btn-gray {
-            background: #444;
-            color: white;
+        button {
+            padding: 16px;
         }
+
+        .btn-blue { background: #007bff; color: white; }
+        .btn-green { background: #28a745; color: white; }
+        .btn-gray { background: #444; color: white; }
+        .btn-orange { background: #fd7e14; color: white; } 
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .d-pad-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: auto auto auto;
+            grid-template-areas:
+                ". top ."
+                "left middle right"
+                ". bottom .";
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        #btn-up { grid-area: top; }
+        #btn-left { grid-area: left; }
+        #btn-ok { grid-area: middle; }
+        #btn-right { grid-area: right; }
+        #btn-down { grid-area: bottom; }
+
     </style>
 </head>
 <body>
-
-    <div id="touchpad">触摸此处移动鼠标</div>
+    <div id="touchpad">触摸移动</div>
 
     <div class="controls">
         <input type="text" id="textInput" placeholder="输入文字...">
-        <button class="btn-blue" onclick="postCmd('text', {text: document.getElementById('textInput').value})">一键发送文本</button>
-        <button class="btn-gray" onclick="postCmd('click')">模拟左键点击</button>
+        <div class="actions-grid">
+            <button class="btn-blue" onclick="postCmd('text', {text: document.getElementById('textInput').value})">发送文本</button>
+            <button class="btn-orange" onclick="postCmd('key', { key: 'Tab' })">切换输入框 (Tab)</button>
+        </div>
+
+        <div class="d-pad-container">
+            <button id="btn-up" class="btn-gray" onclick="postCmd('slideup')">↑</button>
+            <button id="btn-left" class="btn-gray" onclick="postCmd('slideleft')">←</button>
+            <button id="btn-ok" class="btn-green" onclick="postCmd('click')">OK</button>
+            <button id="btn-right" class="btn-gray" onclick="postCmd('slideright')">→</button>
+            <button id="btn-down" class="btn-gray" onclick="postCmd('slidedown')">↓</button>
+        </div>
     </div>
 
     <script>
         let lastX = 0, lastY = 0;
         let isSending = false;
-        let moveScaleFactor = 1.0; // Default scale factor
+        let moveScaleFactor = 1.0;
 
-        // Fetch config and calculate the scale factor on page load
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const response = await fetch('/webview/config');
                 const config = await response.json();
                 const tvWidth = config.width;
                 const phoneWidth = window.innerWidth;
-
                 if (tvWidth && phoneWidth > 0) {
                     moveScaleFactor = tvWidth / phoneWidth;
-                    console.log(`TV Width: ${tvWidth}, Phone Width: ${phoneWidth}, Scale Factor: ${moveScaleFactor}`);
                 }
-            } catch (e) {
-                console.error("获取配置失败或计算缩放比例失败", e);
-            }
+            } catch (e) { console.error("获取配置失败", e); }
         });
 
-        // 通用发送函数
         async function postCmd(type, data = {}) {
             try {
                 const params = new URLSearchParams();
@@ -99,36 +130,27 @@
                 for (const key in data) {
                     params.append(key, data[key]);
                 }
-
                 await fetch('', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: params.toString()
                 });
             } catch (e) { console.error("发送失败", e); }
         }
 
         const touchpad = document.getElementById('touchpad');
-
         touchpad.addEventListener('touchstart', e => {
             lastX = e.touches[0].clientX;
             lastY = e.touches[0].clientY;
         });
-
         touchpad.addEventListener('touchmove', e => {
+            e.preventDefault();
             if (isSending) return;
             isSending = true;
-
-            // Apply the calculated scale factor
             const dx = Math.round((e.touches[0].clientX - lastX) * moveScaleFactor);
             const dy = Math.round((e.touches[0].clientY - lastY) * moveScaleFactor);
-
             if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-                postCmd('move', { x: dx, y: dy }).then(() => {
-                    isSending = false;
-                });
+                postCmd('move', { x: dx, y: dy }).then(() => { isSending = false; });
                 lastX = e.touches[0].clientX;
                 lastY = e.touches[0].clientY;
             } else {

@@ -27,10 +27,7 @@ namespace HassWebView.Core.Configuration
                             {
                                 #if ANDROID
                                     var intent = new Android.Content.Intent(Android.Content.Intent.ActionView);
-                                    string mimeType = url.Contains(".m3u8", StringComparison.OrdinalIgnoreCase) 
-    ? "application/x-mpegURL" 
-    : "video/*";
-                                    intent.SetDataAndType(Android.Net.Uri.Parse(url.Trim('"')), mimeType);
+                                    intent.SetDataAndType(Android.Net.Uri.Parse(url.Trim('"')), "video/*");
                                     intent.SetFlags(Android.Content.ActivityFlags.NewTask);
                                     Android.App.Application.Context.StartActivity(intent);
                                 #else

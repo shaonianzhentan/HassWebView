@@ -1,17 +1,10 @@
 (function(window) {
     'use strict';
 
-    // Prevent re-injection if the object already exists
     if (window.HassWebView) {
         return;
     }
 
-    /**
-     * From CssInjector.js
-     * Injects a CSS string into the document's head.
-     * @param {string} css The CSS text to inject.
-     * @param {string} [host] An optional identifier for the injection source (for logging).
-     */
     function injectCss(css, host) {
         try {
             const style = document.createElement('style');
@@ -26,25 +19,16 @@
         }
     }
 
-    /**
-     * From TextInput.js
-     * Inserts or replaces text in the currently active text input element.
-     * @param {string} content The text content to insert.
-     * @param {boolean} append If true, appends the content; otherwise, replaces the selection.
-     */
     function insertText(content, append) {
         const el = document.activeElement;
-        // The original check from TextInput.js
         if (!el || (el.tagName !== 'HA-INPUT' && el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) {
              console.warn('[HassWebView] insertText: No active text input element found.');
              return;
         }
 
-        // The original implementation from TextInput.js
         el.value = append ? el.value + content : content;
         
         try {
-            // The original events from TextInput.js
             ['input', 'change', 'compositionstart', 'compositionend', 'blur', 'focus'].forEach(evt => {
                 const event = new Event(evt, { bubbles: true, cancelable: true, view: window });
                 el.dispatchEvent(event);
@@ -53,15 +37,9 @@
             console.error('[HassWebView] Error dispatching events for insertText:', ex);
         }
         
-        // Move cursor to the end
         el.selectionStart = el.selectionEnd = el.value.length;
     }
 
-    /**
-     * Shows a toast message overlay on the screen.
-     * @param {string} message The message to display.
-     * @param {number} [duration=3000] The duration in milliseconds to show the toast.
-     */
     function showToast(message, duration = 3000) {
         const styleId = 'hasswebview-toast-style';
         if (!document.getElementById(styleId)) {
@@ -110,7 +88,6 @@
                     toast.parentNode.removeChild(toast);
                 }
             }, { once: true });
-            // Fallback for safety
             setTimeout(() => {
                 if (toast.parentNode) {
                     toast.parentNode.removeChild(toast);
@@ -119,49 +96,42 @@
         }, duration);
     }
 
+    /**
+     * Simulates a key press event on the currently focused element, traversing Shadow DOM.
+     * @param {string} key The key identifier to simulate (e.g., 'Tab', 'Enter').
+     */
+    function simulateKeyPress(key) {
+        function getDeepActiveElement() {
+            let activeEl = document.activeElement;
+            while (activeEl && activeEl.shadowRoot && activeEl.shadowRoot.activeElement) {
+                activeEl = activeEl.shadowRoot.activeElement;
+            }
+            return activeEl;
+        }
+
+        const target = getDeepActiveElement() || document.body;
+        console.log(`[HassWebView] Simulating '${key}' press on`, target);
+
+        const eventOptions = {
+            key: key,
+            bubbles: true,
+            composed: true, // Allows event to cross Shadow DOM boundaries
+            cancelable: true,
+            view: window
+        };
+
+        target.dispatchEvent(new KeyboardEvent('keydown', eventOptions));
+        target.dispatchEvent(new KeyboardEvent('keyup', eventOptions));
+    }
+
     // --- Expose the Public API ---
     window.HassWebView = {
         injectCss: injectCss,
         insertText: insertText,
-        toast: showToast
+        toast: showToast,
+        simulateKeyPress: simulateKeyPress
     };
 
     console.log('[HassWebView] Injected script and API are ready.');
-
-    /**
- * 移除页面所有键盘监听事件
- * 支持：keydown / keyup / keypress
- */
-    function removeAllKeyListeners() {
-        // 定义要清除的键盘事件类型
-        const keyEvents = ['keydown', 'keyup', 'keypress'];
-
-        // 遍历清除 window / document / body 上的所有监听
-        [window, document, document.body].forEach(target => {
-            keyEvents.forEach(event => {
-                // 方案1：移除内联事件（onkeydown="" 这种）
-                target[`on${event}`] = null;
-
-                // 方案2：覆盖 addEventListener，阻止后续新注册的键盘事件
-                const originalAdd = target.addEventListener;
-                target.addEventListener = function (type, listener, options) {
-                    if (!keyEvents.includes(type)) {
-                        // 非键盘事件正常注册
-                        return originalAdd.call(this, type, listener, options);
-                    }
-                    // 键盘事件直接拦截，不注册
-                    return undefined;
-                };
-
-                // 方案3：暴力清空当前已注册的所有该事件（最有效）
-                target.cloneNode(true).replaceWith(target);
-            });
-        });
-
-        console.log('✅ 已移除页面所有键盘按键监听');
-    }
-
-    // 执行：一键移除所有按键监听
-    window.addEventListener('load', removeAllKeyListeners);
 
 })(window);

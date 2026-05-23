@@ -132,6 +132,11 @@ public class WebViewClientHandler : WebViewClient
     public override async void OnPageFinished(WebView view, string url)
     {
         base.OnPageFinished(view, url);
+
+        // 同步导航状态
+        _webView.CanGoBack = view.CanGoBack();
+        _webView.CanGoForward = view.CanGoForward();
+
         _webView.SendNavigated(new WebNavigatedEventArgs(WebNavigationEvent.NewPage, new UrlWebViewSource { Url = url }, url, WebNavigationResult.Success));
 
         try
@@ -148,12 +153,11 @@ public class WebViewClientHandler : WebViewClient
         }
     }
 
-    public override async void DoUpdateVisitedHistory(WebView view, string url, bool isReload)
+    public override void DoUpdateVisitedHistory(WebView view, string url, bool isReload)
     {
         base.DoUpdateVisitedHistory(view, url, isReload);
-        var list = await _webView.GetBackForwardListAsync();
-        _webView.CanGoBack = list.CurrentIndex > 0;
-        _webView.CanGoForward = list.CurrentIndex < list.History.Count - 1;
+        _webView.CanGoBack = view.CanGoBack();
+        _webView.CanGoForward = view.CanGoForward();
     }
 
     public override void OnReceivedSslError(WebView p0, ISslErrorHandler p1, ISslError p2)

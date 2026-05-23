@@ -37,7 +37,9 @@ public partial class HassMediaPage : ContentPage, IKeyHandler
 
     protected override void OnDisappearing()
     {
-        // 页面消失时，停止重复操作并释放按键处理器的控制权
+        // 页面消失时，暂停视频播放防止音频继续播放
+        webViewWithCursor.WebViewControl.EvaluateJavaScriptAsync("if(typeof playPause==='function')playPause();");
+        // 停止重复操作并释放按键处理器的控制权
         _keyService.StopRepeatingAction();
         _remoteControlService.ClearActiveControl(webViewWithCursor);
         base.OnDisappearing();

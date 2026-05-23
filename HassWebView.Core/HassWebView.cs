@@ -1,6 +1,7 @@
 using HassWebView.Core.Bridges;
 using HassWebView.Core.Events;
 using HassWebView.Core.Models;
+using HassWebView.Core.Services;
 using Microsoft.Maui.Controls;
 using System;
 using System.Collections.Generic;
