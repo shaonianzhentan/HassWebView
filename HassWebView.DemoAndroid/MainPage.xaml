@@ -53,7 +53,6 @@
                                      Min="16"
                                      Max="30"
                                      Step="0.5"
-                                     ValueFormat="{0:0.0}"
                                      Unit="°C" />
                 </hass:DetailCard.ActionContent>
                 <hass:InfoRow Title="当前温度" Value="28°C" />

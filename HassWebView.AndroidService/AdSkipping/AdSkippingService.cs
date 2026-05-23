@@ -104,7 +104,7 @@ public class AdSkippingService : AccessibilityService
         {
             EventTypes        = EventTypes.WindowStateChanged | EventTypes.WindowContentChanged,
             FeedbackType      = FeedbackFlags.Generic,
-            Flags             = AccessibilityServiceFlags.Default | AccessibilityServiceFlags.RetrieveWindowContent,
+            Flags             = AccessibilityServiceFlags.Default | AccessibilityServiceFlags.RetrieveInteractiveWindows,
             NotificationTimeout = 100,
         });
     }

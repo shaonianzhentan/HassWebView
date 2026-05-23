@@ -10,7 +10,8 @@ namespace HassWebView.AndroidService;
 
 [Service(Name = "HassWebView.AndroidService.NotificationListener",
          Label = "HassWebView Notification Listener",
-         Permission = "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE")]
+         Permission = "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE", 
+         Exported = true)]
 [IntentFilter(new[] { "android.service.notification.NotificationListenerService" })]
 public class NotificationListener : NotificationListenerService
 {

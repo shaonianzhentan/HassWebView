@@ -1,3 +1,4 @@
+using HassWebView.AndroidService.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Hosting;
 
