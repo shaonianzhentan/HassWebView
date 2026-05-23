@@ -153,11 +153,8 @@ public partial class HassWebPage : ContentPage, IKeyHandler
                 case "video/play":
                     var videoUrl = msg?["data"]?.GetValue<string>();
                     var origin = msg?["origin"]?.GetValue<string>();
-                    if (!string.IsNullOrEmpty(videoUrl)) _pageOptions.PlayVideo(videoUrl, origin, false);
-                    break;
-                case "play/video":
-                    var videoUrl2 = msg?["data"]?.GetValue<string>();
-                    _pageOptions.PlayVideo(videoUrl2, null, true);
+                    var external = msg?["external"]?.GetValue<bool>() ?? false;
+                    if (!string.IsNullOrEmpty(videoUrl)) _pageOptions.PlayVideo(videoUrl, origin, external);
                     break;
             }
         }
@@ -181,6 +178,11 @@ public partial class HassWebPage : ContentPage, IKeyHandler
         base.OnDisappearing();
     }
 
+    protected override bool OnBackButtonPressed()
+    {
+        OnSingleClick(new RemoteKeyEventArgs("Back"));
+        return true;
+    }
 
     #region IKeyHandler Implementation
 

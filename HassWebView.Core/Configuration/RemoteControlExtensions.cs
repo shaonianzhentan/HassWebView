@@ -40,6 +40,11 @@ namespace HassWebView.Core.Configuration
                         activity.Window.Callback = new KeyCallback(originalCallback, keyService);
                     });
 
+                    android.OnBackPressed(activity =>
+                    {
+                        return true;
+                    });
+
                 });
 #endif
 #if WINDOWS

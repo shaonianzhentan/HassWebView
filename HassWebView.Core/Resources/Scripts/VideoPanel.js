@@ -170,14 +170,33 @@
         const urlText = document.createElement('div');
         urlText.textContent = videoUrl;
         Object.assign(urlText.style, {
-            wordBreak: 'break-all',
+            wordBreak: 'break-all'
+        });
+
+        const buttonRow = document.createElement('div');
+        Object.assign(buttonRow.style, {
+            display: 'flex',
+            gap: '6px',
+            alignSelf: 'flex-end'
+        });
+
+        const playButton = document.createElement('button');
+        playButton.textContent = '播放视频';
+        Object.assign(playButton.style, {
+            padding: '4px 8px',
+            backgroundColor: '#007bff',
+            color: '#fff',
+            border: '1px solid #0056b3',
+            borderRadius: '3px',
             cursor: 'pointer'
         });
-        urlText.addEventListener('click', () => {
+        playButton.addEventListener('click', (e) => {
+            e.stopPropagation();
             window.externalApp.externalBus(JSON.stringify({
                 type: 'video/play',
                 data: videoUrl,
-                origin: top.location.origin
+                origin: top.location.origin,
+                external: false
             }));
         });
 
@@ -189,19 +208,23 @@
             color: '#fff',
             border: '1px solid #777',
             borderRadius: '3px',
-            cursor: 'pointer',
-            alignSelf: 'flex-end'
+            cursor: 'pointer'
         });
         externalPlayButton.addEventListener('click', (e) => {
             e.stopPropagation();
             window.externalApp.externalBus(JSON.stringify({
-                type: 'play/video',
-                data: videoUrl
+                type: 'video/play',
+                data: videoUrl,
+                origin: top.location.origin,
+                external: true
             }));
         });
 
+        buttonRow.appendChild(playButton);
+        buttonRow.appendChild(externalPlayButton);
+
         item.appendChild(urlText);
-        item.appendChild(externalPlayButton);
+        item.appendChild(buttonRow);
         
         tabContent.insertBefore(item, tabContent.firstChild);
 
