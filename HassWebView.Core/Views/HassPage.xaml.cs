@@ -197,7 +197,7 @@ public partial class HassPage : ContentPage, IKeyHandler
         _isAuthPagePresented = true;
         _authDismissed = false; // Reset when explicitly navigating to auth
 
-        if (!string.IsNullOrEmpty(message)) ToastService.Show(message);
+        if (!string.IsNullOrEmpty(message)) ToastService.Show(webView, message);
 
         // Create the auth page, passing all necessary dependencies.
         var authPage = new HassAuthPage(_pageOptions, _hassApiService, _keyService, _httpServer);
@@ -269,7 +269,7 @@ public partial class HassPage : ContentPage, IKeyHandler
                 else
                 {
                     _lastBackPressTime = DateTime.UtcNow;
-                    ToastService.Show("再按一次退出应用");
+                    ToastService.Show(webView, "再按一次退出应用");
                 }
             }
         }
@@ -285,6 +285,8 @@ public partial class HassPage : ContentPage, IKeyHandler
     public async void OnLongClick(RemoteKeyEventArgs args)
     {
         _lastBackPressTime = null;
+        if (webView.OnLongClick(args.KeyName)) return;
+
     }
 
     #endregion

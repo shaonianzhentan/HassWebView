@@ -83,11 +83,11 @@
             pointerEvents: 'auto'
         });
 
-        // 阻止所有触摸/鼠标/指针事件穿透到下层页面元素
+        // 阻止事件冒泡到下层页面元素，但不在捕获阶段拦截以保证内部元素事件正常触发
         ['touchstart', 'touchmove', 'touchend', 'mousedown', 'mousemove', 'mouseup', 'click', 'pointerdown', 'pointermove', 'pointerup'].forEach(function(evt) {
             container.addEventListener(evt, function(e) {
                 e.stopPropagation();
-            }, true);
+            }, false);
         });
 
         const tabsContainer = document.createElement('div');

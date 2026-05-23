@@ -186,11 +186,12 @@
     }
 
     // 使用 capture 阶段拦截，确保在所有其他监听器之前执行
-    document.addEventListener('keydown', function(e) {
+    window.addEventListener('keydown', function (e) {
+        console.log(e.keyCode)
         _hwv_handleKeyEvent(e, 'down');
     }, true);
 
-    document.addEventListener('keyup', function(e) {
+    window.addEventListener('keyup', function(e) {
         _hwv_handleKeyEvent(e, 'up');
     }, true);
 
