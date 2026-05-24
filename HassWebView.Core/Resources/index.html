@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>连接到 Home Assistant</title>
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         /* --- Base & Reset --- */
         html {
@@ -242,7 +243,7 @@
             </form>
         </div>
         <div id="tv">
-             <img src="" style="width: 200px; height: 200px; margin: 20px auto; display: block;"/>
+             <div id="qrcode" style="width: 200px; height: 200px; margin: 20px auto;"></div>
         </div>
     </div>
 
@@ -281,7 +282,14 @@
                             populateUrl(message.data.hassUrl);
                         }
                         if (message.data.remoteUrl) {
-                            $("#tv img").attr("src", "https://cdn.dotmaui.com/qrc/?t=" + encodeURIComponent(message.data.remoteUrl));
+                            var el = document.getElementById("qrcode");
+                            el.innerHTML = "";
+                            new QRCode(el, {
+                                text: message.data.remoteUrl,
+                                width: 200,
+                                height: 200,
+                                correctLevel: QRCode.CorrectLevel.H
+                            });
                             $("#tv").show();
                         }
                     }
