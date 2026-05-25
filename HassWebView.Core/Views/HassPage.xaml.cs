@@ -156,7 +156,7 @@ public partial class HassPage : ContentPage, IKeyHandler
         {
             case "config/get":
                 var id = msg?["id"]?.GetValue<int>();
-                wv.WindowExternalBus(new { id, type = "result", success = true, result = new { hasSettingsScreen = true, canWriteTag = false } });
+                wv.WindowExternalBus(new { id, type = "result", success = true, result = new { hasSettingsScreen = _pageOptions.ShowSettingsScreen != null, canWriteTag = false } });
                 break;
             case "config_screen/show":
                 _pageOptions.ShowSettingsScreen?.Invoke();

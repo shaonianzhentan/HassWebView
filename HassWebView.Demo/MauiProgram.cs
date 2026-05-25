@@ -58,15 +58,7 @@ public static class MauiProgram
                 });
             })
             .UseHassWebView()
-            .UseHassPage((sp, options) =>
-            {
-                // 遵从您的指示：保持此实现为 Action，不修改接口
-                options.ShowSettingsScreen = () =>
-                {
-                    // "发后不理" 式调用，符合 Action 委托的定义
-                    Shell.Current.Navigation.PushModalAsync(new MainPage());
-                };
-            })
+            .UseHassPage<SettingsPage>()
             .UseImmersiveMode()
             .UseRemoteControl()
             .UseHassComponents();

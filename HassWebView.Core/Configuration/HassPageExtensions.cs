@@ -8,7 +8,15 @@ namespace HassWebView.Core.Configuration
 {
     public static class HassPageExtensions
     {
-        public static MauiAppBuilder UseHassPage(this MauiAppBuilder builder, Action<IServiceProvider, HassPageOptions> configureOptions = null)
+        /// <summary>
+        /// 泛型快捷方式：直接指定设置页类型
+        /// </summary>
+        public static MauiAppBuilder UseHassPage<TSettingsPage>(this MauiAppBuilder builder, Action<IServiceProvider, HassPageOptions> configureOptions = null) where TSettingsPage : Page
+        {
+            return builder.UseHassPage(typeof(TSettingsPage), configureOptions);
+        }
+
+        public static MauiAppBuilder UseHassPage(this MauiAppBuilder builder, Type settingsPage = null, Action<IServiceProvider, HassPageOptions> configureOptions = null)
         {
             builder.Services.TryAddSingleton<IHassApiService, HassApiService>();
 
@@ -90,6 +98,17 @@ namespace HassWebView.Core.Configuration
                 // 初始化 GetPushUrl 默认实现：延迟从 HttpServer 获取 BaseUrl，避免构造时依赖
                 options.GetPushUrl = () => sp.GetService<HttpServer>()?.BaseUrl ?? string.Empty;
 
+                // 封装设置页导航逻辑默认实现
+                if (settingsPage != null)
+                {
+                    var capturedType = settingsPage;
+                    options.ShowSettingsScreen = () =>
+                    {
+                        var page = (Page)ActivatorUtilities.CreateInstance(sp, capturedType);
+                        Shell.Current.Navigation.PushModalAsync(new NavigationPage(page));
+                    };
+                }
+
                 // 允许用户覆盖默认实现
                 configureOptions?.Invoke(sp, options);
 
@@ -98,6 +117,7 @@ namespace HassWebView.Core.Configuration
 
             // 为依赖注入注册页面
             builder.Services.AddTransient<HassPage>();
+            builder.Services.AddTransient<HassAuthPage>();
             builder.Services.AddTransient<HassWebPage>();
             builder.Services.AddTransient<HassMediaPage>();
 
