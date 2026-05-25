@@ -87,8 +87,12 @@ namespace HassWebView.Core.Configuration
                     await Shell.Current.Navigation.PushModalAsync(webPage);
                 };
 
+                // 初始化 GetPushUrl 默认实现：延迟从 HttpServer 获取 BaseUrl，避免构造时依赖
+                options.GetPushUrl = () => sp.GetService<HttpServer>()?.BaseUrl ?? string.Empty;
+
                 // 允许用户覆盖默认实现
                 configureOptions?.Invoke(sp, options);
+
                 return options;
             });
 

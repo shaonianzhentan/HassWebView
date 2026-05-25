@@ -38,10 +38,6 @@ public partial class HassPage : ContentPage, IKeyHandler
         _hassApiService = hassApiService;
         _remoteControlService = remoteControlService;
 
-        if (_httpServer != null && string.IsNullOrEmpty(_pageOptions.PushUrl))
-        {
-            _pageOptions.PushUrl = _httpServer.BaseUrl;
-        }
 
         var wv = webView.WebViewControl;
         wv.Navigating += OnWebViewNavigating;
@@ -49,6 +45,8 @@ public partial class HassPage : ContentPage, IKeyHandler
         wv.AuthTokenRequested += OnWebViewAuthTokenRequested;
         wv.LogoutRequested += OnWebViewLogoutRequested;
         wv.ExternalBusMessageReceived += OnExternalBusMessageReceived;
+
+        Loaded += OnPageLoaded;
     }
 
     protected override async void OnAppearing()
@@ -59,6 +57,18 @@ public partial class HassPage : ContentPage, IKeyHandler
 
         // The core logic now resides here to be executed every time the page appears.
         await CheckAuthAndLoadAsync();
+    }
+
+    private async void OnPageLoaded(object sender, EventArgs e)
+    {
+        // 校验 PushUrl，若为空则弹出警告并退出
+        var pushUrl = _pageOptions.GetPushUrl?.Invoke();
+        if (string.IsNullOrEmpty(pushUrl))
+        {
+            await DisplayAlert("配置错误", "未配置 HttpServer，PushUrl 为空，应用无法正常运行。", "退出");
+            Application.Current.Quit();
+            return;
+        }
     }
 
     private async Task CheckAuthAndLoadAsync()
@@ -104,7 +114,7 @@ public partial class HassPage : ContentPage, IKeyHandler
         var hassUrl = await _authStore.GetHassUrlAsync();
         var webhookId = await _authStore.GetWebhookIdAsync();
         var deviceId = await _authStore.GetDeviceIdAsync();
-        var pushUrl = string.IsNullOrEmpty(_pageOptions.PushUrl) && _httpServer != null ? _httpServer.BaseUrl : _pageOptions.PushUrl;
+        var pushUrl = _pageOptions.GetPushUrl();
 
         var mobileApp = new MobileApp(hassUrl, webhookId);
         await mobileApp.UpdateRegistrationAsync(new UpdateRegistrationRequest

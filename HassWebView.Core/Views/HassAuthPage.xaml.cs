@@ -94,7 +94,7 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
                 OsName = DeviceInfo.Current.Platform.ToString(),
                 OsVersion = DeviceInfo.Current.VersionString,
                 SupportsEncryption = false,
-                AppData = new MobileAppData(deviceId, _pageOptions.PushUrl)
+                AppData = new MobileAppData(deviceId, _pageOptions.GetPushUrl())
             };
 
             var registrationResult = await hassApi.RegisterMobileAppAsync(registrationRequest);
