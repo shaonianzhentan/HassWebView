@@ -230,8 +230,8 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         webView.Settings.UseWideViewPort = true;
         webView.Settings.SetSupportZoom(true);
         
-        webView.Focusable = false;
-        webView.FocusableInTouchMode = false;
+        webView.Focusable = true;
+        webView.FocusableInTouchMode = true;
         webView.Clickable = true;
 
         webView.WebChromeClient = new WebChromeClientHandler(VirtualView);

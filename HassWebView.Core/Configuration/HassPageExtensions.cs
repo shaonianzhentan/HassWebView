@@ -102,10 +102,10 @@ namespace HassWebView.Core.Configuration
                 if (settingsPage != null)
                 {
                     var capturedType = settingsPage;
-                    options.ShowSettingsScreen = () =>
+                    options.ShowSettingsScreen = async () =>
                     {
                         var page = (Page)ActivatorUtilities.CreateInstance(sp, capturedType);
-                        Shell.Current.Navigation.PushModalAsync(new NavigationPage(page));
+                        await Shell.Current.Navigation.PushModalAsync(new NavigationPage(page));
                     };
                 }
 

@@ -16,7 +16,7 @@ namespace HassWebView.Core.Configuration
     {
         public IAuthStore AuthStore { get; set; }
         public Func<string, string?, bool, Task> PlayVideo { get; set; }
-        public Action ShowSettingsScreen { get; set; }
+        public Func<Task> ShowSettingsScreen { get; set; }
         public Action<string> OpenWebPage { get; set; }
         public Func<string> GetPushUrl { get; set; }
 

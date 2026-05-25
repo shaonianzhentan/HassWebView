@@ -4,7 +4,7 @@
              x:Class="HassWebView.Demo.SettingsPage"
              xmlns:hass="clr-namespace:HassWebView.Component;assembly=HassWebView.Component"
              Title="设置"
-             BackgroundColor="{AppThemeBinding Light='#F2F2F7', Dark='#000000}">
+             BackgroundColor="{AppThemeBinding Light='#F2F2F7', Dark='#000000'}">
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="16">

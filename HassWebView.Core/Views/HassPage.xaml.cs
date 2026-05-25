@@ -148,6 +148,7 @@ public partial class HassPage : ContentPage, IKeyHandler
     private async void OnExternalBusMessageReceived(object sender, string message)
     {
         if (string.IsNullOrEmpty(message)) return;
+        Console.WriteLine(message);
         var wv = webView.WebViewControl;
         var msg = JsonNode.Parse(message);
         var type = msg?["type"]?.GetValue<string>();
@@ -159,7 +160,8 @@ public partial class HassPage : ContentPage, IKeyHandler
                 wv.WindowExternalBus(new { id, type = "result", success = true, result = new { hasSettingsScreen = _pageOptions.ShowSettingsScreen != null, canWriteTag = false } });
                 break;
             case "config_screen/show":
-                _pageOptions.ShowSettingsScreen?.Invoke();
+                if (_pageOptions.ShowSettingsScreen != null)
+                    await _pageOptions.ShowSettingsScreen();
                 break;
             case "webview/config":
                 var hassUrl = await _authStore.GetHassUrlAsync();
