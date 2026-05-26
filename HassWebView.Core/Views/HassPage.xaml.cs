@@ -1,7 +1,6 @@
 using HassWebView.Core.Configuration;
 using HassWebView.Core.Events;
 using HassWebView.Core.Auth;
-using HassWebView.Core.Services;
 using HassWebView.Core.Interfaces;
 using HassWebView.HassApi;
 using HassWebView.HassApi.Models;
@@ -65,7 +64,7 @@ public partial class HassPage : ContentPage, IKeyHandler
         var pushUrl = _pageOptions.GetPushUrl?.Invoke();
         if (string.IsNullOrEmpty(pushUrl))
         {
-            await DisplayAlert("配置错误", "未配置 HttpServer，PushUrl 为空，应用无法正常运行。", "退出");
+            await webView.ShowAlert("配置错误", "未配置 HttpServer，PushUrl 为空，应用无法正常运行。");
             Application.Current.Quit();
             return;
         }
@@ -207,7 +206,7 @@ public partial class HassPage : ContentPage, IKeyHandler
         _isAuthPagePresented = true;
         _authDismissed = false; // Reset when explicitly navigating to auth
 
-        if (!string.IsNullOrEmpty(message)) ToastService.Show(webView, message);
+        if (!string.IsNullOrEmpty(message)) webView.ShowToast(message);
 
         // Create the auth page, passing all necessary dependencies.
         var authPage = new HassAuthPage(_pageOptions, _hassApiService, _keyService, _httpServer);
@@ -279,7 +278,7 @@ public partial class HassPage : ContentPage, IKeyHandler
                 else
                 {
                     _lastBackPressTime = DateTime.UtcNow;
-                    ToastService.Show(webView, "再按一次退出应用");
+                    webView.ShowToast("再按一次退出应用");
                 }
             }
         }

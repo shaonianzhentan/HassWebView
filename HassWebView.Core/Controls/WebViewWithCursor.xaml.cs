@@ -17,6 +17,12 @@ public partial class WebViewWithCursor : ContentView
     private const int ToastDurationMs = 2500;
     private const uint ToastFadeMs = 200;
 
+    // Alert 相关
+    private TaskCompletionSource<bool> _alertTcs;
+    private const uint AlertFadeMs = 200;
+    private bool _isAlertVisible = false;
+    private bool _isAlertCancelBtnFocused = false;
+
     public WebViewWithCursor()
     {
         InitializeComponent();
@@ -66,14 +72,12 @@ public partial class WebViewWithCursor : ContentView
             loadingBar.IsVisible = true;
             loadingBar.Opacity = 1;
 
-            // 重置宽度为 0
             AbsoluteLayout.SetLayoutBounds(loadingBar, new Rect(0, 0, 0, 3));
 
-            // 快速增长到 70%，然后缓慢爬到 90%（模拟等待响应）
             await GrowBarAsync(0.7, 300, token);
             await GrowBarAsync(0.9, 8000, token);
         }
-        catch (OperationCanceledException) { /* 导航完成，由 FinishLoadingBarAsync 接管 */ }
+        catch (OperationCanceledException) { }
     }
 
     private async Task GrowBarAsync(double targetRatio, uint durationMs, CancellationToken token)
@@ -95,10 +99,8 @@ public partial class WebViewWithCursor : ContentView
 
     private async Task FinishLoadingBarAsync()
     {
-        // 迅速填满到 100%
         AbsoluteLayout.SetLayoutBounds(loadingBar, new Rect(0, 0, 1, 3));
         await Task.Delay(150);
-        // 淡出消失
         await loadingBar.FadeTo(0, 200);
         loadingBar.IsVisible = false;
         loadingBar.Opacity = 1;
@@ -124,7 +126,6 @@ public partial class WebViewWithCursor : ContentView
 
         MainThread.BeginInvokeOnMainThread(async () =>
         {
-            // 取消上一个 Toast
             _toastCts?.Cancel();
             _toastCts = new CancellationTokenSource();
             var token = _toastCts.Token;
@@ -132,24 +133,128 @@ public partial class WebViewWithCursor : ContentView
             toastLabel.Text = message;
             toastPanel.IsVisible = true;
 
-            // 淡入
             toastPanel.Opacity = 0;
             await toastPanel.FadeTo(1, ToastFadeMs);
 
             try
             {
-                // 等待指定时间
                 await Task.Delay(durationMs, token);
-
-                // 淡出
                 await toastPanel.FadeTo(0, ToastFadeMs);
                 toastPanel.IsVisible = false;
             }
             catch (TaskCanceledException)
             {
-                // 被新 Toast 取消，不做清理（新 Toast 会接管 UI）
             }
         });
+    }
+
+    /// <summary>
+    /// 显示 Alert 对话框（单按钮确认，类似 JavaScript 的 alert）。
+    /// </summary>
+    public async Task ShowAlert(string title, string message, string accept = "确定")
+    {
+        _alertTcs = new TaskCompletionSource<bool>();
+
+        await MainThread.InvokeOnMainThreadAsync(() =>
+        {
+            alertTitle.Text = title;
+            alertMessage.Text = message;
+            alertCancelBtn.IsVisible = false;
+            alertAcceptBtn.Text = accept;
+            alertAcceptBtn.Flex = 1;
+
+            alertOverlay.IsVisible = true;
+            alertPanel.IsVisible = true;
+
+            alertOverlay.Opacity = 0;
+            alertPanel.Opacity = 0;
+
+            _isAlertVisible = true;
+            _isAlertCancelBtnFocused = false;
+
+            _ = AnimateAlertInAsync();
+        });
+
+        await _alertTcs.Task;
+    }
+
+    /// <summary>
+    /// 显示 Confirm 对话框（双按钮：取消和确定）。
+    /// 返回 true 表示用户点击确定，false 表示取消。
+    /// </summary>
+    public async Task<bool> ShowConfirm(string title, string message, string cancel = "取消", string accept = "确定")
+    {
+        _alertTcs = new TaskCompletionSource<bool>();
+
+        await MainThread.InvokeOnMainThreadAsync(() =>
+        {
+            alertTitle.Text = title;
+            alertMessage.Text = message;
+            alertCancelBtn.Text = cancel;
+            alertCancelBtn.IsVisible = true;
+            alertAcceptBtn.Text = accept;
+            alertAcceptBtn.Flex = 1;
+
+            alertOverlay.IsVisible = true;
+            alertPanel.IsVisible = true;
+
+            alertOverlay.Opacity = 0;
+            alertPanel.Opacity = 0;
+
+            _isAlertVisible = true;
+            _isAlertCancelBtnFocused = true;
+
+            _ = AnimateAlertInAsync();
+        });
+
+        return await _alertTcs.Task;
+    }
+
+    private async Task AnimateAlertInAsync()
+    {
+        await Task.WhenAll(
+            alertOverlay.FadeTo(1, AlertFadeMs),
+            alertPanel.FadeTo(1, AlertFadeMs)
+        );
+    }
+
+    private async Task AnimateAlertOutAsync()
+    {
+        await Task.WhenAll(
+            alertOverlay.FadeTo(0, AlertFadeMs),
+            alertPanel.FadeTo(0, AlertFadeMs)
+        );
+
+        alertOverlay.IsVisible = false;
+        alertPanel.IsVisible = false;
+        _isAlertVisible = false;
+        _isAlertCancelBtnFocused = false;
+    }
+
+    private async void OnAlertCancelClicked(object sender, EventArgs e)
+    {
+        await AnimateAlertOutAsync();
+        _alertTcs?.SetResult(false);
+    }
+
+    private async void OnAlertAcceptClicked(object sender, EventArgs e)
+    {
+        await AnimateAlertOutAsync();
+        _alertTcs?.SetResult(true);
+    }
+
+    private void UpdateAlertButtonFocus()
+    {
+        if (_isAlertCancelBtnFocused && alertCancelBtn.IsVisible)
+        {
+            alertCancelBtn.BackgroundColor = Color.FromHex("#E0E0E0");
+            alertAcceptBtn.BackgroundColor = Color.FromHex("#F2F2F7");
+        }
+        else
+        {
+            alertCancelBtn.BackgroundColor = Color.FromHex("#F2F2F7");
+            alertAcceptBtn.BackgroundColor = Color.FromHex("#007BFF");
+        }
     }
 
     public async Task LoadEmbeddedHtml(string resourcePath)
@@ -175,16 +280,21 @@ public partial class WebViewWithCursor : ContentView
         }
     }
 
-
     public void ToggleCursorVisibility()
     {
         cursor.IsVisible = !cursor.IsVisible;
     }
 
-
     public bool OnSingleClick(string KeyName)
     {
         Debug.WriteLine($"[HassPage] Single Click: {KeyName}");
+
+        // 如果对话框显示，遥控器控制对话框按钮
+        if (_isAlertVisible)
+        {
+            return HandleAlertKeyPress(KeyName);
+        }
+
         if (_cursorControl is null) return false;
 
         switch (KeyName)
@@ -204,6 +314,39 @@ public partial class WebViewWithCursor : ContentView
         }
 
         return true;
+    }
+
+    private bool HandleAlertKeyPress(string keyName)
+    {
+        switch (keyName)
+        {
+            case "Enter":
+                // 按 Enter 键触发当前聚焦的按钮
+                if (_isAlertCancelBtnFocused && alertCancelBtn.IsVisible)
+                {
+                    OnAlertCancelClicked(null, null);
+                }
+                else
+                {
+                    OnAlertAcceptClicked(null, null);
+                }
+                return true;
+            case "Left":
+            case "Right":
+                // 左右键切换按钮焦点（仅 Confirm 对话框）
+                if (alertCancelBtn.IsVisible)
+                {
+                    _isAlertCancelBtnFocused = !_isAlertCancelBtnFocused;
+                    UpdateAlertButtonFocus();
+                }
+                return true;
+            case "Back":
+                // 按 Back 键关闭对话框（相当于取消）
+                OnAlertCancelClicked(null, null);
+                return true;
+            default:
+                return false;
+        }
     }
 
     public bool OnDoubleClick(string KeyName)

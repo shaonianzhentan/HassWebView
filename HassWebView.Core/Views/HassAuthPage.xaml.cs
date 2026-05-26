@@ -8,7 +8,6 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Web;
 using System.Runtime.InteropServices;
-using HassWebView.Core.Services;
 using HassWebView.Core.Events;
 
 namespace HassWebView.Core.Views;
@@ -182,7 +181,7 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
         {
             _state = PageState.NeedsAuth;
             await webView.LoadEmbeddedHtml("index.html");
-            if (!string.IsNullOrEmpty(message)) ToastService.Show(webView, message);
+            if (!string.IsNullOrEmpty(message)) webView.ShowToast(message);
         });
     }
 
