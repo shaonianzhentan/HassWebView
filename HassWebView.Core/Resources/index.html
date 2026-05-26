@@ -7,7 +7,6 @@
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        /* --- Base & Reset --- */
         html {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
@@ -24,17 +23,14 @@
             justify-content: center;
             background-color: #f0f2f5;
             color: #1c1e21;
-            /* height: 100vh; is removed to prevent keyboard jiggle */
         }
 
-        /* --- Main Container --- */
         .container {
             width: 100%;
             max-width: 480px;
             padding: 20px;
         }
 
-        /* --- Card --- */
         .card {
             background-color: #fff;
             border-radius: 12px;
@@ -43,13 +39,11 @@
             box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
         }
 
-        /* --- Logo --- */
         .logo {
             height: 30px;
             margin: 0 auto 24px;
         }
 
-        /* --- Typography --- */
         h1 {
             font-size: 24px;
             font-weight: 600;
@@ -61,7 +55,6 @@
             margin: 0 0 32px;
         }
 
-        /* --- Tabs --- */
         .tabs {
             display: flex;
             margin-bottom: 20px;
@@ -84,14 +77,13 @@
             border-bottom-color: #007bff;
         }
         .tab-content {
-            display: none; /* Hidden by default */
+            display: none;
             margin-bottom: 16px;
         }
         .tab-content.active {
-            display: block; /* Visible when active */
+            display: block;
         }
         
-        /* --- Input Groups & Form --- */
         .input-group, .ip-input-group {
             display: flex;
             border: 1px solid #dddfe2;
@@ -115,7 +107,6 @@
             background-color: #fff;
         }
 
-        /* --- IP Input Group Specific --- */
         .ip-input-group span {
             padding: 14px;
             background-color: #e4e6eb;
@@ -143,7 +134,6 @@
             margin-top: 10px;
         }
 
-        /* --- Loading Spinner --- */
         #loading {
             display: none;
             position: fixed;
@@ -176,7 +166,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- Toast Notification --- */
         #toast {
             visibility: hidden;
             min-width: 250px;
@@ -206,6 +195,67 @@
             display: none;
         }
 
+        /* --- Discovery List --- */
+        #discovery-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #discovery-list li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border: 1px solid #dddfe2;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: #f5f6f7;
+        }
+        #discovery-list li:hover {
+            background-color: #e8f0fe;
+            border-color: #007bff;
+        }
+        #discovery-list li.selected {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: white;
+        }
+        #discovery-list li.selected .hass-url {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        #discovery-list .hass-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        #discovery-list .hass-url {
+            font-size: 14px;
+            color: #606770;
+        }
+        #discovery-list .hass-icon {
+            width: 32px;
+            height: 32px;
+            background-color: #34C759;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        #discovery-list li.selected .hass-icon {
+            background-color: white;
+            color: #007bff;
+        }
+        .discovery-empty {
+            text-align: center;
+            padding: 20px;
+            color: #606770;
+            font-size: 14px;
+        }
+
     </style>
 </head>
 <body>
@@ -219,15 +269,23 @@
         <div class="card">
             <img src="https://www.home-assistant.io/images/home-assistant-logo.svg" alt="Home Assistant" class="logo">
             <h1>欢迎回来</h1>
-            <p>请输入您的 Home Assistant 地址</p>
+            <p>点击下方发现的实例进行连接</p>
 
             <div class="tabs">
-                <button class="tab-link active" data-tab="ip-panel">IP 地址</button>
+                <button class="tab-link active" data-tab="discovery-panel">局域网发现</button>
+                <button class="tab-link" data-tab="ip-panel">IP 地址</button>
                 <button class="tab-link" data-tab="url-panel">完整网址</button>
             </div>
 
             <form id="connect-form" onsubmit="return false;">
-                <div id="ip-panel" class="tab-content active">
+                <div id="discovery-panel" class="tab-content active">
+                    <ul id="discovery-list">
+                        <li class="discovery-empty">
+                            <span>正在扫描局域网...</span>
+                        </li>
+                    </ul>
+                </div>
+                <div id="ip-panel" class="tab-content">
                     <div class="ip-input-group">
                         <span>http://</span>
                         <input type="text" class="url-input" id="ha-ip" placeholder="192.168.1.100" pattern="\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}" inputmode="numeric">
@@ -248,7 +306,8 @@
     </div>
 
     <script>
-        // --- App Communication (C# to WebView) ---
+        var hasScanned = false;
+
         window.externalBus = function (msg) {
             console.log("Message received from C#: ", msg);
             
@@ -298,6 +357,10 @@
                     hideLoading();
                     showToast(message.message);
                     break;
+                case 'hass/discover/result':
+                    hideLoading();
+                    handleDiscoveryResult(message.data);
+                    break;
                 case 'x5/download':
                     showLoading("下载进度 " + message.data + "%")
                     break;
@@ -311,7 +374,6 @@
             }
         };
 
-        // --- UI Control Functions (ES5 Compliant) ---
         function showLoading(message) {
             message = message || '请稍候...';
             $('#loading-text').text(message);
@@ -330,7 +392,6 @@
             toastTimer = setTimeout(function() { toast.removeClass('show'); }, duration);
         }
         
-        // --- Compatibility Check ---
         function checkWebViewCompatibility() {
             var result = { isCompatible: true, reason: "" };
             try {
@@ -385,7 +446,68 @@
             }
         }
 
-        // --- Initialization ---
+        function handleDiscoveryResult(instances) {
+            var list = $('#discovery-list');
+            list.empty();
+
+            if (!instances || instances.length === 0) {
+                list.append('<li class="discovery-empty"><span>未发现局域网中的 Home Assistant 实例</span></li>');
+                return;
+            }
+
+            instances.forEach(function(hass) {
+                var url = 'http://' + hass.hostName + ':' + hass.port;
+                var item = $('<li>');
+                item.append('<span class="hass-icon">H</span>');
+                item.append('<div style="flex: 1; text-align: left; margin-left: 12px;">');
+                item.find('div').append('<div class="hass-name">' + (hass.name || 'Home Assistant') + '</div>');
+                item.find('div').append('<div class="hass-url">' + url + '</div>');
+                item.append('</div>');
+                
+                item.on('click', function() {
+                    selectAndConnect(hass);
+                });
+                
+                list.append(item);
+            });
+        }
+
+        function selectAndConnect(hass) {
+            var url = 'http://' + hass.hostName + ':' + hass.port;
+            showLoading("正在连接到 " + (hass.name || 'Home Assistant') + "...");
+            
+            if(window.externalApp && window.externalApp.externalBus) {
+                 window.externalApp.externalBus(JSON.stringify({
+                    type: 'webview/auth',
+                    data: url
+                }));
+            } else {
+                console.warn("Not in C# environment. URL to verify: " + url);
+                hideLoading();
+                showToast("当前不在应用环境中，无法连接。");
+            }
+        }
+
+        function scanForHass() {
+            if (hasScanned) return;
+            hasScanned = true;
+            
+            showLoading("正在扫描局域网...");
+            
+            if(window.externalApp && window.externalApp.externalBus){
+                window.externalApp.externalBus(JSON.stringify({ type: 'hass/discover' }));
+            } else {
+                hideLoading();
+                var mockInstances = [
+                    { name: 'Home Assistant', hostName: 'home-assistant.local', port: 8123 },
+                    { name: 'Home Assistant', hostName: 'hass.local', port: 8123 },
+                    { name: 'Home Assistant', hostName: '192.168.1.100', port: 8123 }
+                ];
+                handleDiscoveryResult(mockInstances);
+                showToast("当前不在应用环境中，显示模拟数据。");
+            }
+        }
+
         $(document).ready(function() {
             
             var form = $('#connect-form');
@@ -396,9 +518,12 @@
                 $(this).addClass('active');
                 $('.tab-content').removeClass('active');
                 $('#' + tabId).addClass('active');
+                
+                if (tabId === 'discovery-panel' && !hasScanned) {
+                    scanForHass();
+                }
             });
 
-            // Check compatibility
             var compatibility = checkWebViewCompatibility();
             if (!compatibility.isCompatible) {
                 showLoading("正在加载兼容内核...");
@@ -410,12 +535,14 @@
                 }
             }
 
-            // Request config from C#
             if(window.externalApp && window.externalApp.externalBus){
                 window.externalApp.externalBus(JSON.stringify({ type: 'webview/config' }));
             }
 
-            // --- App Communication (WebView to C#) ---
+            setTimeout(function() {
+                scanForHass();
+            }, 500);
+
             form.on('submit', function(event) {
                 event.preventDefault();
                 

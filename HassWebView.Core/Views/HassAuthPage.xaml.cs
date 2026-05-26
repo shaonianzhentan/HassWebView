@@ -147,6 +147,11 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
                      wv.WindowExternalBus(new { type = "webview/config", data = new { hassUrl, remoteUrl = (string)null } });
                      break;
 
+                case "hass/discover":
+                    var instances = await HassDiscovery.DiscoverAsync();
+                    wv.WindowExternalBus(new { type = "hass/discover/result", data = instances });
+                    break;
+
                 case "x5/init": // RESTORED X5 INITIALIZATION LOGIC
 #if ANDROID
                     string apkUrl = string.Empty;
