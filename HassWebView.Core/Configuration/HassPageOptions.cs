@@ -19,6 +19,7 @@ namespace HassWebView.Core.Configuration
         public Func<Task> ShowSettingsScreen { get; set; }
         public Action<string> OpenWebPage { get; set; }
         public Func<string> GetPushUrl { get; set; }
+        public Func<string> GetX5ApkUrl { get; set; }
 
         private const string DomainConfigsCacheFile = "domain_configs.yaml";
 

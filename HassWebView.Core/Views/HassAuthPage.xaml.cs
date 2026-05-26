@@ -18,18 +18,18 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
     private PageState _state = PageState.NeedsAuth;
 
     /// <summary>
-    /// 标记授权是否成功完成，供外部判断 Modal 关闭原因。
+    /// 标记授权是否已成功完成，供外部判断 Modal 关闭原因。
     /// </summary>
     public bool IsAuthenticated { get; private set; } = false;
 
     private readonly HassPageOptions _pageOptions;
     private readonly IAuthStore _authStore;
-    private readonly IHassApiService _hassApiService;
+    private readonly IHttpApiService _hassApiService;
     private readonly HttpServer _httpServer;
     private readonly KeyService _keyService;
 
     // Constructor to accept all necessary services from HassPage
-    public HassAuthPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService keyService = null, HttpServer httpServer = null)
+    public HassAuthPage(HassPageOptions pageOptions, IHttpApiService hassApiService, KeyService keyService = null, HttpServer httpServer = null)
     {
         InitializeComponent();
         
@@ -99,7 +99,7 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
             var registrationResult = await hassApi.RegisterMobileAppAsync(registrationRequest);
             if (registrationResult?.WebhookId == null)
             {
-                await ShowErrorAndStay("注册应用失败，请检查您的Home Assistant配置。");
+                await ShowErrorAndStay("注册应用失败，请检查您的 Home Assistant 配置。");
                 return;
             }
 
@@ -137,7 +137,7 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
                     }
                     else
                     {
-                        wv.WindowExternalBus(new { type = "webview/auth", message = "无法访问提供的URL，请确保它是正确的Home Assistant实例地址。" });
+                        wv.WindowExternalBus(new { type = "webview/auth", message = "无法访问提供的 URL，请确保它是正确的 Home Assistant 实例地址。" });
                     }
                     break;
                 
@@ -153,9 +153,7 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
 
                 case "x5/init": // RESTORED X5 INITIALIZATION LOGIC
 #if ANDROID
-                    string apkUrl = string.Empty;
-                    if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64) apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm64_046295.tbs.apk";
-                    else if (RuntimeInformation.ProcessArchitecture == Architecture.Arm) apkUrl = "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm_045912_x5.tbs.apk";
+                    string apkUrl = _pageOptions.GetX5ApkUrl?.Invoke() ?? string.Empty;
                     if (!string.IsNullOrEmpty(apkUrl))
                     {
                         Debug.WriteLine($"[HassAuthPage] Initializing Tencent X5 Core with APK: {apkUrl}");
