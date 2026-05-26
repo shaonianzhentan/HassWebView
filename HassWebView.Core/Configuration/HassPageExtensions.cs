@@ -3,6 +3,7 @@ using HassWebView.Core.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace HassWebView.Core.Configuration
 {

@@ -1,6 +1,7 @@
 using HassWebView.Core.Auth;
 using HassWebView.Core.Configuration;
 using HassWebView.Core.Interfaces;
+using HassWebView.Core.Services;
 using HassWebView.HassApi;
 using HassWebView.HassApi.Models;
 using System.Diagnostics;
@@ -24,12 +25,12 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
 
     private readonly HassPageOptions _pageOptions;
     private readonly IAuthStore _authStore;
-    private readonly IHttpApiService _hassApiService;
+    private readonly IHassApiService _hassApiService;
     private readonly HttpServer _httpServer;
     private readonly KeyService _keyService;
 
     // Constructor to accept all necessary services from HassPage
-    public HassAuthPage(HassPageOptions pageOptions, IHttpApiService hassApiService, KeyService keyService = null, HttpServer httpServer = null)
+    public HassAuthPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService keyService = null, HttpServer httpServer = null)
     {
         InitializeComponent();
         

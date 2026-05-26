@@ -82,7 +82,7 @@
                        TextColor="{AppThemeBinding Light='#666666', Dark='#8E8E93'}"
                        HorizontalOptions="Center"
                        HorizontalTextAlignment="Center" />
-                <HorizontalStackLayout Spacing="12">
+                <HorizontalStackLayout Spacing="12" WidthRequest="280">
                     <Button x:Name="alertCancelBtn"
                             Text="取消"
                             FontSize="14"
@@ -91,7 +91,7 @@
                             BackgroundColor="{AppThemeBinding Light='#F2F2F7', Dark='#3A3A3C'}"
                             BorderWidth="0"
                             CornerRadius="8"
-                            Flex="1"
+                            HorizontalOptions="FillAndExpand"
                             HeightRequest="44"
                             Clicked="OnAlertCancelClicked" />
                     <Button x:Name="alertAcceptBtn"
@@ -102,7 +102,7 @@
                             BackgroundColor="{StaticResource Primary}"
                             BorderWidth="0"
                             CornerRadius="8"
-                            Flex="1"
+                            HorizontalOptions="FillAndExpand"
                             HeightRequest="44"
                             Clicked="OnAlertAcceptClicked" />
                 </HorizontalStackLayout>

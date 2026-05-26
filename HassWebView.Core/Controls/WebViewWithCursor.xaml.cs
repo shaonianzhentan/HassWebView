@@ -161,7 +161,6 @@ public partial class WebViewWithCursor : ContentView
             alertMessage.Text = message;
             alertCancelBtn.IsVisible = false;
             alertAcceptBtn.Text = accept;
-            alertAcceptBtn.Flex = 1;
 
             alertOverlay.IsVisible = true;
             alertPanel.IsVisible = true;
@@ -193,7 +192,6 @@ public partial class WebViewWithCursor : ContentView
             alertCancelBtn.Text = cancel;
             alertCancelBtn.IsVisible = true;
             alertAcceptBtn.Text = accept;
-            alertAcceptBtn.Flex = 1;
 
             alertOverlay.IsVisible = true;
             alertPanel.IsVisible = true;

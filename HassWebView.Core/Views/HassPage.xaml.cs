@@ -2,6 +2,7 @@ using HassWebView.Core.Configuration;
 using HassWebView.Core.Events;
 using HassWebView.Core.Auth;
 using HassWebView.Core.Interfaces;
+using HassWebView.Core.Services;
 using HassWebView.HassApi;
 using HassWebView.HassApi.Models;
 using System.Diagnostics;
