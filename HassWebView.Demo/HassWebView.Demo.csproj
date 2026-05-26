@@ -70,8 +70,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\HassWebView.Component\HassWebView.Component.csproj" />
-	  <ProjectReference Include="..\HassWebView.Core\HassWebView.Core.csproj" />
-	</ItemGroup>
+  <ProjectReference Include="..\HassWebView.Core\HassWebView.Core.csproj" />
+</ItemGroup>
 
 </Project>

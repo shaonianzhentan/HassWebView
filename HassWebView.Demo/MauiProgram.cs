@@ -1,4 +1,3 @@
-using HassWebView.Component;
 using HassWebView.Core;
 using HassWebView.Core.Configuration;
 using HassWebView.HassApi.Models;
@@ -60,8 +59,7 @@ public static class MauiProgram
             .UseHassWebView()
             .UseHassPage<SettingsPage>()
             .UseImmersiveMode()
-            .UseRemoteControl()
-            .UseHassComponents();
+            .UseRemoteControl();
 
 #if DEBUG
         builder.Logging.AddDebug();
