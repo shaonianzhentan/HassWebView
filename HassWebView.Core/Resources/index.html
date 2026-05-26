@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>连接到 Home Assistant</title>
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         html {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -341,14 +340,9 @@
                             populateUrl(message.data.hassUrl);
                         }
                         if (message.data.remoteUrl) {
+                            // 使用 C# 生成的 SVG 二维码
                             var el = document.getElementById("qrcode");
-                            el.innerHTML = "";
-                            new QRCode(el, {
-                                text: message.data.remoteUrl,
-                                width: 200,
-                                height: 200,
-                                correctLevel: QRCode.CorrectLevel.H
-                            });
+                            el.innerHTML = message.data.remoteUrl;
                             $("#tv").show();
                         }
                     }

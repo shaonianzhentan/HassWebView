@@ -143,7 +143,29 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
                 
                 case "webview/config":
                      var hassUrl = await _authStore.GetHassUrlAsync();
-                     wv.WindowExternalBus(new { type = "webview/config", data = new { hassUrl, remoteUrl = (string)null } });
+                     string remoteUrl = null;
+                     string remoteUrlQrCode = null;
+                     
+                     // 构建完整的远程访问 URL
+                     if (_httpServer != null && !string.IsNullOrEmpty(_httpServer.BaseUrl))
+                     {
+                         remoteUrl = _httpServer.BaseUrl.TrimEnd('/') + "/webview/remote";
+                     }
+                     
+                     // 使用 C# 生成二维码
+                     if (!string.IsNullOrEmpty(remoteUrl))
+                     {
+                         try
+                         {
+                             remoteUrlQrCode = QrCodeService.GenerateSvg(remoteUrl, 200, QrCodeService.ErrorCorrectionLevel.H);
+                         }
+                         catch (Exception ex)
+                         {
+                             Debug.WriteLine($"[HassAuthPage] Error generating QR code: {ex.Message}");
+                         }
+                     }
+                     
+                     wv.WindowExternalBus(new { type = "webview/config", data = new { hassUrl, remoteUrl = remoteUrlQrCode } });
                      break;
 
                 case "hass/discover":
