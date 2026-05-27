@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:component="clr-namespace:HassWebView.Component.Components"
+             x:Class="HassWebView.DemoComponent.Views.ThemeSelectorExamplePage"
+             Title="ThemeSelector 组件示例"
+             BackgroundColor="White">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="20">
+            <Label Text="ThemeSelector 主题选择组件" FontSize="24" FontAttributes="Bold" />
+            <Label Text="用于选择亮色/暗色/系统主题" FontSize="14" TextColor="#86868B" />
+            
+            <!-- 只使用 ThemeSelector 组件 -->
+            <component:ThemeSelector />
+            
+            <BoxView HeightRequest="40" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

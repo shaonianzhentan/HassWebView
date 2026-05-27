@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:component="clr-namespace:HassWebView.Component.Components"
+             x:Class="HassWebView.DemoComponent.Views.InputExamplePage"
+             Title="Input 组件示例"
+             BackgroundColor="{AppThemeBinding Light={StaticResource LightBackgroundColor}, Dark={StaticResource DarkBackgroundColor}}">
+    
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="20">
+            
+            <Label Text="Input 输入框组件" FontSize="24" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource LightTextColor}, Dark={StaticResource DarkTextColor}}" />
+            
+            <Label Text="支持标签、占位符、密码模式、键盘类型、错误状态" FontSize="14" TextColor="#86868B" />
+            
+            <component:SectionHeader Title="基础输入" />
+            <component:Input Label="用户名" Placeholder="请输入用户名" />
+            
+            <component:SectionHeader Title="密码输入" />
+            <component:Input Label="密码" Placeholder="请输入密码" IsPassword="True" />
+            
+            <component:SectionHeader Title="邮箱输入" />
+            <component:Input Label="邮箱" Placeholder="请输入邮箱" KeyboardType="Email" />
+            
+            <component:SectionHeader Title="数字输入" />
+            <component:Input Label="年龄" Placeholder="请输入年龄" KeyboardType="Numeric" />
+            
+            <component:SectionHeader Title="错误状态" />
+            <component:Input Label="错误示例" Placeholder="这是一个错误示例" HasError="True" ErrorText="请填写此字段" />
+            
+            <BoxView HeightRequest="40" />
+            
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

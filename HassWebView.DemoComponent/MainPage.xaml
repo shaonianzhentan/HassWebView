@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:component="clr-namespace:HassWebView.Component.Components;assembly=HassWebView.Component"
+             x:Class="HassWebView.DemoComponent.MainPage"
+             Title="HassWebView Demo Component">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="24">
+            <Label Text="HassWebView Component Demo"
+                   FontAttributes="Bold"
+                   FontSize="28" />
+
+            <Label Text="这是一组来自 HassWebView.Component 的控件示例：" />
+
+            <Frame BorderColor="#E5E5EA" CornerRadius="16" Padding="16" HasShadow="False">
+                <VerticalStackLayout Spacing="16">
+                    <Label Text="Chip 示例" FontAttributes="Bold" />
+                    <HorizontalStackLayout Spacing="12">
+                        <component:Chip Text="默认" IconText="✨" Type="Default" />
+                        <component:Chip Text="Primary" IconText="🚀" Type="Primary" />
+                        <component:Chip Text="Success" IconText="✅" Type="Success" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BorderColor="#E5E5EA" CornerRadius="16" Padding="16" HasShadow="False">
+                <VerticalStackLayout Spacing="16">
+                    <Label Text="ButtonCard 示例" FontAttributes="Bold" />
+                    <component:ButtonCard Icon="💡" Title="客厅灯" State="On" ShowBadge="True" />
+                    <component:ButtonCard Icon="🚪" Title="前门" State="Locked" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BorderColor="#E5E5EA" CornerRadius="16" Padding="16" HasShadow="False">
+                <VerticalStackLayout Spacing="16">
+                    <Label Text="Alert 示例" FontAttributes="Bold" />
+                    <component:Alert Title="成功" Message="组件库已成功加载并运行。" Type="Success" />
+                    <component:Alert Title="警告" Message="这是一个警告样例消息。" Type="Warning" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Label Text="更多示例页面：" FontAttributes="Bold" />
+            <VerticalStackLayout x:Name="ButtonsLayout" Spacing="10" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

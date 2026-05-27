@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:component="clr-namespace:HassWebView.Component.Components"
+             x:Class="HassWebView.DemoComponent.Views.SettingsGroupExamplePage"
+             Title="SettingsGroup 组件示例"
+             BackgroundColor="White">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="20">
+            <Label Text="SettingsGroup 设置组组件" FontSize="24" FontAttributes="Bold" />
+            <Label Text="用于分组显示设置项" FontSize="14" TextColor="#86868B" />
+            
+            <!-- 只使用 SettingsGroup 组件 -->
+            <component:SettingsGroup Title="常规设置">
+                <component:EntityRow Title="通知" IconText="🔔" State="开启" StateColor="#10B981" />
+                <component:EntityRow Title="声音" IconText="🔊" State="开启" StateColor="#10B981" />
+                <component:EntityRow Title="震动" IconText="📳" State="关闭" StateColor="#9CA3AF" />
+            </component:SettingsGroup>
+            
+            <component:SettingsGroup Title="隐私设置">
+                <component:EntityRow Title="定位服务" IconText="📍" State="开启" StateColor="#10B981" />
+                <component:EntityRow Title="数据收集" IconText="📊" State="关闭" StateColor="#9CA3AF" />
+            </component:SettingsGroup>
+            
+            <BoxView HeightRequest="40" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

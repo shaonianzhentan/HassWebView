@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:component="clr-namespace:HassWebView.Component.Components"
+             x:Class="HassWebView.DemoComponent.Views.AboutPage"
+             Title="关于"
+             BackgroundColor="{AppThemeBinding Light={StaticResource LightBackgroundColor}, Dark={StaticResource DarkBackgroundColor}}">
+    
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="20">
+            
+            <!-- Logo 和应用名称 -->
+            <VerticalStackLayout Spacing="12" HorizontalOptions="Center" Margin="0,20,0,0">
+                <Frame WidthRequest="100" HeightRequest="100" CornerRadius="50" BackgroundColor="#007AFF" Padding="0" HorizontalOptions="Center">
+                    <Label Text="🏠" FontSize="50" HorizontalOptions="Center" VerticalOptions="Center" />
+                </Frame>
+                <Label x:Name="AppNameLabel" FontSize="28" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource LightTextColor}, Dark={StaticResource DarkTextColor}}" />
+                <Label Text="Home Assistant 设计系统组件库" FontSize="14" TextColor="#86868B" />
+            </VerticalStackLayout>
+            
+            <!-- 应用信息卡片 -->
+            <component:SectionHeader Title="应用信息" />
+            
+            <component:Card>
+                <VerticalStackLayout Spacing="12">
+                    <component:InfoRow Icon="📱" Label="应用名称" Value="{Binding AppName}" />
+                    <component:InfoRow Icon="🔢" Label="版本号" Value="{Binding Version}" />
+                    <component:InfoRow Icon="🛠️" Label="框架" Value="{Binding Framework}" />
+                    <component:InfoRow Icon="🎨" Label="设计规范" Value="{Binding DesignSystem}" />
+                </VerticalStackLayout>
+            </component:Card>
+            
+            <!-- 项目链接 -->
+            <component:SectionHeader Title="项目链接" />
+            
+            <component:Card>
+                <component:ActionLink Text="🔗 GitHub 仓库" Clicked="OnGitHubClicked" />
+            </component:Card>
+            
+            <!-- 组件统计 -->
+            <component:SectionHeader Title="组件统计" />
+            
+            <HorizontalStackLayout Spacing="16" HorizontalOptions="Center">
+                <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                    <component:Gauge x:Name="CompletedGauge" Minimum="0" Unit="个" Label="已实现" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                    <component:Gauge x:Name="ProgressGauge" Minimum="0" Unit="个" Label="进行中" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+            
+            <!-- 功能特性 -->
+            <component:SectionHeader Title="功能特性" />
+            
+            <component:Card>
+                <VerticalStackLayout Spacing="8">
+                    <component:FeatureItem Text="支持亮色/暗色/系统主题切换" />
+                    <component:FeatureItem Text="支持手机/平板/电视尺寸适配" />
+                    <component:FeatureItem Text="遵循 Home Assistant 设计规范" />
+                    <component:FeatureItem Text="跨平台兼容（iOS/macOS/Android/Windows）" />
+                </VerticalStackLayout>
+            </component:Card>
+            
+            <!-- 页脚 -->
+            <VerticalStackLayout Spacing="8" Margin="0,20,0,40" HorizontalOptions="Center">
+                <Label Text="Made with ❤️ for Home Assistant" FontSize="12" TextColor="#86868B" />
+                <Label Text="© 2024 HassWebView Team" FontSize="12" TextColor="#86868B" />
+            </VerticalStackLayout>
+            
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
