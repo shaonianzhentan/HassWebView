@@ -11,13 +11,22 @@ public partial class InfoRow : ContentView
         SizeManager.SizeChanged += (s, e) => UpdateSize();
     }
 
-    public static readonly BindableProperty TitleProperty =
-        BindableProperty.Create(nameof(Title), typeof(string), typeof(InfoRow), string.Empty);
+    public static readonly BindableProperty IconProperty =
+        BindableProperty.Create(nameof(Icon), typeof(string), typeof(InfoRow), string.Empty);
 
-    public string Title
+    public string Icon
     {
-        get => (string)GetValue(TitleProperty);
-        set => SetValue(TitleProperty, value);
+        get => (string)GetValue(IconProperty);
+        set => SetValue(IconProperty, value);
+    }
+
+    public static readonly BindableProperty LabelProperty =
+        BindableProperty.Create(nameof(Label), typeof(string), typeof(InfoRow), string.Empty);
+
+    public string Label
+    {
+        get => (string)GetValue(LabelProperty);
+        set => SetValue(LabelProperty, value);
     }
 
     public static readonly BindableProperty ValueProperty =
@@ -34,15 +43,18 @@ public partial class InfoRow : ContentView
         switch (SizeManager.CurrentSize)
         {
             case ComponentSize.Phone:
-                TitleLabel.FontSize = 14;
+                IconLabel.FontSize = 20;
+                LabelLabel.FontSize = 14;
                 ValueLabel.FontSize = 14;
                 break;
             case ComponentSize.Tablet:
-                TitleLabel.FontSize = 18;
+                IconLabel.FontSize = 28;
+                LabelLabel.FontSize = 18;
                 ValueLabel.FontSize = 18;
                 break;
             case ComponentSize.TV:
-                TitleLabel.FontSize = 24;
+                IconLabel.FontSize = 36;
+                LabelLabel.FontSize = 24;
                 ValueLabel.FontSize = 24;
                 break;
         }

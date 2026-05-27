@@ -12,13 +12,13 @@ public partial class ButtonCard : ContentView
         SizeManager.SizeChanged += (s, e) => UpdateSize();
     }
 
-    public static readonly BindableProperty IconTextProperty =
-        BindableProperty.Create(nameof(IconText), typeof(string), typeof(ButtonCard), string.Empty);
+    public static readonly BindableProperty IconProperty =
+        BindableProperty.Create(nameof(Icon), typeof(string), typeof(ButtonCard), string.Empty);
 
-    public string IconText
+    public string Icon
     {
-        get => (string)GetValue(IconTextProperty);
-        set => SetValue(IconTextProperty, value);
+        get => (string)GetValue(IconProperty);
+        set => SetValue(IconProperty, value);
     }
 
     public static readonly BindableProperty TitleProperty =

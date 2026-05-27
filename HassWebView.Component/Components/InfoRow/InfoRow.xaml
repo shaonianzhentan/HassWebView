@@ -4,14 +4,19 @@
              x:Class="HassWebView.Component.Components.InfoRow"
              x:Name="this">
 
-    <Grid ColumnDefinitions="*,Auto" Padding="16,8">
-        <Label x:Name="TitleLabel"
+    <Grid ColumnDefinitions="40,*,Auto" Padding="16,8" ColumnSpacing="8">
+        <Label x:Name="IconLabel"
                Grid.Column="0"
-               Text="{Binding Source={x:Reference this}, Path=Title}"
+               Text="{Binding Source={x:Reference this}, Path=Icon}"
+               FontSize="20"
+               HorizontalOptions="Center" />
+        <Label x:Name="LabelLabel"
+               Grid.Column="1"
+               Text="{Binding Source={x:Reference this}, Path=Label}"
                FontSize="14"
                TextColor="{AppThemeBinding Light=#636366, Dark=#8E8E93}" />
         <Label x:Name="ValueLabel"
-               Grid.Column="1"
+               Grid.Column="2"
                Text="{Binding Source={x:Reference this}, Path=Value}"
                FontSize="14"
                TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#FFFFFF}"

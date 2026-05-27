@@ -129,7 +129,7 @@ public partial class Gauge : ContentView
     private void UpdateProgress()
     {
         double range = Maximum - Minimum;
-        double percentage = Math.Max(0, Math.Min(1, (Value - Minimum) / range));
+        double percentage = range == 0 ? 0 : Math.Max(0, Math.Min(1, (Value - Minimum) / range));
         
         // Home Assistant 风格的颜色：绿色 -> 黄色 -> 红色
         if (percentage >= 0.9)

@@ -11,7 +11,7 @@
         <VerticalStackLayout Spacing="8">
             <Grid ColumnDefinitions="*,Auto">
                 <Label x:Name="IconLabel"
-                       Text="{Binding Source={x:Reference this}, Path=IconText}"
+                       Text="{Binding Source={x:Reference this}, Path=Icon}"
                        FontSize="36"
                        VerticalOptions="Center" />
                 <Border x:Name="BadgeBorder"

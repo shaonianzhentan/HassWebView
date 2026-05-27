@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:component="clr-namespace:HassWebView.Component.Components"
+             x:Class="HassWebView.Component.Views.SliderCardExamplePage"
+             Title="SliderCard 组件示例"
+             BackgroundColor="White">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="20">
+            <Label Text="SliderCard 滑块卡片组件" FontSize="24" FontAttributes="Bold" />
+            <Label Text="带标签的滑块组件，用于调节数值" FontSize="14" TextColor="#86868B" />
+            
+            <!-- 只使用 SliderCard 组件 -->
+            <component:SliderCard Title="亮度调节" Value="75" Min="0" Max="100" Unit="%" />
+            <component:SliderCard Title="温度调节" Value="24" Min="16" Max="30" Unit="°C" />
+            <component:SliderCard Title="音量调节" Value="60" Min="0" Max="100" Unit="%" />
+            
+            <BoxView HeightRequest="40" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

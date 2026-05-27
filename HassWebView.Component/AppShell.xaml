@@ -19,31 +19,79 @@
     </Shell.FlyoutHeader>
 
     <FlyoutItem Title="首页" Icon="🏠">
-        <ShellContent ContentTemplate="{DataTemplate local:MainPage}" />
+        <ShellContent Route="MainPage" ContentTemplate="{DataTemplate local:MainPage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="Alert" Icon="⚠️">
-        <ShellContent ContentTemplate="{DataTemplate views:AlertExamplePage}" />
+        <ShellContent Route="AlertExamplePage" ContentTemplate="{DataTemplate views:AlertExamplePage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="Chip" Icon="📌">
-        <ShellContent ContentTemplate="{DataTemplate views:ChipExamplePage}" />
+        <ShellContent Route="ChipExamplePage" ContentTemplate="{DataTemplate views:ChipExamplePage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="ControlSwitch" Icon="🔘">
-        <ShellContent ContentTemplate="{DataTemplate views:ControlSwitchExamplePage}" />
+        <ShellContent Route="ControlSwitchExamplePage" ContentTemplate="{DataTemplate views:ControlSwitchExamplePage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="Input" Icon="✏️">
-        <ShellContent ContentTemplate="{DataTemplate views:InputExamplePage}" />
+        <ShellContent Route="InputExamplePage" ContentTemplate="{DataTemplate views:InputExamplePage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="Spinner" Icon="🔄">
-        <ShellContent ContentTemplate="{DataTemplate views:SpinnerExamplePage}" />
+        <ShellContent Route="SpinnerExamplePage" ContentTemplate="{DataTemplate views:SpinnerExamplePage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="Gauge" Icon="📊">
-        <ShellContent ContentTemplate="{DataTemplate views:GaugeExamplePage}" />
+        <ShellContent Route="GaugeExamplePage" ContentTemplate="{DataTemplate views:GaugeExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="ButtonCard" Icon="🔘">
+        <ShellContent Route="ButtonCardExamplePage" ContentTemplate="{DataTemplate views:ButtonCardExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="ButtonGrid" Icon="🔲">
+        <ShellContent Route="ButtonGridExamplePage" ContentTemplate="{DataTemplate views:ButtonGridExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="DetailCard" Icon="📋">
+        <ShellContent Route="DetailCardExamplePage" ContentTemplate="{DataTemplate views:DetailCardExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Dialog" Icon="💬">
+        <ShellContent Route="DialogExamplePage" ContentTemplate="{DataTemplate views:DialogExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="EntityRow" Icon="📝">
+        <ShellContent Route="EntityRowExamplePage" ContentTemplate="{DataTemplate views:EntityRowExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="EntityListGroup" Icon="📋">
+        <ShellContent Route="EntityListGroupExamplePage" ContentTemplate="{DataTemplate views:EntityListGroupExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="SliderCard" Icon="🎚️">
+        <ShellContent Route="SliderCardExamplePage" ContentTemplate="{DataTemplate views:SliderCardExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="StateBadge" Icon="🏷️">
+        <ShellContent Route="StateBadgeExamplePage" ContentTemplate="{DataTemplate views:StateBadgeExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="ThemeSelector" Icon="🎨">
+        <ShellContent Route="ThemeSelectorExamplePage" ContentTemplate="{DataTemplate views:ThemeSelectorExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="SizeSelector" Icon="📐">
+        <ShellContent Route="SizeSelectorExamplePage" ContentTemplate="{DataTemplate views:SizeSelectorExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="SettingsGroup" Icon="⚙️">
+        <ShellContent Route="SettingsGroupExamplePage" ContentTemplate="{DataTemplate views:SettingsGroupExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="关于" Icon="ℹ️">
+        <ShellContent Route="AboutPage" ContentTemplate="{DataTemplate views:AboutPage}" />
     </FlyoutItem>
 
 </Shell>
