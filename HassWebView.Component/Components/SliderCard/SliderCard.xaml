@@ -29,8 +29,8 @@
                 </Label>
             </Grid>
             <Slider x:Name="ValueSlider"
-                    Minimum="0"
-                    Maximum="100"
+                    Minimum="{Binding Source={x:Reference this}, Path=Min}"
+                    Maximum="{Binding Source={x:Reference this}, Path=Max}"
                     Value="{Binding Source={x:Reference this}, Path=Value}"
                     ThumbColor="#007AFF"
                     MinimumTrackColor="#007AFF"

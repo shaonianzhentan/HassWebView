@@ -12,9 +12,9 @@
             <Label Text="用于展示实体详细信息的卡片" FontSize="14" TextColor="#86868B" />
             
             <!-- 只使用 DetailCard 组件 -->
-            <component:DetailCard Icon="🌡️" Name="室内温度" State="23.5°C" Subtitle="客厅" />
-            <component:DetailCard Icon="💧" Name="室内湿度" State="65%" Subtitle="卧室" />
-            <component:DetailCard Icon="🔋" Name="电池电量" State="85%" Subtitle="智能门锁" />
+            <component:DetailCard Title="室内温度" State="23.5°C" Subtitle="客厅" />
+            <component:DetailCard Title="室内湿度" State="65%" Subtitle="卧室" />
+            <component:DetailCard Title="电池电量" State="85%" Subtitle="智能门锁" />
             
             <BoxView HeightRequest="40" />
         </VerticalStackLayout>

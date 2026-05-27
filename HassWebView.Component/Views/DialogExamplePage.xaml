@@ -13,9 +13,10 @@
             
             <!-- 只使用 Dialog 组件 -->
             <Button Text="显示对话框" Clicked="OnShowDialogClicked" />
-            <component:Dialog x:Name="ExampleDialog" Title="提示" Message="这是一个对话框示例">
-                <Button Text="确定" Clicked="OnDialogConfirmClicked" />
-            </component:Dialog>
+            <component:Dialog x:Name="ExampleDialog"
+                              Title="提示"
+                              Message="这是一个对话框示例"
+                              Confirmed="OnDialogConfirmClicked" />
             
             <BoxView HeightRequest="40" />
         </VerticalStackLayout>

@@ -23,10 +23,28 @@ public partial class SliderCard : ContentView
     public static readonly BindableProperty ValueProperty =
         BindableProperty.Create(nameof(Value), typeof(double), typeof(SliderCard), 0.0);
 
+    public static readonly BindableProperty MinProperty =
+        BindableProperty.Create(nameof(Min), typeof(double), typeof(SliderCard), 0.0);
+
+    public static readonly BindableProperty MaxProperty =
+        BindableProperty.Create(nameof(Max), typeof(double), typeof(SliderCard), 100.0);
+
     public double Value
     {
         get => (double)GetValue(ValueProperty);
         set => SetValue(ValueProperty, value);
+    }
+
+    public double Min
+    {
+        get => (double)GetValue(MinProperty);
+        set => SetValue(MinProperty, value);
+    }
+
+    public double Max
+    {
+        get => (double)GetValue(MaxProperty);
+        set => SetValue(MaxProperty, value);
     }
 
     public static readonly BindableProperty UnitProperty =

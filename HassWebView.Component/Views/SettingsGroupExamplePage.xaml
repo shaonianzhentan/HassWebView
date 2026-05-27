@@ -13,14 +13,14 @@
             
             <!-- 只使用 SettingsGroup 组件 -->
             <component:SettingsGroup Title="常规设置">
-                <component:EntityRow Name="通知" Icon="🔔" State="开启" StateColor="#10B981" />
-                <component:EntityRow Name="声音" Icon="🔊" State="开启" StateColor="#10B981" />
-                <component:EntityRow Name="震动" Icon="📳" State="关闭" StateColor="#9CA3AF" />
+                <component:EntityRow Title="通知" IconText="🔔" State="开启" StateColor="#10B981" />
+                <component:EntityRow Title="声音" IconText="🔊" State="开启" StateColor="#10B981" />
+                <component:EntityRow Title="震动" IconText="📳" State="关闭" StateColor="#9CA3AF" />
             </component:SettingsGroup>
             
             <component:SettingsGroup Title="隐私设置">
-                <component:EntityRow Name="定位服务" Icon="📍" State="开启" StateColor="#10B981" />
-                <component:EntityRow Name="数据收集" Icon="📊" State="关闭" StateColor="#9CA3AF" />
+                <component:EntityRow Title="定位服务" IconText="📍" State="开启" StateColor="#10B981" />
+                <component:EntityRow Title="数据收集" IconText="📊" State="关闭" StateColor="#9CA3AF" />
             </component:SettingsGroup>
             
             <BoxView HeightRequest="40" />

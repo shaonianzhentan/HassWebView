@@ -5,8 +5,8 @@ public partial class Dialog : ContentView
     public static readonly BindableProperty TitleProperty =
         BindableProperty.Create(nameof(Title), typeof(string), typeof(Dialog), string.Empty);
 
-    public static readonly BindableProperty ContentProperty =
-        BindableProperty.Create(nameof(Content), typeof(string), typeof(Dialog), string.Empty);
+    public static readonly BindableProperty MessageProperty =
+        BindableProperty.Create(nameof(Message), typeof(string), typeof(Dialog), string.Empty);
 
     public static readonly BindableProperty CancelTextProperty =
         BindableProperty.Create(nameof(CancelText), typeof(string), typeof(Dialog), "取消");
@@ -25,10 +25,10 @@ public partial class Dialog : ContentView
         set => SetValue(TitleProperty, value);
     }
 
-    public string Content
+    public string Message
     {
-        get => (string)GetValue(ContentProperty);
-        set => SetValue(ContentProperty, value);
+        get => (string)GetValue(MessageProperty);
+        set => SetValue(MessageProperty, value);
     }
 
     public string CancelText

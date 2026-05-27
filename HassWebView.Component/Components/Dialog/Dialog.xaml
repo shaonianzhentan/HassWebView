@@ -33,7 +33,7 @@
                 
                 <!-- 内容 -->
                 <Label x:Name="ContentLabel"
-                       Text="{Binding Source={x:Reference this}, Path=Content}"
+                       Text="{Binding Source={x:Reference this}, Path=Message}"
                        FontSize="14"
                        TextColor="#3C3C3C"
                        LineBreakMode="WordWrap" />

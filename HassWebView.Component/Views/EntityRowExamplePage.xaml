@@ -12,11 +12,11 @@
             <Label Text="用于显示 Home Assistant 实体信息的行组件" FontSize="14" TextColor="#86868B" />
             
             <!-- 只使用 EntityRow 组件 -->
-            <component:EntityRow Name="客厅灯" Icon="💡" State="on" StateColor="#FCD34D" />
-            <component:EntityRow Name="卧室灯" Icon="💡" State="off" StateColor="#9CA3AF" />
-            <component:EntityRow Name="室内温度" Icon="🌡️" State="23.5°C" StateColor="#3B82F6" />
-            <component:EntityRow Name="空调" Icon="❄️" State="制冷" StateColor="#3B82F6" />
-            <component:EntityRow Name="加湿器" Icon="💧" State="开启" StateColor="#10B981" />
+            <component:EntityRow Title="客厅灯" IconText="💡" State="on" StateColor="#FCD34D" />
+            <component:EntityRow Title="卧室灯" IconText="💡" State="off" StateColor="#9CA3AF" />
+            <component:EntityRow Title="室内温度" IconText="🌡️" State="23.5°C" StateColor="#3B82F6" />
+            <component:EntityRow Title="空调" IconText="❄️" State="制冷" StateColor="#3B82F6" />
+            <component:EntityRow Title="加湿器" IconText="💧" State="开启" StateColor="#10B981" />
             
             <BoxView HeightRequest="40" />
         </VerticalStackLayout>

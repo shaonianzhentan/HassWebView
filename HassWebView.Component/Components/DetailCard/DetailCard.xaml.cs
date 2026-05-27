@@ -72,24 +72,24 @@ public partial class DetailCard : ContentView
         switch (SizeManager.CurrentSize)
         {
             case ComponentSize.Phone:
-                CardBorder.Padding = new Thickness(20);
+                CardFrame.Padding = new Thickness(20);
                 TitleLabel.FontSize = 16;
                 SubtitleLabel.FontSize = 14;
-                StateBorder.Padding = new Thickness(12, 6);
+                StateFrame.Padding = new Thickness(12, 6);
                 StateLabel.FontSize = 14;
                 break;
             case ComponentSize.Tablet:
-                CardBorder.Padding = new Thickness(28);
+                CardFrame.Padding = new Thickness(28);
                 TitleLabel.FontSize = 24;
                 SubtitleLabel.FontSize = 18;
-                StateBorder.Padding = new Thickness(20, 10);
+                StateFrame.Padding = new Thickness(20, 10);
                 StateLabel.FontSize = 20;
                 break;
             case ComponentSize.TV:
-                CardBorder.Padding = new Thickness(36);
+                CardFrame.Padding = new Thickness(36);
                 TitleLabel.FontSize = 32;
                 SubtitleLabel.FontSize = 24;
-                StateBorder.Padding = new Thickness(28, 14);
+                StateFrame.Padding = new Thickness(28, 14);
                 StateLabel.FontSize = 28;
                 break;
         }
