@@ -63,9 +63,9 @@
 
             <!-- ===== SettingsGroup: 应用设置 ===== -->
             <hass:SettingsGroup Title="通知设置" Footer="修改后即时生效">
-                <hass:SwitchCard Title="启用推送通知" IsToggled="True" />
+                <hass:ControlSwitch Title="启用推送通知" IsToggled="True" />
                 <hass:InfoRow Title="通知渠道" Value="Home Assistant" />
-                <hass:SwitchCard Title="震动反馈" />
+                <hass:ControlSwitch Title="震动反馈" />
             </hass:SettingsGroup>
 
             <hass:SettingsGroup Title="系统信息">

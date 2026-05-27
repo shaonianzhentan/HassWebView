@@ -15,9 +15,18 @@ public class HassComponentInitializer : IMauiInitializeService
             return;
         }
 
-        if (!application.Resources.MergedDictionaries.Any(x => x is Resources.ComponentResources))
+        // 尝试加载资源字典，如果失败则忽略，避免阻塞应用启动
+        try
         {
-            application.Resources.MergedDictionaries.Add(new Resources.ComponentResources());
+            var res = new Resources.ComponentResources();
+            if (!application.Resources.MergedDictionaries.Any(x => x is Resources.ComponentResources))
+            {
+                application.Resources.MergedDictionaries.Add(res);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to load ComponentResources: {ex.Message}");
         }
     }
 }

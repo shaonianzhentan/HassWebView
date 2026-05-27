@@ -62,7 +62,7 @@
                                  ValueChanged="OnGpsIntervalChanged" />
 
                 <!-- WiFi 时停止定位 -->
-                <hass:SwitchCard x:Name="GpsWifiSwitch"
+                <hass:ControlSwitch x:Name="GpsWifiSwitch"
                                  Title="WiFi 连接时停止定位"
                                  Description="接入 WiFi 后暂停 GPS 定位上报"
                                  Toggled="OnGpsWifiSwitchToggled" />
@@ -104,7 +104,7 @@
                 </Border>
 
                 <!-- 屏幕事件推送 -->
-                <hass:SwitchCard x:Name="ScreenEventSwitch"
+                <hass:ControlSwitch x:Name="ScreenEventSwitch"
                                  Title="屏幕事件推送"
                                  Description="屏幕亮起/熄灭时向 HA 上报状态"
                                  Toggled="OnScreenEventSwitchToggled" />
@@ -139,7 +139,7 @@
                 </Border>
 
                 <!-- 启用短信转发 -->
-                <hass:SwitchCard x:Name="SmsForwardSwitch"
+                <hass:ControlSwitch x:Name="SmsForwardSwitch"
                                  Title="启用短信转发"
                                  Description="收到短信后转发至 HA Webhook"
                                  Toggled="OnSmsForwardSwitchToggled" />
@@ -172,7 +172,7 @@
                 </Border>
 
                 <!-- 自动刷新 -->
-                <hass:SwitchCard x:Name="WidgetAutoRefreshSwitch"
+                <hass:ControlSwitch x:Name="WidgetAutoRefreshSwitch"
                                  Title="小组件自动刷新"
                                  Description="按固定间隔自动更新小组件数据"
                                  Toggled="OnWidgetAutoRefreshToggled" />
@@ -193,22 +193,22 @@
             <!-- ═══════════════════════════════════════ -->
             <hass:SettingsGroup Title="功能开关">
 
-                <hass:SwitchCard x:Name="ScreenEventGlobalSwitch"
+                <hass:ControlSwitch x:Name="ScreenEventGlobalSwitch"
                                  Title="屏幕事件推送"
                                  Description="屏幕亮起/熄灭时上报状态至 HA"
                                  Toggled="OnScreenEventGlobalToggled" />
 
-                <hass:SwitchCard x:Name="WifiStopGpsSwitch"
+                <hass:ControlSwitch x:Name="WifiStopGpsSwitch"
                                  Title="WiFi 连接停止定位"
                                  Description="连接 WiFi 后暂停 GPS 上报"
                                  Toggled="OnWifiStopGpsToggled" />
 
-                <hass:SwitchCard x:Name="KeyControlSwitch"
+                <hass:ControlSwitch x:Name="KeyControlSwitch"
                                  Title="按键控制"
                                  Description="硬件音量键控制 HA 设备"
                                  Toggled="OnKeyControlToggled" />
 
-                <hass:SwitchCard x:Name="LanAutoSwitchCard"
+                <hass:ControlSwitch x:Name="LanAutoSwitchCard"
                                  Title="局域网自动切换"
                                  Description="局域网内自动切换至本地 HA 地址"
                                  Toggled="OnLanAutoSwitchToggled" />

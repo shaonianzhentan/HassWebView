@@ -1,4 +1,4 @@
-namespace HassWebView.Component;
+namespace HassWebView.DemoComponent;
 
 using System;
 using System.Collections.Generic;
