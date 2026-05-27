@@ -20,8 +20,9 @@ public partial class AppShell : Shell
 
     private void OnAppShellLoaded(object? sender, EventArgs e)
     {
-        InitializePageRoutes();
-        StartAutoNavigation();
+        // 暂时禁用自动导航以排查崩溃原因
+        // InitializePageRoutes();
+        // StartAutoNavigation();
     }
 
     private void OnAppShellUnloaded(object? sender, EventArgs e)
