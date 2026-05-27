@@ -1,63 +1,21 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:models="clr-namespace:HassWebView.Component.Models"
-             x:Class="HassWebView.Component.InfoRow"
+             x:Class="HassWebView.Component.Components.InfoRow"
              x:Name="this">
 
-    <VerticalStackLayout>
-
-        <Grid ColumnDefinitions="*,Auto"
-              ColumnSpacing="12"
-              Padding="0,12">
-
-            <!-- Title (left) -->
-            <Label Grid.Column="0"
-                   Text="{Binding Source={x:Reference this}, Path=Title}"
-                   VerticalOptions="Center">
-                <Label.Style>
-                    <Style TargetType="Label" BasedOn="{StaticResource ListItemTitleLabelStyle}">
-                        <Style.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Small}">
-                                <Setter Property="FontSize" Value="{StaticResource TitleFontSizeSmall}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Large}">
-                                <Setter Property="FontSize" Value="{StaticResource TitleFontSizeLarge}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Label.Style>
-            </Label>
-
-            <!-- Value (right) -->
-            <Label Grid.Column="1"
-                   Text="{Binding Source={x:Reference this}, Path=Value}"
-                   VerticalOptions="Center"
-                   HorizontalOptions="End"
-                   TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}">
-                <Label.Style>
-                    <Style TargetType="Label">
-                        <Setter Property="FontSize" Value="{StaticResource DescriptionFontSizeMedium}" />
-                        <Style.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Small}">
-                                <Setter Property="FontSize" Value="{StaticResource DescriptionFontSizeSmall}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Large}">
-                                <Setter Property="FontSize" Value="{StaticResource DescriptionFontSizeLarge}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Label.Style>
-            </Label>
-
-        </Grid>
-
-        <!-- Divider line -->
-        <BoxView x:Name="DividerLine"
-                 HeightRequest="0.5"
-                 HorizontalOptions="Fill"
-                 Color="{AppThemeBinding Light='#E5E5EA', Dark='#38383A'}" />
-
-    </VerticalStackLayout>
+    <Grid ColumnDefinitions="*,Auto" Padding="16,8">
+        <Label x:Name="TitleLabel"
+               Grid.Column="0"
+               Text="{Binding Source={x:Reference this}, Path=Title}"
+               FontSize="14"
+               TextColor="{AppThemeBinding Light=#636366, Dark=#8E8E93}" />
+        <Label x:Name="ValueLabel"
+               Grid.Column="1"
+               Text="{Binding Source={x:Reference this}, Path=Value}"
+               FontSize="14"
+               TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#FFFFFF}"
+               HorizontalTextAlignment="End" />
+    </Grid>
 
 </ContentView>

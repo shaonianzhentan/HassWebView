@@ -1,24 +1,18 @@
-using HassWebView.Component.Models;
+namespace HassWebView.Component.Components;
 
-namespace HassWebView.Component;
+using HassWebView.Component.Models;
 
 public partial class SectionHeader : ContentView
 {
     public SectionHeader()
     {
         InitializeComponent();
+        UpdateSize();
+        SizeManager.SizeChanged += (s, e) => UpdateSize();
     }
 
-    /// <summary>
-    /// Fired when the optional action label is tapped.
-    /// </summary>
     public event EventHandler? ActionTapped;
 
-    #region Bindable Properties
-
-    /// <summary>
-    /// The section title text (rendered uppercase with letter spacing).
-    /// </summary>
     public static readonly BindableProperty TitleProperty =
         BindableProperty.Create(nameof(Title), typeof(string), typeof(SectionHeader), string.Empty);
 
@@ -28,9 +22,6 @@ public partial class SectionHeader : ContentView
         set => SetValue(TitleProperty, value);
     }
 
-    /// <summary>
-    /// Optional action text shown on the right. Setting this makes the action label visible.
-    /// </summary>
     public static readonly BindableProperty ActionProperty =
         BindableProperty.Create(nameof(Action), typeof(string), typeof(SectionHeader), null,
             propertyChanged: (b, _, newValue) =>
@@ -45,19 +36,24 @@ public partial class SectionHeader : ContentView
         set => SetValue(ActionProperty, value);
     }
 
-    /// <summary>
-    /// Controls the size variant (currently affects padding via parent context).
-    /// </summary>
-    public static readonly BindableProperty SizeProperty =
-        BindableProperty.Create(nameof(Size), typeof(ComponentSize), typeof(SectionHeader), ComponentSize.Medium);
-
-    public ComponentSize Size
+    private void UpdateSize()
     {
-        get => (ComponentSize)GetValue(SizeProperty);
-        set => SetValue(SizeProperty, value);
+        switch (SizeManager.CurrentSize)
+        {
+            case ComponentSize.Phone:
+                TitleLabel.FontSize = 12;
+                ActionLabel.FontSize = 12;
+                break;
+            case ComponentSize.Tablet:
+                TitleLabel.FontSize = 18;
+                ActionLabel.FontSize = 18;
+                break;
+            case ComponentSize.TV:
+                TitleLabel.FontSize = 24;
+                ActionLabel.FontSize = 24;
+                break;
+        }
     }
-
-    #endregion
 
     private void OnActionTapped(object sender, TappedEventArgs e)
     {

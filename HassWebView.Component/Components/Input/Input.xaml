@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HassWebView.Component.Components.Input"
+             x:Name="this">
+
+    <VerticalStackLayout Spacing="4">
+        <Label x:Name="LabelLabel"
+               Text="{Binding Source={x:Reference this}, Path=Label}"
+               FontSize="13"
+               TextColor="#86868B"
+               IsVisible="{Binding Source={x:Reference this}, Path=ShowLabel}" />
+        
+        <Border x:Name="InputBorder"
+                StrokeShape="RoundRectangle 8"
+                Padding="12"
+                BackgroundColor="#FFFFFF"
+                Stroke="#E5E5EA">
+            <Entry x:Name="InputEntry"
+                   Text="{Binding Source={x:Reference this}, Path=Text, Mode=TwoWay}"
+                   Placeholder="{Binding Source={x:Reference this}, Path=Placeholder}"
+                   FontSize="16"
+                   TextColor="#1D1D1F"
+                   PlaceholderColor="#86868B"
+                   BackgroundColor="Transparent"
+                   IsPassword="{Binding Source={x:Reference this}, Path=IsPassword}"
+                   Keyboard="{Binding Source={x:Reference this}, Path=KeyboardType}" />
+        </Border>
+        
+        <Label x:Name="ErrorLabel"
+               Text="{Binding Source={x:Reference this}, Path=ErrorText}"
+               FontSize="12"
+               TextColor="#FF3B30"
+               IsVisible="{Binding Source={x:Reference this}, Path=HasError}" />
+    </VerticalStackLayout>
+
+</ContentView>

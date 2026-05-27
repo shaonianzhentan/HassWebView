@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:component="clr-namespace:HassWebView.Component.Components"
+             x:Class="HassWebView.Component.Views.SpinnerExamplePage"
+             Title="Spinner 组件示例"
+             BackgroundColor="{AppThemeBinding Light={StaticResource LightBackgroundColor}, Dark={StaticResource DarkBackgroundColor}}">
+    
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="20">
+            
+            <Label Text="Spinner 加载指示器组件" FontSize="24" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource LightTextColor}, Dark={StaticResource DarkTextColor}}" />
+            
+            <Label Text="支持不同大小和颜色" FontSize="14" TextColor="#86868B" />
+            
+            <component:SectionHeader Title="不同大小" />
+            <HorizontalStackLayout Spacing="24" HorizontalOptions="Center">
+                <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                    <component:Spinner IsRunning="True" Size="24" />
+                    <Label Text="小号" FontSize="12" TextColor="#86868B" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                    <component:Spinner IsRunning="True" Size="32" />
+                    <Label Text="中号" FontSize="12" TextColor="#86868B" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                    <component:Spinner IsRunning="True" Size="48" />
+                    <Label Text="大号" FontSize="12" TextColor="#86868B" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                    <component:Spinner IsRunning="True" Size="64" />
+                    <Label Text="特大号" FontSize="12" TextColor="#86868B" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+            
+            <component:SectionHeader Title="不同颜色" />
+            <HorizontalStackLayout Spacing="24" HorizontalOptions="Center">
+                <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                    <component:Spinner IsRunning="True" Size="48" Color="#007AFF" />
+                    <Label Text="蓝色" FontSize="12" TextColor="#86868B" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                    <component:Spinner IsRunning="True" Size="48" Color="#30D158" />
+                    <Label Text="绿色" FontSize="12" TextColor="#86868B" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                    <component:Spinner IsRunning="True" Size="48" Color="#FF9F0A" />
+                    <Label Text="橙色" FontSize="12" TextColor="#86868B" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                    <component:Spinner IsRunning="True" Size="48" Color="#FF3B30" />
+                    <Label Text="红色" FontSize="12" TextColor="#86868B" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+            
+            <BoxView HeightRequest="40" />
+            
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,22 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:HassWebView.Component"
-             x:Class="HassWebView.Component.ButtonGrid"
-             x:Name="this">
+             x:Class="HassWebView.Component.Components.ButtonGrid">
 
-    <VerticalStackLayout Spacing="4">
-
-        <!-- Optional section title -->
-        <local:SectionHeader x:Name="HeaderSection"
-                             Title="{Binding Source={x:Reference this}, Path=Title}"
-                             IsVisible="False" />
-
-        <!-- Grid built dynamically in code-behind -->
-        <Grid x:Name="ButtonsGrid"
-              ColumnSpacing="10"
-              RowSpacing="10" />
-
-    </VerticalStackLayout>
+    <Grid ColumnDefinitions="*,*" RowDefinitions="*,*" RowSpacing="12" ColumnSpacing="12">
+        <ContentPresenter Grid.Row="0" Grid.Column="0" />
+        <ContentPresenter Grid.Row="0" Grid.Column="1" />
+        <ContentPresenter Grid.Row="1" Grid.Column="0" />
+        <ContentPresenter Grid.Row="1" Grid.Column="1" />
+    </Grid>
 
 </ContentView>

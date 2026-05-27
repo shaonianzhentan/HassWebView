@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HassWebView.Component.Components.ThemeSelector"
+             x:Name="this">
+
+    <Border StrokeShape="RoundRectangle 12"
+            Padding="8"
+            BackgroundColor="{AppThemeBinding Light={StaticResource LightCardColor}, Dark={StaticResource DarkCardColor}}">
+        <HorizontalStackLayout Spacing="4">
+            <Button x:Name="LightBtn"
+                    Text="☀️"
+                    FontSize="16"
+                    CornerRadius="8"
+                    Padding="12,6"
+                    Clicked="OnThemeClicked"
+                    CommandParameter="Light" />
+            <Button x:Name="DarkBtn"
+                    Text="🌙"
+                    FontSize="16"
+                    CornerRadius="8"
+                    Padding="12,6"
+                    Clicked="OnThemeClicked"
+                    CommandParameter="Dark" />
+            <Button x:Name="SystemBtn"
+                    Text="🔄"
+                    FontSize="16"
+                    CornerRadius="8"
+                    Padding="12,6"
+                    Clicked="OnThemeClicked"
+                    CommandParameter="System" />
+        </HorizontalStackLayout>
+    </Border>
+
+</ContentView>

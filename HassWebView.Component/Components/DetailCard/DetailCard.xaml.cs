@@ -1,33 +1,20 @@
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
+namespace HassWebView.Component.Components;
 
-namespace HassWebView.Component;
+using HassWebView.Component.Models;
 
-[ContentProperty(nameof(InfoRows))]
 public partial class DetailCard : ContentView
 {
-    private readonly ObservableCollection<View> _infoRows = new();
-
     public DetailCard()
     {
         InitializeComponent();
-        _infoRows.CollectionChanged += OnInfoRowsChanged;
+        UpdateStateColor();
+        UpdateSize();
+        SizeManager.SizeChanged += (s, e) => UpdateSize();
     }
-
-    /// <summary>
-    /// InfoRow views placed directly in XAML (ContentProperty).
-    /// The last row automatically has HideBottomLine = true.
-    /// </summary>
-    public IList<View> InfoRows => _infoRows;
-
-    #region Bindable Properties
 
     public static readonly BindableProperty TitleProperty =
         BindableProperty.Create(nameof(Title), typeof(string), typeof(DetailCard), string.Empty);
 
-    /// <summary>
-    /// Main title shown in the card header.
-    /// </summary>
     public string Title
     {
         get => (string)GetValue(TitleProperty);
@@ -35,77 +22,76 @@ public partial class DetailCard : ContentView
     }
 
     public static readonly BindableProperty SubtitleProperty =
-        BindableProperty.Create(nameof(Subtitle), typeof(string), typeof(DetailCard), null,
-            propertyChanged: (b, _, newValue) =>
-            {
-                if (b is DetailCard card)
-                    card.SubtitleLabel.IsVisible = !string.IsNullOrEmpty((string?)newValue);
-            });
+        BindableProperty.Create(nameof(Subtitle), typeof(string), typeof(DetailCard), string.Empty);
 
-    /// <summary>
-    /// Optional subtitle shown below the title (e.g. device model or room name).
-    /// </summary>
-    public string? Subtitle
+    public string Subtitle
     {
-        get => (string?)GetValue(SubtitleProperty);
+        get => (string)GetValue(SubtitleProperty);
         set => SetValue(SubtitleProperty, value);
     }
 
     public static readonly BindableProperty StateProperty =
-        BindableProperty.Create(nameof(State), typeof(string), typeof(DetailCard), "off");
+        BindableProperty.Create(nameof(State), typeof(string), typeof(DetailCard), string.Empty,
+            propertyChanged: (b, _, __) =>
+            {
+                if (b is DetailCard card)
+                    card.UpdateStateColor();
+            });
 
-    /// <summary>
-    /// Entity state string that drives the StateBadge color in the header.
-    /// </summary>
     public string State
     {
         get => (string)GetValue(StateProperty);
         set => SetValue(StateProperty, value);
     }
 
-    public static readonly BindableProperty ActionContentProperty =
-        BindableProperty.Create(nameof(ActionContent), typeof(View), typeof(DetailCard), null,
-            propertyChanged: (b, _, newValue) =>
-            {
-                if (b is DetailCard card)
-                {
-                    card.ActionPresenter.Content = newValue as View;
-                    card.ActionPresenter.IsVisible = newValue is not null;
-                }
-            });
-
-    /// <summary>
-    /// Optional view placed at the bottom of the card (e.g. a SliderCard).
-    /// Set via DetailCard.ActionContent in XAML.
-    /// </summary>
-    public View? ActionContent
+    public Color StateColor
     {
-        get => (View?)GetValue(ActionContentProperty);
-        set => SetValue(ActionContentProperty, value);
+        get => (Color)GetValue(StateColorProperty);
+        set => SetValue(StateColorProperty, value);
     }
 
-    #endregion
+    public static readonly BindableProperty StateColorProperty =
+        BindableProperty.Create(nameof(StateColor), typeof(Color), typeof(DetailCard), Color.FromHex("#34C759"));
 
-    private void OnInfoRowsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    private void UpdateStateColor()
     {
-        RebuildInfoContainer();
-    }
-
-    private void RebuildInfoContainer()
-    {
-        InfoContainer.Children.Clear();
-
-        var views = _infoRows.ToList();
-        for (int i = 0; i < views.Count; i++)
+        Color color = State?.ToLower() switch
         {
-            var view = views[i];
-            bool isLast = i == views.Count - 1;
+            "on" => Color.FromHex("#34C759"),
+            "open" => Color.FromHex("#34C759"),
+            "off" => Color.FromHex("#8E8E93"),
+            "closed" => Color.FromHex("#8E8E93"),
+            "unavailable" => Color.FromHex("#FF3B30"),
+            _ => Color.FromHex("#34C759")
+        };
+        StateColor = color;
+    }
 
-            // Auto-set HideBottomLine on InfoRow
-            if (view is InfoRow infoRow)
-                infoRow.HideBottomLine = isLast;
-
-            InfoContainer.Children.Add(view);
+    private void UpdateSize()
+    {
+        switch (SizeManager.CurrentSize)
+        {
+            case ComponentSize.Phone:
+                CardBorder.Padding = new Thickness(20);
+                TitleLabel.FontSize = 16;
+                SubtitleLabel.FontSize = 14;
+                StateBorder.Padding = new Thickness(12, 6);
+                StateLabel.FontSize = 14;
+                break;
+            case ComponentSize.Tablet:
+                CardBorder.Padding = new Thickness(28);
+                TitleLabel.FontSize = 24;
+                SubtitleLabel.FontSize = 18;
+                StateBorder.Padding = new Thickness(20, 10);
+                StateLabel.FontSize = 20;
+                break;
+            case ComponentSize.TV:
+                CardBorder.Padding = new Thickness(36);
+                TitleLabel.FontSize = 32;
+                SubtitleLabel.FontSize = 24;
+                StateBorder.Padding = new Thickness(28, 14);
+                StateLabel.FontSize = 28;
+                break;
         }
     }
 }

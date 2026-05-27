@@ -1,45 +1,24 @@
+namespace HassWebView.Component.Components;
+
 using HassWebView.Component.Models;
 
-namespace HassWebView.Component;
-
-public partial class StateBadge : Border
+public partial class StateBadge : ContentView
 {
     public StateBadge()
     {
         InitializeComponent();
-        UpdateAppearance();
+        UpdateStateColor();
+        UpdateSize();
+        SizeManager.SizeChanged += (s, e) => UpdateSize();
     }
 
-    protected override void OnHandlerChanged()
-    {
-        base.OnHandlerChanged();
-        if (Handler is not null)
-        {
-            // Subscribe when attached to the visual tree
-            if (Application.Current is not null)
-                Application.Current.RequestedThemeChanged += OnThemeChanged;
-        }
-        else
-        {
-            // Unsubscribe when detached
-            if (Application.Current is not null)
-                Application.Current.RequestedThemeChanged -= OnThemeChanged;
-        }
-    }
-
-    private void OnThemeChanged(object? sender, AppThemeChangedEventArgs e)
-    {
-        UpdateAppearance();
-    }
-
-    #region Bindable Properties
-
-    /// <summary>
-    /// The state string driving the badge color. e.g. "on", "off", "unavailable", "unknown"
-    /// </summary>
     public static readonly BindableProperty StateProperty =
-        BindableProperty.Create(nameof(State), typeof(string), typeof(StateBadge), "off",
-            propertyChanged: (b, _, _) => ((StateBadge)b).UpdateAppearance());
+        BindableProperty.Create(nameof(State), typeof(string), typeof(StateBadge), string.Empty,
+            propertyChanged: (b, _, __) =>
+            {
+                if (b is StateBadge badge)
+                    badge.UpdateStateColor();
+            });
 
     public string State
     {
@@ -47,68 +26,41 @@ public partial class StateBadge : Border
         set => SetValue(StateProperty, value);
     }
 
-    /// <summary>
-    /// Controls the badge size.
-    /// </summary>
-    public static readonly BindableProperty SizeProperty =
-        BindableProperty.Create(nameof(Size), typeof(ComponentSize), typeof(StateBadge), ComponentSize.Medium,
-            propertyChanged: (b, _, _) => ((StateBadge)b).UpdateAppearance());
-
-    public ComponentSize Size
+    private void UpdateStateColor()
     {
-        get => (ComponentSize)GetValue(SizeProperty);
-        set => SetValue(SizeProperty, value);
-    }
-
-    /// <summary>
-    /// Manually override the badge color. If set, ignores State-driven color.
-    /// </summary>
-    public static readonly BindableProperty ColorProperty =
-        BindableProperty.Create(nameof(Color), typeof(Color), typeof(StateBadge), null,
-            propertyChanged: (b, _, _) => ((StateBadge)b).UpdateAppearance());
-
-    public Color Color
-    {
-        get => (Color)GetValue(ColorProperty);
-        set => SetValue(ColorProperty, value);
-    }
-
-    #endregion
-
-    private void UpdateAppearance()
-    {
-        // Update size
-        double size = Size switch
+        Color color = State?.ToLower() switch
         {
-            ComponentSize.Small => 8,
-            ComponentSize.Large => 16,
-            _ => 12
+            "on" => Color.FromHex("#34C759"),
+            "open" => Color.FromHex("#34C759"),
+            "active" => Color.FromHex("#34C759"),
+            "locked" => Color.FromHex("#34C759"),
+            "off" => Color.FromHex("#8E8E93"),
+            "closed" => Color.FromHex("#8E8E93"),
+            "inactive" => Color.FromHex("#8E8E93"),
+            "unlocked" => Color.FromHex("#8E8E93"),
+            "unavailable" => Color.FromHex("#FF3B30"),
+            "unknown" => Color.FromHex("#FF9500"),
+            _ => Color.FromHex("#8E8E93")
         };
-        WidthRequest = size;
-        HeightRequest = size;
+        BadgeBorder.BackgroundColor = color;
+    }
 
-        // If Color is manually overridden, use it directly
-        if (Color is not null)
+    private void UpdateSize()
+    {
+        switch (SizeManager.CurrentSize)
         {
-            BackgroundColor = Color;
-            return;
+            case ComponentSize.Phone:
+                BadgeBorder.Padding = new Thickness(10, 6);
+                StateLabel.FontSize = 11;
+                break;
+            case ComponentSize.Tablet:
+                BadgeBorder.Padding = new Thickness(16, 10);
+                StateLabel.FontSize = 16;
+                break;
+            case ComponentSize.TV:
+                BadgeBorder.Padding = new Thickness(24, 14);
+                StateLabel.FontSize = 24;
+                break;
         }
-
-        // Determine dark mode
-        bool isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
-
-        // Map state to HA 2026 color
-        BackgroundColor = State?.ToLowerInvariant() switch
-        {
-            "on" => isDark ? Microsoft.Maui.Graphics.Color.FromArgb("#FFA726")
-                           : Microsoft.Maui.Graphics.Color.FromArgb("#FF9800"),
-            "unavailable" or "unknown" =>
-                isDark ? Microsoft.Maui.Graphics.Color.FromArgb("#EF5350")
-                       : Microsoft.Maui.Graphics.Color.FromArgb("#F44336"),
-            "off" => isDark ? Microsoft.Maui.Graphics.Color.FromArgb("#757575")
-                            : Microsoft.Maui.Graphics.Color.FromArgb("#9E9E9E"),
-            _ => isDark ? Microsoft.Maui.Graphics.Color.FromArgb("#03A9F4")
-                        : Microsoft.Maui.Graphics.Color.FromArgb("#039BE5")
-        };
     }
 }

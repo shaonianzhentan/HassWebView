@@ -1,19 +1,16 @@
-using HassWebView.Component.Models;
+namespace HassWebView.Component.Components;
 
-namespace HassWebView.Component;
+using HassWebView.Component.Models;
 
 public partial class InfoRow : ContentView
 {
     public InfoRow()
     {
         InitializeComponent();
+        UpdateSize();
+        SizeManager.SizeChanged += (s, e) => UpdateSize();
     }
 
-    #region Bindable Properties
-
-    /// <summary>
-    /// The label shown on the left side.
-    /// </summary>
     public static readonly BindableProperty TitleProperty =
         BindableProperty.Create(nameof(Title), typeof(string), typeof(InfoRow), string.Empty);
 
@@ -23,9 +20,6 @@ public partial class InfoRow : ContentView
         set => SetValue(TitleProperty, value);
     }
 
-    /// <summary>
-    /// The value shown on the right side.
-    /// </summary>
     public static readonly BindableProperty ValueProperty =
         BindableProperty.Create(nameof(Value), typeof(string), typeof(InfoRow), string.Empty);
 
@@ -35,34 +29,22 @@ public partial class InfoRow : ContentView
         set => SetValue(ValueProperty, value);
     }
 
-    /// <summary>
-    /// When true, hides the bottom divider line (useful for the last row in a group).
-    /// </summary>
-    public static readonly BindableProperty HideBottomLineProperty =
-        BindableProperty.Create(nameof(HideBottomLine), typeof(bool), typeof(InfoRow), false,
-            propertyChanged: (b, _, newValue) =>
-            {
-                if (b is InfoRow row)
-                    row.DividerLine.IsVisible = !(bool)newValue;
-            });
-
-    public bool HideBottomLine
+    private void UpdateSize()
     {
-        get => (bool)GetValue(HideBottomLineProperty);
-        set => SetValue(HideBottomLineProperty, value);
+        switch (SizeManager.CurrentSize)
+        {
+            case ComponentSize.Phone:
+                TitleLabel.FontSize = 14;
+                ValueLabel.FontSize = 14;
+                break;
+            case ComponentSize.Tablet:
+                TitleLabel.FontSize = 18;
+                ValueLabel.FontSize = 18;
+                break;
+            case ComponentSize.TV:
+                TitleLabel.FontSize = 24;
+                ValueLabel.FontSize = 24;
+                break;
+        }
     }
-
-    /// <summary>
-    /// Controls the font sizes of the row.
-    /// </summary>
-    public static readonly BindableProperty SizeProperty =
-        BindableProperty.Create(nameof(Size), typeof(ComponentSize), typeof(InfoRow), ComponentSize.Medium);
-
-    public ComponentSize Size
-    {
-        get => (ComponentSize)GetValue(SizeProperty);
-        set => SetValue(SizeProperty, value);
-    }
-
-    #endregion
 }

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HassWebView.Component.Components.Dialog"
+             x:Name="this"
+             IsVisible="False">
+
+    <!-- 背景遮罩 -->
+    <Grid x:Name="OverlayGrid"
+          BackgroundColor="#000000"
+          Opacity="0.5">
+        <Grid.GestureRecognizers>
+            <TapGestureRecognizer Tapped="OnOverlayTapped" />
+        </Grid.GestureRecognizers>
+        
+        <!-- 对话框内容 -->
+        <Border x:Name="DialogBorder"
+                StrokeShape="RoundRectangle 16"
+                Padding="24"
+                BackgroundColor="#FFFFFF"
+                WidthRequest="320"
+                HeightRequest="240"
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
+            
+            <VerticalStackLayout Spacing="16">
+                <!-- 标题 -->
+                <Label x:Name="TitleLabel"
+                       Text="{Binding Source={x:Reference this}, Path=Title}"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="#1D1D1F" />
+                
+                <!-- 内容 -->
+                <Label x:Name="ContentLabel"
+                       Text="{Binding Source={x:Reference this}, Path=Content}"
+                       FontSize="14"
+                       TextColor="#3C3C3C"
+                       LineBreakMode="WordWrap" />
+                
+                <!-- 按钮区域 -->
+                <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
+                    <Button x:Name="CancelBtn"
+                            Text="{Binding Source={x:Reference this}, Path=CancelText}"
+                            FontSize="14"
+                            TextColor="#007AFF"
+                            BackgroundColor="Transparent"
+                            Clicked="OnCancelClicked" />
+                    <Button x:Name="ConfirmBtn"
+                            Text="{Binding Source={x:Reference this}, Path=ConfirmText}"
+                            FontSize="14"
+                            TextColor="White"
+                            BackgroundColor="#007AFF"
+                            CornerRadius="8"
+                            Clicked="OnConfirmClicked" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+
+</ContentView>

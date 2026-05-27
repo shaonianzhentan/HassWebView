@@ -1,67 +1,24 @@
-using System.Windows.Input;
-using HassWebView.Component.Models;
+namespace HassWebView.Component.Components;
 
-namespace HassWebView.Component;
+using HassWebView.Component.Models;
 
 public partial class ButtonCard : ContentView
 {
     public ButtonCard()
     {
         InitializeComponent();
-        UpdateActiveAppearance();
+        UpdateStateColor();
+        UpdateSize();
+        SizeManager.SizeChanged += (s, e) => UpdateSize();
     }
-
-    protected override void OnHandlerChanged()
-    {
-        base.OnHandlerChanged();
-        if (Handler is not null)
-        {
-            if (Application.Current is not null)
-                Application.Current.RequestedThemeChanged += OnThemeChanged;
-        }
-        else
-        {
-            if (Application.Current is not null)
-                Application.Current.RequestedThemeChanged -= OnThemeChanged;
-        }
-    }
-
-    private void OnThemeChanged(object? sender, AppThemeChangedEventArgs e)
-    {
-        UpdateActiveAppearance();
-    }
-
-    /// <summary>
-    /// Fired when the card is tapped.
-    /// </summary>
-    public event EventHandler? Tapped;
-
-    #region Bindable Properties
 
     public static readonly BindableProperty IconTextProperty =
-        BindableProperty.Create(nameof(IconText), typeof(string), typeof(ButtonCard), null,
-            propertyChanged: (b, _, _) => ((ButtonCard)b).UpdateIconLabel());
+        BindableProperty.Create(nameof(IconText), typeof(string), typeof(ButtonCard), string.Empty);
 
-    /// <summary>
-    /// Text or emoji character shown inside the icon shape.
-    /// </summary>
-    public string? IconText
+    public string IconText
     {
-        get => (string?)GetValue(IconTextProperty);
+        get => (string)GetValue(IconTextProperty);
         set => SetValue(IconTextProperty, value);
-    }
-
-    public static readonly BindableProperty IconProperty =
-        BindableProperty.Create(nameof(Icon), typeof(ImageSource), typeof(ButtonCard), null,
-            propertyChanged: (b, _, _) => ((ButtonCard)b).UpdateIconLabel());
-
-    /// <summary>
-    /// ImageSource shown inside the icon shape (takes priority over IconText).
-    /// </summary>
-    public ImageSource? Icon
-    {
-        get => (ImageSource?)GetValue(IconProperty);
-        set => SetValue(IconProperty, value);
     }
 
     public static readonly BindableProperty TitleProperty =
@@ -74,27 +31,22 @@ public partial class ButtonCard : ContentView
     }
 
     public static readonly BindableProperty StateProperty =
-        BindableProperty.Create(nameof(State), typeof(string), typeof(ButtonCard), null,
-            propertyChanged: (b, _, _) => ((ButtonCard)b).UpdateActiveAppearance());
+        BindableProperty.Create(nameof(State), typeof(string), typeof(ButtonCard), string.Empty,
+            propertyChanged: (b, _, __) =>
+            {
+                if (b is ButtonCard card)
+                    card.UpdateStateColor();
+            });
 
-    /// <summary>
-    /// State text displayed below the title. Also drives StateLabel color.
-    /// </summary>
-    public string? State
+    public string State
     {
-        get => (string?)GetValue(StateProperty);
+        get => (string)GetValue(StateProperty);
         set => SetValue(StateProperty, value);
     }
 
     public static readonly BindableProperty IsActiveProperty =
-        BindableProperty.Create(nameof(IsActive), typeof(bool), typeof(ButtonCard), false,
-            defaultBindingMode: BindingMode.TwoWay,
-            propertyChanged: (b, _, _) => ((ButtonCard)b).UpdateActiveAppearance());
+        BindableProperty.Create(nameof(IsActive), typeof(bool), typeof(ButtonCard), false);
 
-    /// <summary>
-    /// Controls the icon background tint and state label color.
-    /// true → orange (On), false → neutral gray (Off).
-    /// </summary>
     public bool IsActive
     {
         get => (bool)GetValue(IsActiveProperty);
@@ -102,122 +54,60 @@ public partial class ButtonCard : ContentView
     }
 
     public static readonly BindableProperty ShowBadgeProperty =
-        BindableProperty.Create(nameof(ShowBadge), typeof(bool), typeof(ButtonCard), false,
-            propertyChanged: (b, _, newValue) =>
-            {
-                if (b is ButtonCard card)
-                    card.Badge.IsVisible = (bool)newValue;
-            });
+        BindableProperty.Create(nameof(ShowBadge), typeof(bool), typeof(ButtonCard), false);
 
-    /// <summary>
-    /// When true, shows the StateBadge in the top-right corner.
-    /// The badge State follows this card's State property.
-    /// </summary>
     public bool ShowBadge
     {
         get => (bool)GetValue(ShowBadgeProperty);
         set => SetValue(ShowBadgeProperty, value);
     }
 
-    public static readonly BindableProperty CommandProperty =
-        BindableProperty.Create(nameof(Command), typeof(ICommand), typeof(ButtonCard), null);
-
-    public ICommand? Command
+    public Color StateColor
     {
-        get => (ICommand?)GetValue(CommandProperty);
-        set => SetValue(CommandProperty, value);
+        get => (Color)GetValue(StateColorProperty);
+        set => SetValue(StateColorProperty, value);
     }
 
-    public static readonly BindableProperty CommandParameterProperty =
-        BindableProperty.Create(nameof(CommandParameter), typeof(object), typeof(ButtonCard), null);
+    public static readonly BindableProperty StateColorProperty =
+        BindableProperty.Create(nameof(StateColor), typeof(Color), typeof(ButtonCard), Color.FromHex("#636366"));
 
-    public object? CommandParameter
+    private void UpdateStateColor()
     {
-        get => GetValue(CommandParameterProperty);
-        set => SetValue(CommandParameterProperty, value);
+        Color color = State?.ToLower() switch
+        {
+            "on" => Color.FromHex("#34C759"),
+            "open" => Color.FromHex("#34C759"),
+            "locked" => Color.FromHex("#34C759"),
+            _ => Color.FromHex("#636366")
+        };
+        StateColor = color;
     }
 
-    public static readonly BindableProperty SizeProperty =
-        BindableProperty.Create(nameof(Size), typeof(ComponentSize), typeof(ButtonCard), ComponentSize.Medium);
-
-    public ComponentSize Size
+    private void UpdateSize()
     {
-        get => (ComponentSize)GetValue(SizeProperty);
-        set => SetValue(SizeProperty, value);
-    }
-
-    #endregion
-
-    private void UpdateIconLabel()
-    {
-        if (Icon is not null)
+        switch (SizeManager.CurrentSize)
         {
-            IconImage.Source = Icon;
-            IconImage.IsVisible = true;
-            IconLabel.IsVisible = false;
+            case ComponentSize.Phone:
+                CardBorder.Padding = new Thickness(16);
+                IconLabel.FontSize = 36;
+                TitleLabel.FontSize = 14;
+                StateLabel.FontSize = 12;
+                BadgeBorder.Padding = new Thickness(6, 3);
+                break;
+            case ComponentSize.Tablet:
+                CardBorder.Padding = new Thickness(20);
+                IconLabel.FontSize = 48;
+                TitleLabel.FontSize = 16;
+                StateLabel.FontSize = 14;
+                BadgeBorder.Padding = new Thickness(8, 4);
+                break;
+            case ComponentSize.TV:
+                CardBorder.Padding = new Thickness(28);
+                IconLabel.FontSize = 64;
+                TitleLabel.FontSize = 22;
+                StateLabel.FontSize = 18;
+                BadgeBorder.Padding = new Thickness(12, 6);
+                break;
         }
-        else
-        {
-            IconLabel.Text = IconText;
-            IconLabel.IsVisible = true;
-            IconImage.IsVisible = false;
-        }
-    }
-
-    private void UpdateActiveAppearance()
-    {
-        bool isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
-        string? stateLower = State?.ToLowerInvariant();
-
-        // Sync badge state
-        Badge.State = State ?? "off";
-
-        if (IsActive || stateLower == "on")
-        {
-            // Warm orange tint icon background
-            IconBorder.BackgroundColor = isDark
-                ? Microsoft.Maui.Graphics.Color.FromArgb("#FFA726").WithAlpha(0.20f)
-                : Microsoft.Maui.Graphics.Color.FromArgb("#FF9800").WithAlpha(0.15f);
-
-            // Orange state label
-            StateLabel.TextColor = isDark
-                ? Microsoft.Maui.Graphics.Color.FromArgb("#FFA726")
-                : Microsoft.Maui.Graphics.Color.FromArgb("#FF9800");
-        }
-        else if (stateLower is "unavailable" or "unknown")
-        {
-            // Red tint icon background
-            IconBorder.BackgroundColor = isDark
-                ? Microsoft.Maui.Graphics.Color.FromArgb("#EF5350").WithAlpha(0.20f)
-                : Microsoft.Maui.Graphics.Color.FromArgb("#F44336").WithAlpha(0.15f);
-
-            // Red state label
-            StateLabel.TextColor = isDark
-                ? Microsoft.Maui.Graphics.Color.FromArgb("#EF5350")
-                : Microsoft.Maui.Graphics.Color.FromArgb("#F44336");
-        }
-        else
-        {
-            // Neutral gray icon background
-            IconBorder.BackgroundColor = isDark
-                ? Microsoft.Maui.Graphics.Color.FromArgb("#3A3A3C")
-                : Microsoft.Maui.Graphics.Color.FromArgb("#EBEBEB");
-
-            // Gray state label
-            StateLabel.TextColor = isDark
-                ? Microsoft.Maui.Graphics.Color.FromArgb("#8E8E93")
-                : Microsoft.Maui.Graphics.Color.FromArgb("#9E9E9E");
-        }
-    }
-
-    private async void OnTapped(object sender, TappedEventArgs e)
-    {
-        // HA 2026-style elastic tap feedback
-        await this.ScaleTo(0.96, 50, Easing.CubicOut);
-        await this.ScaleTo(1.0, 80, Easing.SpringOut);
-
-        Tapped?.Invoke(this, EventArgs.Empty);
-        if (Command?.CanExecute(CommandParameter) ?? false)
-            Command.Execute(CommandParameter);
     }
 }

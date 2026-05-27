@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HassWebView.Component.Components.ControlSwitch"
+             x:Name="this">
+    
+    <Border x:Name="SwitchBorder"
+            StrokeShape="RoundRectangle 15"
+            BackgroundColor="#EFEFF4">
+        <Grid x:Name="SwitchGrid"
+              WidthRequest="51"
+              HeightRequest="31">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnTapped" />
+            </Grid.GestureRecognizers>
+            
+            <Ellipse x:Name="Thumb"
+                     WidthRequest="27"
+                     HeightRequest="27"
+                     Fill="White"
+                     Margin="2"
+                     HorizontalOptions="Start" />
+        </Grid>
+    </Border>
+
+</ContentView>

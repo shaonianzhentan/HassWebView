@@ -1,103 +1,34 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:models="clr-namespace:HassWebView.Component.Models"
-             x:Class="HassWebView.Component.EntityRow"
+             x:Class="HassWebView.Component.Components.EntityRow"
              x:Name="this">
 
-    <ContentView.GestureRecognizers>
-        <TapGestureRecognizer Tapped="OnTapped" />
-    </ContentView.GestureRecognizers>
-
-    <Grid ColumnDefinitions="52,*,Auto"
-          ColumnSpacing="12"
-          Padding="0,10">
-
-        <!-- Left: Icon with rounded state-colored background -->
+    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16" ColumnSpacing="12">
         <Border x:Name="IconBorder"
-                Grid.Column="0"
-                WidthRequest="40"
-                HeightRequest="40"
-                StrokeThickness="0"
-                HorizontalOptions="Center"
-                VerticalOptions="Center">
-            <Border.StrokeShape>
-                <RoundRectangle CornerRadius="12" />
-            </Border.StrokeShape>
-
-            <!-- ImageSource icon (when Icon is set) -->
-            <Grid>
-                <Image x:Name="IconImage"
-                       WidthRequest="22"
-                       HeightRequest="22"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center"
-                       IsVisible="False" />
-                <!-- Text/emoji icon (when IconText is set) -->
-                <Label x:Name="IconLabel"
-                       FontSize="{StaticResource HaIconFontSize}"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center"
-                       HorizontalTextAlignment="Center" />
-            </Grid>
+                StrokeShape="RoundRectangle 12"
+                Padding="10"
+                BackgroundColor="{Binding Source={x:Reference this}, Path=IconBackgroundColor}">
+            <Label x:Name="IconLabel"
+                   Text="{Binding Source={x:Reference this}, Path=IconText}"
+                   FontSize="20" />
         </Border>
-
-        <!-- Center: Title + Description -->
-        <VerticalStackLayout Grid.Column="1"
-                             VerticalOptions="Center"
-                             Spacing="2">
-
-            <Label Text="{Binding Source={x:Reference this}, Path=Title}">
-                <Label.Style>
-                    <Style TargetType="Label" BasedOn="{StaticResource ListItemTitleLabelStyle}">
-                        <Style.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Small}">
-                                <Setter Property="FontSize" Value="{StaticResource TitleFontSizeSmall}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Large}">
-                                <Setter Property="FontSize" Value="{StaticResource TitleFontSizeLarge}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Label.Style>
-            </Label>
-
-            <Label Text="{Binding Source={x:Reference this}, Path=Description}">
-                <Label.Style>
-                    <Style TargetType="Label" BasedOn="{StaticResource ListItemDescriptionLabelStyle}">
-                        <Style.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Small}">
-                                <Setter Property="FontSize" Value="{StaticResource DescriptionFontSizeSmall}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="{x:Static models:ComponentSize.Large}">
-                                <Setter Property="FontSize" Value="{StaticResource DescriptionFontSizeLarge}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Label.Style>
-                <Label.Triggers>
-                    <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Description}" Value="{x:Null}">
-                        <Setter Property="IsVisible" Value="False" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Description}" Value="">
-                        <Setter Property="IsVisible" Value="False" />
-                    </DataTrigger>
-                </Label.Triggers>
-            </Label>
-
-        </VerticalStackLayout>
-
-        <!-- Right: replaceable content, defaults to state label -->
-        <ContentView x:Name="RightPresenter"
-                     Grid.Column="2"
-                     VerticalOptions="Center">
-            <!-- Default: state text label (replaced when RightContent is set) -->
-            <Label x:Name="DefaultStateLabel"
+        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+            <Label x:Name="TitleLabel"
+                   Text="{Binding Source={x:Reference this}, Path=Title}"
+                   FontSize="15"
+                   TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#FFFFFF}" />
+            <Label x:Name="StateLabel"
                    Text="{Binding Source={x:Reference this}, Path=State}"
-                   FontSize="{StaticResource DescriptionFontSizeMedium}"
-                   VerticalOptions="Center" />
-        </ContentView>
-
+                   FontSize="13"
+                   TextColor="{Binding Source={x:Reference this}, Path=StateColor}" />
+        </VerticalStackLayout>
+        <Label x:Name="ArrowLabel"
+               Grid.Column="2"
+               Text="›"
+               FontSize="24"
+               TextColor="{AppThemeBinding Light=#C7C7CC, Dark=#48484A}"
+               VerticalOptions="Center" />
     </Grid>
 
 </ContentView>

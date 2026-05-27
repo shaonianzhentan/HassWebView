@@ -1,0 +1,17 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HassWebView.Component.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <Color x:Key="LightBackgroundColor">#F5F5F7</Color>
+            <Color x:Key="DarkBackgroundColor">#000000</Color>
+            <Color x:Key="LightCardColor">#FFFFFF</Color>
+            <Color x:Key="DarkCardColor">#2C2C2E</Color>
+            <Color x:Key="LightTextColor">#1D1D1F</Color>
+            <Color x:Key="DarkTextColor">#FFFFFF</Color>
+            <Color x:Key="LightBorderColor">#E5E5EA</Color>
+            <Color x:Key="DarkBorderColor">#3A3A3C</Color>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

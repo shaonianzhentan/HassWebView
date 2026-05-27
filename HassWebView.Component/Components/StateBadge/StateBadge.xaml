@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<Border xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-        x:Class="HassWebView.Component.StateBadge"
-        x:Name="this"
-        StrokeThickness="0"
-        HorizontalOptions="Center"
-        VerticalOptions="Center">
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HassWebView.Component.Components.StateBadge"
+             x:Name="this">
 
-    <Border.StrokeShape>
-        <Ellipse />
-    </Border.StrokeShape>
+    <Border x:Name="BadgeBorder"
+            StrokeShape="RoundRectangle 16"
+            Padding="10,6"
+            BackgroundColor="#8E8E93">
+        <Label x:Name="StateLabel"
+               Text="{Binding Source={x:Reference this}, Path=State}"
+               FontSize="11"
+               FontAttributes="Bold"
+               TextColor="White" />
+    </Border>
 
-</Border>
+</ContentView>

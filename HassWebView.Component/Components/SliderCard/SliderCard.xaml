@@ -1,53 +1,40 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="HassWebView.Component.SliderCard"
+             x:Class="HassWebView.Component.Components.SliderCard"
              x:Name="this">
 
-    <Border StrokeThickness="0"
-            Padding="16">
-        <Border.StrokeShape>
-            <RoundRectangle CornerRadius="16" />
-        </Border.StrokeShape>
-        <Border.BackgroundColor>
-            <AppThemeBinding Light="#FFFFFF" Dark="#2C2C2E" />
-        </Border.BackgroundColor>
-        <Border.Shadow>
-            <Shadow Brush="#000000" Offset="0,2" Radius="8" Opacity="0.08" />
-        </Border.Shadow>
-
-        <VerticalStackLayout Spacing="8">
-
-            <!-- Header: Title + current value -->
+    <Border x:Name="CardBorder"
+            StrokeShape="RoundRectangle 12"
+            Padding="16"
+            BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#2C2C2E}">
+        <VerticalStackLayout Spacing="12">
             <Grid ColumnDefinitions="*,Auto">
-
-                <Label Grid.Column="0"
+                <Label x:Name="TitleLabel"
+                       Grid.Column="0"
                        Text="{Binding Source={x:Reference this}, Path=Title}"
-                       FontSize="16"
-                       FontAttributes="Bold"
-                       VerticalOptions="Center"
-                       TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#FFFFFF}" />
                 <Label x:Name="ValueLabel"
                        Grid.Column="1"
-                       FontSize="16"
+                       FontSize="14"
                        FontAttributes="Bold"
-                       VerticalOptions="Center"
-                       TextColor="{AppThemeBinding Light='#039BE5', Dark='#03A9F4'}" />
-
+                       TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#FFFFFF}">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{Binding Source={x:Reference this}, Path=Value}" />
+                            <Span Text="{Binding Source={x:Reference this}, Path=Unit}" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
             </Grid>
-
-            <!-- Slider -->
-            <Slider x:Name="MainSlider"
-                    Minimum="{Binding Source={x:Reference this}, Path=Min}"
-                    Maximum="{Binding Source={x:Reference this}, Path=Max}"
-                    Value="{Binding Source={x:Reference this}, Path=Value, Mode=TwoWay}"
-                    MinimumTrackColor="{AppThemeBinding Light='#039BE5', Dark='#03A9F4'}"
-                    MaximumTrackColor="{AppThemeBinding Light='#E5E5EA', Dark='#38383A'}"
-                    ThumbColor="{AppThemeBinding Light='#039BE5', Dark='#03A9F4'}"
-                    DragCompleted="OnDragCompleted"
-                    ValueChanged="OnSliderValueChanged" />
-
+            <Slider x:Name="ValueSlider"
+                    Minimum="0"
+                    Maximum="100"
+                    Value="{Binding Source={x:Reference this}, Path=Value}"
+                    ThumbColor="#007AFF"
+                    MinimumTrackColor="#007AFF"
+                    MaximumTrackColor="#8E8E93" />
         </VerticalStackLayout>
     </Border>
 

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HassWebView.Component.Components.SizeSelector"
+             x:Name="this">
+
+    <Border StrokeShape="RoundRectangle 12"
+            Padding="8"
+            BackgroundColor="{AppThemeBinding Light={StaticResource LightCardColor}, Dark={StaticResource DarkCardColor}}">
+        <HorizontalStackLayout Spacing="4">
+            <Button x:Name="MediumBtn"
+                    Text="📱"
+                    FontSize="16"
+                    CornerRadius="8"
+                    Padding="12,6"
+                    Clicked="OnSizeClicked"
+                    CommandParameter="Phone" />
+            <Button x:Name="LargeBtn"
+                    Text="📲"
+                    FontSize="16"
+                    CornerRadius="8"
+                    Padding="12,6"
+                    Clicked="OnSizeClicked"
+                    CommandParameter="Tablet" />
+            <Button x:Name="ExtraLargeBtn"
+                    Text="📺"
+                    FontSize="16"
+                    CornerRadius="8"
+                    Padding="12,6"
+                    Clicked="OnSizeClicked"
+                    CommandParameter="TV" />
+        </HorizontalStackLayout>
+    </Border>
+
+</ContentView>

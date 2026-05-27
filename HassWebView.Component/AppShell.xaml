@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:local="clr-namespace:HassWebView.Component"
+       xmlns:views="clr-namespace:HassWebView.Component.Views"
+       x:Class="HassWebView.Component.AppShell"
+       Title="Home Assistant Components"
+       FlyoutBehavior="Locked">
+
+    <Shell.FlyoutHeader>
+        <Grid BackgroundColor="#007AFF" HeightRequest="120">
+            <Label Text="🏠 智能家居组件" 
+                   FontSize="20" 
+                   FontAttributes="Bold" 
+                   TextColor="White" 
+                   HorizontalOptions="Center" 
+                   VerticalOptions="Center" />
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <FlyoutItem Title="首页" Icon="🏠">
+        <ShellContent ContentTemplate="{DataTemplate local:MainPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Alert" Icon="⚠️">
+        <ShellContent ContentTemplate="{DataTemplate views:AlertExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Chip" Icon="📌">
+        <ShellContent ContentTemplate="{DataTemplate views:ChipExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="ControlSwitch" Icon="🔘">
+        <ShellContent ContentTemplate="{DataTemplate views:ControlSwitchExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Input" Icon="✏️">
+        <ShellContent ContentTemplate="{DataTemplate views:InputExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Spinner" Icon="🔄">
+        <ShellContent ContentTemplate="{DataTemplate views:SpinnerExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Gauge" Icon="📊">
+        <ShellContent ContentTemplate="{DataTemplate views:GaugeExamplePage}" />
+    </FlyoutItem>
+
+</Shell>
