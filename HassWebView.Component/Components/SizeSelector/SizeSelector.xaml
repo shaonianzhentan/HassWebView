@@ -4,9 +4,11 @@
              x:Class="HassWebView.Component.Components.SizeSelector"
              x:Name="this">
 
-    <Border StrokeShape="RoundRectangle 12"
-            Padding="8"
-            BackgroundColor="{AppThemeBinding Light={StaticResource LightCardColor}, Dark={StaticResource DarkCardColor}}">
+    <Border Padding="8"
+            BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#2C2C2E}">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="12" />
+        </Border.StrokeShape>
         <HorizontalStackLayout Spacing="4">
             <Button x:Name="MediumBtn"
                     Text="📱"

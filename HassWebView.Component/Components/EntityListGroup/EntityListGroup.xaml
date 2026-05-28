@@ -4,17 +4,18 @@
              x:Class="HassWebView.Component.Components.EntityListGroup"
              x:Name="this">
 
-    <Frame CornerRadius="12"
-           Padding="0"
-           BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#2C2C2E}">
+    <Border BackgroundColor="#FFFFFF" Padding="0">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="12" />
+        </Border.StrokeShape>
         <VerticalStackLayout>
             <Label Text="{Binding Source={x:Reference this}, Path=Title}"
-                   FontSize="12"
+                   FontSize="13"
+                   TextColor="#86868B"
                    FontAttributes="Bold"
-                   TextColor="{AppThemeBinding Light=#86868B, Dark=#8E8E93}"
                    Padding="16,12,16,8" />
             <ContentPresenter />
         </VerticalStackLayout>
-    </Frame>
+    </Border>
 
 </ContentView>

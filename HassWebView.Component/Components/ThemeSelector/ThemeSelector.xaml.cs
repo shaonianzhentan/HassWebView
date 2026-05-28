@@ -7,8 +7,12 @@ public partial class ThemeSelector : ContentView
     public ThemeSelector()
     {
         InitializeComponent();
-        UpdateButtonStates();
-        ThemeManager.ThemeChanged += (s, e) => UpdateButtonStates();
+        // 延迟初始化以避免崩溃
+        Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(100), () =>
+        {
+            UpdateButtonStates();
+            ThemeManager.ThemeChanged += (s, e) => UpdateButtonStates();
+        });
     }
 
     private void OnThemeClicked(object sender, EventArgs e)
@@ -24,25 +28,31 @@ public partial class ThemeSelector : ContentView
 
     private void UpdateButtonStates()
     {
-        UpdateButton(LightBtn, ThemeMode.Light);
-        UpdateButton(DarkBtn, ThemeMode.Dark);
-        UpdateButton(SystemBtn, ThemeMode.System);
+        try
+        {
+            UpdateButtonStyle(LightBtn, ThemeManager.CurrentTheme == ThemeMode.Light);
+            UpdateButtonStyle(DarkBtn, ThemeManager.CurrentTheme == ThemeMode.Dark);
+            UpdateButtonStyle(SystemBtn, ThemeManager.CurrentTheme == ThemeMode.System);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"UpdateButtonStates failed: {ex}");
+        }
     }
 
-    private void UpdateButton(Button btn, ThemeMode theme)
+    private void UpdateButtonStyle(Button button, bool isSelected)
     {
-        bool isSelected = ThemeManager.CurrentTheme == theme;
+        if (button == null) return;
+        
         if (isSelected)
         {
-            btn.BackgroundColor = Color.FromHex("#007AFF");
-            btn.TextColor = Colors.White;
+            button.BackgroundColor = Color.FromHex("#007AFF");
+            button.TextColor = Colors.White;
         }
         else
         {
-            // 根据当前系统主题设置未选中按钮的颜色
-            var isDark = Application.Current?.UserAppTheme == AppTheme.Dark;
-            btn.BackgroundColor = isDark ? Color.FromHex("#3A3A3C") : Color.FromHex("#EFEFF4");
-            btn.TextColor = isDark ? Colors.White : Color.FromHex("#1D1D1F");
+            button.BackgroundColor = Color.FromHex("#F2F2F7");
+            button.TextColor = Color.FromHex("#636366");
         }
     }
 }

@@ -4,19 +4,7 @@
        xmlns:local="clr-namespace:HassWebView.DemoComponent"
        xmlns:views="clr-namespace:HassWebView.DemoComponent.Views"
        x:Class="HassWebView.DemoComponent.AppShell"
-       Title="Home Assistant Components"
-       FlyoutBehavior="Locked">
-
-    <Shell.FlyoutHeader>
-        <Grid BackgroundColor="#007AFF" HeightRequest="120">
-            <Label Text="🏠 智能家居组件" 
-                   FontSize="20" 
-                   FontAttributes="Bold" 
-                   TextColor="White" 
-                   HorizontalOptions="Center" 
-                   VerticalOptions="Center" />
-        </Grid>
-    </Shell.FlyoutHeader>
+       Title="Home Assistant Components">
 
     <FlyoutItem Title="首页" Icon="🏠">
         <ShellContent Route="MainPage" ContentTemplate="{DataTemplate local:MainPage}" />
@@ -40,10 +28,6 @@
 
     <FlyoutItem Title="Spinner" Icon="🔄">
         <ShellContent Route="SpinnerExamplePage" ContentTemplate="{DataTemplate views:SpinnerExamplePage}" />
-    </FlyoutItem>
-
-    <FlyoutItem Title="Gauge" Icon="📊">
-        <ShellContent Route="GaugeExamplePage" ContentTemplate="{DataTemplate views:GaugeExamplePage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="ButtonCard" Icon="🔘">
@@ -88,6 +72,10 @@
 
     <FlyoutItem Title="SettingsGroup" Icon="⚙️">
         <ShellContent Route="SettingsGroupExamplePage" ContentTemplate="{DataTemplate views:SettingsGroupExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="设置" Icon="🔧">
+        <ShellContent Route="SettingsPage" ContentTemplate="{DataTemplate views:SettingsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="关于" Icon="ℹ️">

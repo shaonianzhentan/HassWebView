@@ -4,18 +4,17 @@
              xmlns:component="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.DemoComponent.Views.ButtonCardExamplePage"
              Title="ButtonCard 组件示例"
-             BackgroundColor="White">
+             BackgroundColor="#F2F2F7">
 
     <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="ButtonCard 按钮卡片组件" FontSize="24" FontAttributes="Bold" />
-            <Label Text="Home Assistant 风格的按钮卡片" FontSize="14" TextColor="#86868B" />
+        <VerticalStackLayout Padding="16" Spacing="12">
+            <Label Text="ButtonCard 按钮卡片组件" FontSize="24" FontAttributes="Bold" TextColor="#1D1D1F" />
+            <Label Text="用于显示设备控制卡片" FontSize="14" TextColor="#86868B" />
             
             <!-- 只使用 ButtonCard 组件 -->
-            <component:ButtonCard Icon="🔴" Title="客厅灯" State="开启" />
-            <component:ButtonCard Icon="🔵" Title="卧室灯" State="关闭" />
-            <component:ButtonCard Icon="🟢" Title="厨房灯" State="开启" />
-            <component:ButtonCard Icon="🔥" Title="热水器" State="加热中" />
+            <component:ButtonCard Icon="💡" Title="客厅灯" State="开启" StateColor="#34C759" />
+            <component:ButtonCard Icon="❄️" Title="空调" State="制冷 24°C" StateColor="#3B82F6" />
+            <component:ButtonCard Icon="📺" Title="电视" State="关闭" StateColor="#8E8E93" ShowBadge="True" />
             
             <BoxView HeightRequest="40" />
         </VerticalStackLayout>

@@ -11,7 +11,7 @@
             <Label Text="ThemeSelector 主题选择组件" FontSize="24" FontAttributes="Bold" />
             <Label Text="用于选择亮色/暗色/系统主题" FontSize="14" TextColor="#86868B" />
             
-            <!-- 只使用 ThemeSelector 组件 -->
+            <!-- 使用真正的 ThemeSelector 组件 -->
             <component:ThemeSelector />
             
             <BoxView HeightRequest="40" />

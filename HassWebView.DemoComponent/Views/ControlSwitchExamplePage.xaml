@@ -4,41 +4,18 @@
              xmlns:component="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.DemoComponent.Views.ControlSwitchExamplePage"
              Title="ControlSwitch 组件示例"
-             BackgroundColor="{AppThemeBinding Light={StaticResource LightBackgroundColor}, Dark={StaticResource DarkBackgroundColor}}">
-    
+             BackgroundColor="#F2F2F7">
+
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
+            <Label Text="ControlSwitch 开关组件" FontSize="24" FontAttributes="Bold" TextColor="#1D1D1F" />
+            <Label Text="用于切换布尔状态的开关控件" FontSize="14" TextColor="#86868B" />
             
-            <Label Text="ControlSwitch 开关组件" FontSize="24" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource LightTextColor}, Dark={StaticResource DarkTextColor}}" />
-            
-            <Label Text="支持开启、关闭、禁用状态" FontSize="14" TextColor="#86868B" />
-            
-            <component:SectionHeader Title="不同状态" />
-            <VerticalStackLayout Spacing="12">
-                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                    <component:ControlSwitch x:Name="Switch1" />
-                    <Label Text="默认状态" TextColor="{AppThemeBinding Light={StaticResource LightTextColor}, Dark={StaticResource DarkTextColor}}" />
-                </HorizontalStackLayout>
-                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                    <component:ControlSwitch x:Name="Switch2" IsToggled="True" />
-                    <Label Text="已开启" TextColor="{AppThemeBinding Light={StaticResource LightTextColor}, Dark={StaticResource DarkTextColor}}" />
-                </HorizontalStackLayout>
-                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                    <component:ControlSwitch x:Name="Switch3" IsToggled="False" />
-                    <Label Text="已关闭" TextColor="{AppThemeBinding Light={StaticResource LightTextColor}, Dark={StaticResource DarkTextColor}}" />
-                </HorizontalStackLayout>
-                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                    <component:ControlSwitch Disabled="True" />
-                    <Label Text="禁用状态" TextColor="#86868B" />
-                </HorizontalStackLayout>
-                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                    <component:ControlSwitch IsToggled="True" Disabled="True" />
-                    <Label Text="禁用并开启" TextColor="#86868B" />
-                </HorizontalStackLayout>
-            </VerticalStackLayout>
+            <!-- 只使用 ControlSwitch 组件 -->
+            <component:ControlSwitch IsToggled="False" />
+            <component:ControlSwitch IsToggled="True" />
             
             <BoxView HeightRequest="40" />
-            
         </VerticalStackLayout>
     </ScrollView>
 

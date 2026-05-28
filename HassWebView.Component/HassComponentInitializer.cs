@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Hosting;
 
@@ -9,24 +8,34 @@ public class HassComponentInitializer : IMauiInitializeService
 {
     public void Initialize(IServiceProvider serviceProvider)
     {
-        var application = serviceProvider.GetService<Application>() ?? Application.Current;
-        if (application?.Resources?.MergedDictionaries == null)
-        {
-            return;
-        }
-
-        // 尝试加载资源字典，如果失败则忽略，避免阻塞应用启动
         try
         {
-            var res = new Resources.ComponentResources();
-            if (!application.Resources.MergedDictionaries.Any(x => x is Resources.ComponentResources))
+            var application = serviceProvider.GetService<Application>() ?? Application.Current;
+            if (application?.Resources?.MergedDictionaries == null)
             {
-                application.Resources.MergedDictionaries.Add(res);
+                System.Diagnostics.Debug.WriteLine("Application or Resources is null");
+                return;
             }
+
+            // 延迟加载资源字典，避免在应用初始化期间访问资源
+            application.Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
+            {
+                try
+                {
+                    var colorsRes = new ResourceDictionary();
+                    colorsRes.Source = new Uri("Resources/Styles/Colors.xaml", UriKind.Relative);
+                    application.Resources.MergedDictionaries.Add(colorsRes);
+                    System.Diagnostics.Debug.WriteLine("Colors.xaml loaded successfully");
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to load Colors.xaml: {ex.Message}");
+                }
+            });
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to load ComponentResources: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"HassComponentInitializer.Initialize failed: {ex.Message}");
         }
     }
 }

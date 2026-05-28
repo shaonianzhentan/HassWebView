@@ -5,9 +5,11 @@
              x:Name="this">
 
     <Border x:Name="ChipBorder"
-            StrokeShape="RoundRectangle 16"
             Padding="10,6"
             BackgroundColor="#EFEFF4">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="16" />
+        </Border.StrokeShape>
         <HorizontalStackLayout Spacing="6">
             <Label x:Name="IconLabel"
                    Text="{Binding Source={x:Reference this}, Path=IconText}"

@@ -4,17 +4,16 @@
              xmlns:component="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.DemoComponent.Views.DetailCardExamplePage"
              Title="DetailCard 组件示例"
-             BackgroundColor="White">
+             BackgroundColor="#F2F2F7">
 
     <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="DetailCard 详情卡片组件" FontSize="24" FontAttributes="Bold" />
-            <Label Text="用于展示实体详细信息的卡片" FontSize="14" TextColor="#86868B" />
+        <VerticalStackLayout Padding="16" Spacing="12">
+            <Label Text="DetailCard 详情卡片组件" FontSize="24" FontAttributes="Bold" TextColor="#1D1D1F" />
+            <Label Text="用于显示设备详细信息" FontSize="14" TextColor="#86868B" />
             
             <!-- 只使用 DetailCard 组件 -->
-            <component:DetailCard Title="室内温度" State="23.5°C" Subtitle="客厅" />
-            <component:DetailCard Title="室内湿度" State="65%" Subtitle="卧室" />
-            <component:DetailCard Title="电池电量" State="85%" Subtitle="智能门锁" />
+            <component:DetailCard Title="客厅温度传感器" Subtitle="温度" State="23.5°C" StateColor="#34C759" />
+            <component:DetailCard Title="空气质量传感器" Subtitle="PM2.5" State="优" StateColor="#34C759" />
             
             <BoxView HeightRequest="40" />
         </VerticalStackLayout>

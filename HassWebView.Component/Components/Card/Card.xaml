@@ -5,9 +5,11 @@
              x:Name="this">
 
     <Border x:Name="CardBorder"
-            StrokeShape="RoundRectangle 12"
-            BackgroundColor="{AppThemeBinding Light={StaticResource LightCardColor}, Dark={StaticResource DarkCardColor}}"
+            BackgroundColor="#FFFFFF"
             Padding="16">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="12" />
+        </Border.StrokeShape>
         <ContentPresenter Content="{Binding Source={x:Reference this}, Path=Content}" />
     </Border>
 

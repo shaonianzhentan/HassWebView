@@ -5,21 +5,23 @@
              x:Name="this">
 
     <Border x:Name="CardBorder"
-            StrokeShape="RoundRectangle 12"
             Padding="16"
-            BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#2C2C2E}">
+            BackgroundColor="#FFFFFF">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="12" />
+        </Border.StrokeShape>
         <VerticalStackLayout Spacing="12">
             <Grid ColumnDefinitions="*,Auto">
                 <Label x:Name="TitleLabel"
                        Grid.Column="0"
                        Text="{Binding Source={x:Reference this}, Path=Title}"
                        FontSize="14"
-                       TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#FFFFFF}" />
+                       TextColor="#1D1D1F" />
                 <Label x:Name="ValueLabel"
                        Grid.Column="1"
-                       FontSize="14"
+                       FontSize="16"
                        FontAttributes="Bold"
-                       TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#FFFFFF}">
+                       TextColor="#1D1D1F">
                     <Label.FormattedText>
                         <FormattedString>
                             <Span Text="{Binding Source={x:Reference this}, Path=Value}" />
@@ -34,7 +36,7 @@
                     Value="{Binding Source={x:Reference this}, Path=Value}"
                     ThumbColor="#007AFF"
                     MinimumTrackColor="#007AFF"
-                    MaximumTrackColor="#8E8E93" />
+                    MaximumTrackColor="#86868B" />
         </VerticalStackLayout>
     </Border>
 

@@ -6,9 +6,11 @@
 
     <Grid ColumnDefinitions="Auto,*,Auto" Padding="16" ColumnSpacing="12">
         <Border x:Name="IconBorder"
-                StrokeShape="RoundRectangle 12"
                 Padding="10"
                 BackgroundColor="{Binding Source={x:Reference this}, Path=IconBackgroundColor}">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12" />
+            </Border.StrokeShape>
             <Label x:Name="IconLabel"
                    Text="{Binding Source={x:Reference this}, Path=IconText}"
                    FontSize="20" />
@@ -16,8 +18,8 @@
         <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
             <Label x:Name="TitleLabel"
                    Text="{Binding Source={x:Reference this}, Path=Title}"
-                   FontSize="15"
-                   TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#FFFFFF}" />
+                   FontSize="16"
+                   TextColor="#1D1D1F" />
             <Label x:Name="StateLabel"
                    Text="{Binding Source={x:Reference this}, Path=State}"
                    FontSize="13"
@@ -27,7 +29,7 @@
                Grid.Column="2"
                Text="›"
                FontSize="24"
-               TextColor="{AppThemeBinding Light=#C7C7CC, Dark=#48484A}"
+               TextColor="#C7C7CC"
                VerticalOptions="Center" />
     </Grid>
 

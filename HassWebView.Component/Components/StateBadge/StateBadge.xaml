@@ -5,9 +5,11 @@
              x:Name="this">
 
     <Border x:Name="BadgeBorder"
-            StrokeShape="RoundRectangle 16"
             Padding="10,6"
-            BackgroundColor="#8E8E93">
+            BackgroundColor="{Binding Source={x:Reference this}, Path=BadgeColor}">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="16" />
+        </Border.StrokeShape>
         <Label x:Name="StateLabel"
                Text="{Binding Source={x:Reference this}, Path=State}"
                FontSize="11"

@@ -4,12 +4,28 @@ using HassWebView.Component.Models;
 
 public partial class EntityRow : ContentView
 {
+    private bool _isInitialized = false;
+
     public EntityRow()
     {
         InitializeComponent();
-        UpdateColors();
-        UpdateSize();
-        SizeManager.SizeChanged += (s, e) => UpdateSize();
+        
+        // 延迟初始化以避免应用未完全启动时访问 Application.Current
+        Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
+        {
+            try
+            {
+                UpdateColors();
+                UpdateSize();
+                SizeManager.SizeChanged += (s, e) => UpdateSize();
+                ThemeManager.ThemeChanged += (s, e) => UpdateColors();
+                _isInitialized = true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"EntityRow initialization failed: {ex}");
+            }
+        });
     }
 
     public static readonly BindableProperty IconTextProperty =
@@ -35,7 +51,7 @@ public partial class EntityRow : ContentView
             propertyChanged: (b, _, __) =>
             {
                 if (b is EntityRow row)
-                    row.UpdateColors();
+                    row.SafeUpdateColors();
             });
 
     public string State
@@ -49,7 +65,7 @@ public partial class EntityRow : ContentView
             propertyChanged: (b, _, __) =>
             {
                 if (b is EntityRow row)
-                    row.UpdateColors();
+                    row.SafeUpdateColors();
             });
 
     public bool IsActive
@@ -76,45 +92,69 @@ public partial class EntityRow : ContentView
     public static readonly BindableProperty StateColorProperty =
         BindableProperty.Create(nameof(StateColor), typeof(Color), typeof(EntityRow), Color.FromHex("#636366"));
 
+    private void SafeUpdateColors()
+    {
+        if (_isInitialized)
+        {
+            UpdateColors();
+        }
+    }
+
     private void UpdateColors()
     {
-        if (IsActive || State?.ToLower() == "on")
+        try
         {
-            IconBackgroundColor = Color.FromHex("#34C759");
-            StateColor = Color.FromHex("#34C759");
+            var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+            
+            if (IsActive || State?.ToLower() == "on")
+            {
+                IconBackgroundColor = Color.FromHex("#34C759");
+                StateColor = Color.FromHex("#34C759");
+            }
+            else
+            {
+                IconBackgroundColor = isDark ? Color.FromHex("#3A3A3C") : Color.FromHex("#EFEFF4");
+                StateColor = isDark ? Color.FromHex("#8E8E93") : Color.FromHex("#636366");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            IconBackgroundColor = Color.FromHex("#EFEFF4");
-            StateColor = Color.FromHex("#636366");
+            System.Diagnostics.Debug.WriteLine($"EntityRow.UpdateColors failed: {ex}");
         }
     }
 
     private void UpdateSize()
     {
-        switch (SizeManager.CurrentSize)
+        try
         {
-            case ComponentSize.Phone:
-                IconBorder.Padding = new Thickness(10);
-                IconLabel.FontSize = 20;
-                TitleLabel.FontSize = 15;
-                StateLabel.FontSize = 13;
-                ArrowLabel.FontSize = 24;
-                break;
-            case ComponentSize.Tablet:
-                IconBorder.Padding = new Thickness(16);
-                IconLabel.FontSize = 32;
-                TitleLabel.FontSize = 22;
-                StateLabel.FontSize = 18;
-                ArrowLabel.FontSize = 36;
-                break;
-            case ComponentSize.TV:
-                IconBorder.Padding = new Thickness(24);
-                IconLabel.FontSize = 44;
-                TitleLabel.FontSize = 28;
-                StateLabel.FontSize = 22;
-                ArrowLabel.FontSize = 48;
-                break;
+            switch (SizeManager.CurrentSize)
+            {
+                case ComponentSize.Phone:
+                    IconBorder.Padding = new Thickness(10);
+                    IconLabel.FontSize = 20;
+                    TitleLabel.FontSize = 15;
+                    StateLabel.FontSize = 13;
+                    ArrowLabel.FontSize = 24;
+                    break;
+                case ComponentSize.Tablet:
+                    IconBorder.Padding = new Thickness(16);
+                    IconLabel.FontSize = 32;
+                    TitleLabel.FontSize = 22;
+                    StateLabel.FontSize = 18;
+                    ArrowLabel.FontSize = 36;
+                    break;
+                case ComponentSize.TV:
+                    IconBorder.Padding = new Thickness(24);
+                    IconLabel.FontSize = 44;
+                    TitleLabel.FontSize = 28;
+                    StateLabel.FontSize = 22;
+                    ArrowLabel.FontSize = 48;
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"EntityRow.UpdateSize failed: {ex}");
         }
     }
 }

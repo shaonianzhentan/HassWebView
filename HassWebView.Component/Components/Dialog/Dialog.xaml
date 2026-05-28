@@ -15,13 +15,15 @@
         
         <!-- 对话框内容 -->
         <Border x:Name="DialogBorder"
-                StrokeShape="RoundRectangle 16"
                 Padding="24"
                 BackgroundColor="#FFFFFF"
                 WidthRequest="320"
                 HeightRequest="240"
                 HorizontalOptions="Center"
                 VerticalOptions="Center">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="16" />
+            </Border.StrokeShape>
             
             <VerticalStackLayout Spacing="16">
                 <!-- 标题 -->
@@ -35,7 +37,7 @@
                 <Label x:Name="ContentLabel"
                        Text="{Binding Source={x:Reference this}, Path=Message}"
                        FontSize="14"
-                       TextColor="#3C3C3C"
+                       TextColor="#636366"
                        LineBreakMode="WordWrap" />
                 
                 <!-- 按钮区域 -->

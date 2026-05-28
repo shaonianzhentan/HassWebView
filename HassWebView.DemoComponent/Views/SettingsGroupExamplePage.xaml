@@ -4,23 +4,18 @@
              xmlns:component="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.DemoComponent.Views.SettingsGroupExamplePage"
              Title="SettingsGroup 组件示例"
-             BackgroundColor="White">
+             BackgroundColor="{AppThemeBinding Light=#F2F2F7, Dark=#1C1C1E}">
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="SettingsGroup 设置组组件" FontSize="24" FontAttributes="Bold" />
-            <Label Text="用于分组显示设置项" FontSize="14" TextColor="#86868B" />
+            <Label Text="SettingsGroup 设置组组件" FontSize="24" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#FFFFFF}" />
+            <Label Text="用于分组显示设置项" FontSize="14" TextColor="{AppThemeBinding Light=#86868B, Dark=#8E8E93}" />
             
-            <!-- 只使用 SettingsGroup 组件 -->
+            <!-- 使用 SettingsGroup 组件 -->
             <component:SettingsGroup Title="常规设置">
-                <component:EntityRow Title="通知" IconText="🔔" State="开启" StateColor="#10B981" />
-                <component:EntityRow Title="声音" IconText="🔊" State="开启" StateColor="#10B981" />
-                <component:EntityRow Title="震动" IconText="📳" State="关闭" StateColor="#9CA3AF" />
-            </component:SettingsGroup>
-            
-            <component:SettingsGroup Title="隐私设置">
-                <component:EntityRow Title="定位服务" IconText="📍" State="开启" StateColor="#10B981" />
-                <component:EntityRow Title="数据收集" IconText="📊" State="关闭" StateColor="#9CA3AF" />
+                <component:InfoRow Icon="🔔" Label="通知" Value="开启" />
+                <component:InfoRow Icon="🔒" Label="隐私" Value="已保护" />
+                <component:InfoRow Icon="🌙" Label="深色模式" Value="跟随系统" />
             </component:SettingsGroup>
             
             <BoxView HeightRequest="40" />

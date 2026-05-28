@@ -7,32 +7,60 @@ public partial class SizeSelector : ContentView
     public SizeSelector()
     {
         InitializeComponent();
-        UpdateButtonStates();
-        SizeManager.SizeChanged += (s, e) => UpdateButtonStates();
+        
+        // 延迟初始化以避免应用未完全启动时访问 Application.Current
+        Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
+        {
+            UpdateButtonStates();
+            SizeManager.SizeChanged += (s, e) => UpdateButtonStates();
+        });
     }
 
     private void OnSizeClicked(object sender, EventArgs e)
     {
-        if (sender is Button btn && btn.CommandParameter is string sizeStr)
+        try
         {
-            if (Enum.TryParse<ComponentSize>(sizeStr, out var size))
+            if (sender is Button btn && btn.CommandParameter is string sizeStr)
             {
-                SizeManager.SetSize(size);
+                if (Enum.TryParse<ComponentSize>(sizeStr, out var size))
+                {
+                    SizeManager.SetSize(size);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"SizeSelector.OnSizeClicked failed: {ex}");
         }
     }
 
     private void UpdateButtonStates()
     {
-        UpdateButton(MediumBtn, ComponentSize.Phone);
-        UpdateButton(LargeBtn, ComponentSize.Tablet);
-        UpdateButton(ExtraLargeBtn, ComponentSize.TV);
+        try
+        {
+            UpdateButtonStyle(MediumBtn, SizeManager.CurrentSize == ComponentSize.Phone);
+            UpdateButtonStyle(LargeBtn, SizeManager.CurrentSize == ComponentSize.Tablet);
+            UpdateButtonStyle(ExtraLargeBtn, SizeManager.CurrentSize == ComponentSize.TV);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"SizeSelector.UpdateButtonStates failed: {ex}");
+        }
     }
 
-    private void UpdateButton(Button btn, ComponentSize size)
+    private void UpdateButtonStyle(Button button, bool isSelected)
     {
-        bool isSelected = SizeManager.CurrentSize == size;
-        btn.BackgroundColor = isSelected ? Color.FromHex("#007AFF") : Color.FromHex("#EFEFF4");
-        btn.TextColor = isSelected ? Colors.White : Color.FromHex("#1D1D1F");
+        if (button == null) return;
+        
+        if (isSelected)
+        {
+            button.BackgroundColor = Color.FromHex("#007AFF");
+            button.TextColor = Colors.White;
+        }
+        else
+        {
+            button.BackgroundColor = Color.FromHex("#F2F2F7");
+            button.TextColor = Color.FromHex("#636366");
+        }
     }
 }

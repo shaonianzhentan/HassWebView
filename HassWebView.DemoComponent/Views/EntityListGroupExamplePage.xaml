@@ -4,12 +4,12 @@
              xmlns:component="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.DemoComponent.Views.EntityListGroupExamplePage"
              Title="EntityListGroup 组件示例"
-             BackgroundColor="White">
+             BackgroundColor="{AppThemeBinding Light=#F2F2F7, Dark=#1C1C1E}">
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="EntityListGroup 实体列表组组件" FontSize="24" FontAttributes="Bold" />
-            <Label Text="用于分组显示实体列表" FontSize="14" TextColor="#86868B" />
+            <Label Text="EntityListGroup 实体列表组组件" FontSize="24" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#FFFFFF}" />
+            <Label Text="用于分组显示实体列表" FontSize="14" TextColor="{AppThemeBinding Light=#86868B, Dark=#8E8E93}" />
             
             <!-- 只使用 EntityListGroup 组件 -->
             <component:EntityListGroup Title="客厅设备">

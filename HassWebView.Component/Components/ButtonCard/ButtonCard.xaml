@@ -5,9 +5,11 @@
              x:Name="this">
 
     <Border x:Name="CardBorder"
-            StrokeShape="RoundRectangle 12"
             Padding="16"
-            BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#2C2C2E}">
+            BackgroundColor="#FFFFFF">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="12" />
+        </Border.StrokeShape>
         <VerticalStackLayout Spacing="8">
             <Grid ColumnDefinitions="*,Auto">
                 <Label x:Name="IconLabel"
@@ -16,19 +18,20 @@
                        VerticalOptions="Center" />
                 <Border x:Name="BadgeBorder"
                         Grid.Column="1"
-                        StrokeShape="RoundRectangle 10"
                         Padding="6,3"
                         IsVisible="{Binding Source={x:Reference this}, Path=ShowBadge}"
                         BackgroundColor="#FF9500">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="10" />
+                    </Border.StrokeShape>
                     <Label Text="!" FontSize="10" TextColor="White" FontAttributes="Bold" />
                 </Border>
             </Grid>
             <Label x:Name="TitleLabel"
                    Text="{Binding Source={x:Reference this}, Path=Title}"
-                   FontSize="14"
+                   FontSize="16"
                    FontAttributes="Bold"
-                   TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#FFFFFF}"
-                   LineBreakMode="TailTruncation" />
+                   TextColor="#1D1D1F" />
             <Label x:Name="StateLabel"
                    Text="{Binding Source={x:Reference this}, Path=State}"
                    FontSize="12"

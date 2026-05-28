@@ -4,29 +4,20 @@
              xmlns:component="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.DemoComponent.Views.AlertExamplePage"
              Title="Alert 组件示例"
-             BackgroundColor="{AppThemeBinding Light={StaticResource LightBackgroundColor}, Dark={StaticResource DarkBackgroundColor}}">
-    
+             BackgroundColor="#F2F2F7">
+
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            
-            <Label Text="Alert 警告提示组件" FontSize="24" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource LightTextColor}, Dark={StaticResource DarkTextColor}}" />
-            
+            <Label Text="Alert 警告提示组件" FontSize="24" FontAttributes="Bold" TextColor="#1D1D1F" />
             <Label Text="支持四种类型：Warning、Error、Success、Info" FontSize="14" TextColor="#86868B" />
             
-            <component:SectionHeader Title="Warning 警告" />
-            <component:Alert Title="警告" Message="这是一条警告信息，请注意查看。" Type="Warning" />
-            
-            <component:SectionHeader Title="Error 错误" />
-            <component:Alert Title="错误" Message="操作失败，请重试。" Type="Error" />
-            
-            <component:SectionHeader Title="Success 成功" />
-            <component:Alert Title="成功" Message="操作成功完成！" Type="Success" />
-            
-            <component:SectionHeader Title="Info 信息" />
-            <component:Alert Title="信息" Message="这是一条提示信息。" Type="Info" />
+            <!-- 只使用 Alert 组件 -->
+            <component:Alert Type="Warning" Title="警告" Message="这是一个警告提示信息" />
+            <component:Alert Type="Error" Title="错误" Message="这是一个错误提示信息" />
+            <component:Alert Type="Success" Title="成功" Message="操作成功完成" />
+            <component:Alert Type="Info" Title="信息" Message="这是一条信息提示" />
             
             <BoxView HeightRequest="40" />
-            
         </VerticalStackLayout>
     </ScrollView>
 

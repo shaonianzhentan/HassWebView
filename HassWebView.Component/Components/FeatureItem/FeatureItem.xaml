@@ -9,7 +9,7 @@
         <Label x:Name="FeatureText"
                Text="{Binding Source={x:Reference this}, Path=Text}"
                FontSize="14"
-               TextColor="{AppThemeBinding Light={StaticResource LightTextColor}, Dark={StaticResource DarkTextColor}}" />
+               TextColor="{StaticResource TextColor}" />
     </HorizontalStackLayout>
 
 </ContentView>

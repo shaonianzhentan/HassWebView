@@ -7,7 +7,7 @@
     <Button x:Name="LinkButton"
             Text="{Binding Source={x:Reference this}, Path=Text}"
             FontSize="14"
-            TextColor="#007AFF"
+            TextColor="{StaticResource AccentColor}"
             BackgroundColor="Transparent"
             Padding="0"
             HorizontalOptions="Start" />

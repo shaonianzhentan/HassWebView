@@ -13,14 +13,11 @@
         <Label x:Name="LabelLabel"
                Grid.Column="1"
                Text="{Binding Source={x:Reference this}, Path=Label}"
-               FontSize="14"
-               TextColor="{AppThemeBinding Light=#636366, Dark=#8E8E93}" />
+               Style="{StaticResource InfoRowTitleStyle}" />
         <Label x:Name="ValueLabel"
                Grid.Column="2"
                Text="{Binding Source={x:Reference this}, Path=Value}"
-               FontSize="14"
-               TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#FFFFFF}"
-               HorizontalTextAlignment="End" />
+               Style="{StaticResource InfoRowValueStyle}" />
     </Grid>
 
 </ContentView>

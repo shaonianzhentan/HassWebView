@@ -12,10 +12,12 @@
                IsVisible="{Binding Source={x:Reference this}, Path=ShowLabel}" />
         
         <Border x:Name="InputBorder"
-                StrokeShape="RoundRectangle 8"
                 Padding="12"
                 BackgroundColor="#FFFFFF"
                 Stroke="#E5E5EA">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
             <Entry x:Name="InputEntry"
                    Text="{Binding Source={x:Reference this}, Path=Text, Mode=TwoWay}"
                    Placeholder="{Binding Source={x:Reference this}, Path=Placeholder}"

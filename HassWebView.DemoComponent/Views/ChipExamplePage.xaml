@@ -4,38 +4,19 @@
              xmlns:component="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.DemoComponent.Views.ChipExamplePage"
              Title="Chip 组件示例"
-             BackgroundColor="{AppThemeBinding Light={StaticResource LightBackgroundColor}, Dark={StaticResource DarkBackgroundColor}}">
-    
+             BackgroundColor="#F2F2F7">
+
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
+            <Label Text="Chip 芯片标签组件" FontSize="24" FontAttributes="Bold" TextColor="#1D1D1F" />
+            <Label Text="用于显示可选择或可关闭的标签" FontSize="14" TextColor="#86868B" />
             
-            <Label Text="Chip 芯片标签组件" FontSize="24" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource LightTextColor}, Dark={StaticResource DarkTextColor}}" />
-            
-            <Label Text="支持多种类型和可移除功能" FontSize="14" TextColor="#86868B" />
-            
-            <component:SectionHeader Title="不同类型" />
-            <HorizontalStackLayout Spacing="8">
-                <component:Chip Text="默认标签" IconText="📌" />
-                <component:Chip Text="主要标签" Type="Primary" />
-                <component:Chip Text="次要标签" Type="Secondary" />
-            </HorizontalStackLayout>
-            
-            <component:SectionHeader Title="状态类型" />
-            <HorizontalStackLayout Spacing="8">
-                <component:Chip Text="成功" Type="Success" />
-                <component:Chip Text="警告" Type="Warning" />
-                <component:Chip Text="错误" Type="Error" />
-            </HorizontalStackLayout>
-            
-            <component:SectionHeader Title="可移除" />
-            <HorizontalStackLayout Spacing="8">
-                <component:Chip Text="标签1" Dismissible="True" />
-                <component:Chip Text="标签2" Dismissible="True" />
-                <component:Chip Text="标签3" Dismissible="True" />
-            </HorizontalStackLayout>
+            <!-- 只使用 Chip 组件 -->
+            <component:Chip Text="标签示例" ShowIcon="True" IconText="🏷️" />
+            <component:Chip Text="可关闭标签" Dismissible="True" />
+            <component:Chip Text="简单标签" />
             
             <BoxView HeightRequest="40" />
-            
         </VerticalStackLayout>
     </ScrollView>
 

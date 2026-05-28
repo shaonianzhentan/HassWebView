@@ -4,37 +4,37 @@
              x:Class="HassWebView.Component.Components.DetailCard"
              x:Name="this">
 
-    <Frame x:Name="CardFrame"
-           CornerRadius="16"
-           Padding="20"
-           HasShadow="False"
-           BorderColor="Transparent"
-           BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#2C2C2E}">
+    <Border x:Name="CardFrame"
+            Padding="20"
+            BackgroundColor="#FFFFFF">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="16" />
+        </Border.StrokeShape>
         <VerticalStackLayout Spacing="8">
             <Label x:Name="TitleLabel"
                    Text="{Binding Source={x:Reference this}, Path=Title}"
                    FontSize="16"
                    FontAttributes="Bold"
-                   TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#FFFFFF}" />
+                   TextColor="#1D1D1F" />
             <Label x:Name="SubtitleLabel"
                    Text="{Binding Source={x:Reference this}, Path=Subtitle}"
                    FontSize="14"
-                   TextColor="{AppThemeBinding Light=#636366, Dark=#8E8E93}" />
-            <Frame x:Name="StateFrame"
-                   CornerRadius="12"
-                   Padding="12,6"
-                   Margin="0,12,0,0"
-                   HasShadow="False"
-                   BorderColor="Transparent"
-                   BackgroundColor="{Binding Source={x:Reference this}, Path=StateColor}">
+                   TextColor="#636366" />
+            <Border x:Name="StateFrame"
+                    Padding="12,6"
+                    Margin="0,12,0,0"
+                    BackgroundColor="{Binding Source={x:Reference this}, Path=StateColor}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12" />
+                </Border.StrokeShape>
                 <Label x:Name="StateLabel"
                        Text="{Binding Source={x:Reference this}, Path=State}"
                        FontSize="14"
                        FontAttributes="Bold"
                        TextColor="White"
                        HorizontalOptions="Center" />
-            </Frame>
+            </Border>
         </VerticalStackLayout>
-    </Frame>
+    </Border>
 
 </ContentView>

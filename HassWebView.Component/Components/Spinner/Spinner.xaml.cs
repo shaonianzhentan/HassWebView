@@ -17,8 +17,13 @@ public partial class Spinner : ContentView
     public Spinner()
     {
         InitializeComponent();
-        UpdateSpinnerSize();
-        SizeManager.SizeChanged += (s, e) => UpdateSpinnerSize();
+        
+        // 延迟初始化以避免应用未完全启动时访问 Application.Current
+        Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
+        {
+            UpdateSpinnerSize();
+            SizeManager.SizeChanged += (s, e) => UpdateSpinnerSize();
+        });
     }
 
     public bool IsRunning
@@ -51,20 +56,27 @@ public partial class Spinner : ContentView
 
     private void UpdateSpinnerSize()
     {
-        double baseSize = (double)GetValue(SizeProperty);
-        double scale = baseSize / 48;
-        
-        switch (SizeManager.CurrentSize)
+        try
         {
-            case ComponentSize.Phone:
-                SpinnerIndicator.Scale = scale * 1.0;
-                break;
-            case ComponentSize.Tablet:
-                SpinnerIndicator.Scale = scale * 1.4;
-                break;
-            case ComponentSize.TV:
-                SpinnerIndicator.Scale = scale * 1.8;
-                break;
+            double baseSize = (double)GetValue(SizeProperty);
+            double scale = baseSize / 48;
+            
+            switch (SizeManager.CurrentSize)
+            {
+                case ComponentSize.Phone:
+                    SpinnerIndicator.Scale = scale * 1.0;
+                    break;
+                case ComponentSize.Tablet:
+                    SpinnerIndicator.Scale = scale * 1.4;
+                    break;
+                case ComponentSize.TV:
+                    SpinnerIndicator.Scale = scale * 1.8;
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Spinner.UpdateSpinnerSize failed: {ex}");
         }
     }
 }

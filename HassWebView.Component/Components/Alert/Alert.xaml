@@ -5,9 +5,11 @@
              x:Name="this">
 
     <Border x:Name="AlertBorder"
-            StrokeShape="RoundRectangle 12"
             Padding="16"
             BackgroundColor="#FFF8E6">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="12" />
+        </Border.StrokeShape>
         <HorizontalStackLayout Spacing="12">
             <Label x:Name="IconLabel"
                    Text="⚠️"
@@ -22,7 +24,7 @@
                 <Label x:Name="MessageLabel"
                        Text="{Binding Source={x:Reference this}, Path=Message}"
                        FontSize="13"
-                       TextColor="#3C3C3C"
+                       TextColor="#636366"
                        LineBreakMode="WordWrap" />
             </VerticalStackLayout>
             <Button x:Name="CloseBtn"

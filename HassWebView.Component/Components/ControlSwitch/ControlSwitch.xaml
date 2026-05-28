@@ -5,8 +5,10 @@
              x:Name="this">
     
     <Border x:Name="SwitchBorder"
-            StrokeShape="RoundRectangle 15"
             BackgroundColor="#EFEFF4">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="15" />
+        </Border.StrokeShape>
         <Grid x:Name="SwitchGrid"
               WidthRequest="51"
               HeightRequest="31">

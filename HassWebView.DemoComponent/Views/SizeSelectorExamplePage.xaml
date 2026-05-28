@@ -11,7 +11,7 @@
             <Label Text="SizeSelector 尺寸选择组件" FontSize="24" FontAttributes="Bold" />
             <Label Text="用于选择不同尺寸选项" FontSize="14" TextColor="#86868B" />
             
-            <!-- 只使用 SizeSelector 组件 -->
+            <!-- 使用真正的 SizeSelector 组件 -->
             <component:SizeSelector />
             
             <BoxView HeightRequest="40" />

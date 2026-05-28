@@ -1,4 +1,3 @@
-using HassWebView.Component.Services;
 using Microsoft.Maui.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,7 +14,6 @@ public static class MauiAppBuilderExtensions
     public static MauiAppBuilder UseHassComponents(this MauiAppBuilder builder)
     {
         builder.Services.AddSingleton<IMauiInitializeService, HassComponentInitializer>();
-        builder.Services.AddSingleton(_ => AppInfoService.Instance);
         return builder;
     }
 }

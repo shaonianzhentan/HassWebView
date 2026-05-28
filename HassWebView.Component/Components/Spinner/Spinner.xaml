@@ -6,6 +6,6 @@
 
     <ActivityIndicator x:Name="SpinnerIndicator"
                        IsRunning="{Binding Source={x:Reference this}, Path=IsRunning}"
-                       Color="{Binding Source={x:Reference this}, Path=Color}" />
+                       Color="#007AFF" />
 
 </ContentView>

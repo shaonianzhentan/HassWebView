@@ -1,46 +1,53 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:component="clr-namespace:HassWebView.Component.Components;assembly=HassWebView.Component"
              x:Class="HassWebView.DemoComponent.MainPage"
-             Title="HassWebView Demo Component">
+             Title="HassWebView Demo Component"
+             BackgroundColor="#F2F2F7">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="24">
             <Label Text="HassWebView Component Demo"
                    FontAttributes="Bold"
-                   FontSize="28" />
+                   FontSize="28"
+                   TextColor="#1D1D1F" />
 
-            <Label Text="这是一组来自 HassWebView.Component 的控件示例：" />
+            <Label Text="这是一组来自 HassWebView.Component 的控件示例应用"
+                   FontSize="16"
+                   TextColor="#636366" />
 
-            <Frame BorderColor="#E5E5EA" CornerRadius="16" Padding="16" HasShadow="False">
-                <VerticalStackLayout Spacing="16">
-                    <Label Text="Chip 示例" FontAttributes="Bold" />
-                    <HorizontalStackLayout Spacing="12">
-                        <component:Chip Text="默认" IconText="✨" Type="Default" />
-                        <component:Chip Text="Primary" IconText="🚀" Type="Primary" />
-                        <component:Chip Text="Success" IconText="✅" Type="Success" />
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
+            <Label Text="使用侧边栏导航到各个组件示例页面"
+                   FontSize="14"
+                   TextColor="#86868B" />
 
-            <Frame BorderColor="#E5E5EA" CornerRadius="16" Padding="16" HasShadow="False">
-                <VerticalStackLayout Spacing="16">
-                    <Label Text="ButtonCard 示例" FontAttributes="Bold" />
-                    <component:ButtonCard Icon="💡" Title="客厅灯" State="On" ShowBadge="True" />
-                    <component:ButtonCard Icon="🚪" Title="前门" State="Locked" />
-                </VerticalStackLayout>
-            </Frame>
+            <Label Text="应用会每4秒自动跳转到下一个页面进行测试"
+                   FontSize="14"
+                   TextColor="#86868B" />
 
-            <Frame BorderColor="#E5E5EA" CornerRadius="16" Padding="16" HasShadow="False">
-                <VerticalStackLayout Spacing="16">
-                    <Label Text="Alert 示例" FontAttributes="Bold" />
-                    <component:Alert Title="成功" Message="组件库已成功加载并运行。" Type="Success" />
-                    <component:Alert Title="警告" Message="这是一个警告样例消息。" Type="Warning" />
-                </VerticalStackLayout>
-            </Frame>
+            <BoxView HeightRequest="20" />
+            
+            <Label Text="组件列表：" FontAttributes="Bold" TextColor="#1D1D1F" />
+            <Label Text="• Alert - 警告提示组件" FontSize="14" TextColor="#636366" />
+            <Label Text="• Chip - 芯片标签组件" FontSize="14" TextColor="#636366" />
+            <Label Text="• ControlSwitch - 开关组件" FontSize="14" TextColor="#636366" />
+            <Label Text="• Input - 输入框组件" FontSize="14" TextColor="#636366" />
+            <Label Text="• Spinner - 加载指示器组件" FontSize="14" TextColor="#636366" />
+            <Label Text="• Gauge - 仪表盘组件" FontSize="14" TextColor="#636366" />
+            <Label Text="• ButtonCard - 按钮卡片组件" FontSize="14" TextColor="#636366" />
+            <Label Text="• ButtonGrid - 按钮网格组件" FontSize="14" TextColor="#636366" />
+            <Label Text="• DetailCard - 详情卡片组件" FontSize="14" TextColor="#636366" />
+            <Label Text="• Dialog - 对话框组件" FontSize="14" TextColor="#636366" />
+            <Label Text="• EntityRow - 实体行组件" FontSize="14" TextColor="#636366" />
+            <Label Text="• EntityListGroup - 实体列表分组组件" FontSize="14" TextColor="#636366" />
+            <Label Text="• SliderCard - 滑块卡片组件" FontSize="14" TextColor="#636366" />
+            <Label Text="• StateBadge - 状态徽章组件" FontSize="14" TextColor="#636366" />
+            <Label Text="• SettingsGroup - 设置分组组件" FontSize="14" TextColor="#636366" />
 
-            <Label Text="更多示例页面：" FontAttributes="Bold" />
-            <VerticalStackLayout x:Name="ButtonsLayout" Spacing="10" />
+            <BoxView HeightRequest="20" />
+            
+            <Label Text="设置：" FontAttributes="Bold" TextColor="#1D1D1F" />
+            <Label Text="• 设置页面 - 主题和尺寸切换" FontSize="14" TextColor="#636366" />
+            <Label Text="• 关于页面 - 应用信息" FontSize="14" TextColor="#636366" />
         </VerticalStackLayout>
     </ScrollView>
+
 </ContentPage>
