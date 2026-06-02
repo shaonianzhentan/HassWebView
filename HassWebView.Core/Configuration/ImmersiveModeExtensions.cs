@@ -19,8 +19,13 @@ namespace HassWebView.Core.Configuration
                     android.OnCreate((activity, bundle) =>
                     {
                         var window = activity.Window;
+                        if (window == null) return;
+                        
                         WindowCompat.SetDecorFitsSystemWindows(window, false);
-                        var controller = WindowCompat.GetInsetsController(window, window.DecorView);
+                        var decorView = window.DecorView;
+                        if (decorView == null) return;
+                        
+                        var controller = WindowCompat.GetInsetsController(window, decorView);
                         if (controller != null)
                         {
                             controller.Hide(WindowInsetsCompat.Type.StatusBars() | WindowInsetsCompat.Type.NavigationBars());

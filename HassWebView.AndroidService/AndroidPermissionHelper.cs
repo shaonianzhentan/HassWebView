@@ -21,7 +21,9 @@ public static class AndroidPermissionHelper
     public static bool AreNotificationsEnabled()
     {
         var ctx = Application.Context;
-        return NotificationManagerCompat.From(ctx).AreNotificationsEnabled();
+        if (ctx == null) return false;
+        var nm = NotificationManagerCompat.From(ctx);
+        return nm?.AreNotificationsEnabled() ?? false;
     }
 
     // ─────────────────────────────────────────────

@@ -16,8 +16,8 @@ public class VideoWidget : Java.Lang.Object, IEmbeddedWidgetClient
 
     private readonly IEmbeddedWidget _widget;
 
-    private MediaPlayer _player;
-    private string _videoSrc;
+    private MediaPlayer? _player;
+    private string _videoSrc = string.Empty;
 
     public VideoWidget(string tagName, string src, IEmbeddedWidget widget)
     {
@@ -49,7 +49,7 @@ public class VideoWidget : Java.Lang.Object, IEmbeddedWidgetClient
 
     public bool OnTouchEvent(MotionEvent e)
     {
-        if (_videoSrc == null) return false;
+        if (string.IsNullOrEmpty(_videoSrc) || _player == null) return false;
 
         if (e.Action == MotionEventActions.Up)
         {
@@ -108,13 +108,13 @@ public class VideoWidget : Java.Lang.Object, IEmbeddedWidgetClient
     {
         try
         {
-            _player.SetDataSource(_videoSrc);
-            _player.Looping = true;
+            _player?.SetDataSource(_videoSrc);
+            _player!.Looping = true;
             _player.PrepareAsync();
             _player.Prepared += (s, e) =>
             {
                 Log.Info(TAG, "onPrepared");
-                _player.Start();
+                _player?.Start();
             };
         }
         catch (Exception ex)

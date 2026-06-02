@@ -15,9 +15,9 @@ namespace HassWebView.Core
     public class HassWebView : WebView
     {
         #region Events for Home Assistant Authentication
-        public event EventHandler AuthTokenRequested;
-        public event EventHandler LogoutRequested;
-        public event EventHandler<string> ExternalBusMessageReceived;
+        public event EventHandler? AuthTokenRequested;
+        public event EventHandler? LogoutRequested;
+        public event EventHandler<string>? ExternalBusMessageReceived;
         #endregion
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace HassWebView.Core
                         LogoutRequested?.Invoke(this, EventArgs.Empty);
                         break;
                     case "externalBus":
-                        ExternalBusMessageReceived?.Invoke(this, msg as string);
+                        ExternalBusMessageReceived?.Invoke(this, msg as string ?? string.Empty);
                         break;
                 }
             }));
@@ -96,7 +96,7 @@ namespace HassWebView.Core
 
         public bool IsVideoFullscreen => (bool)GetValue(IsVideoFullscreenProperty);
 
-        public event EventHandler<bool> VideoPlayingFullscreen;
+        public event EventHandler<bool>? VideoPlayingFullscreen;
 
         internal void SetIsVideoFullscreen(bool isVideoFullscreen)
         {
@@ -104,9 +104,9 @@ namespace HassWebView.Core
             VideoPlayingFullscreen?.Invoke(this, isVideoFullscreen);
         }
 
-        public new event EventHandler<WebNavigatingEventArgs> Navigating;
-        public new event EventHandler<WebNavigatedEventArgs> Navigated;
-        public event EventHandler<ResourceLoadingEventArgs> ResourceLoading;
+        public new event EventHandler<WebNavigatingEventArgs>? Navigating;
+        public new event EventHandler<WebNavigatedEventArgs>? Navigated;
+        public event EventHandler<ResourceLoadingEventArgs>? ResourceLoading;
 
         internal void SendNavigating(WebNavigatingEventArgs args)
         {

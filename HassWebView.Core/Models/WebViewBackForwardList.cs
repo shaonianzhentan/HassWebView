@@ -7,7 +7,7 @@ namespace HassWebView.Core.Models
     /// </summary>
     public class WebViewBackForwardList
     {
-        public IList<WebViewHistoryItem> History { get; set; }
+        public IList<WebViewHistoryItem> History { get; set; } = new List<WebViewHistoryItem>();
         public int CurrentIndex { get; set; }
     }
 }

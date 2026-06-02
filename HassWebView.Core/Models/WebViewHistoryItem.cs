@@ -5,7 +5,7 @@ namespace HassWebView.Core.Models
     /// </summary>
     public class WebViewHistoryItem
     {
-        public string Url { get; set; }
-        public string Title { get; set; }
+        public string Url { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
     }
 }

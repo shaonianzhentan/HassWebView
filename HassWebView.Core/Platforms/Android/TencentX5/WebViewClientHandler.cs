@@ -45,9 +45,9 @@ public class WebViewClientHandler : WebViewClient
     }
 
     // Override the modern version of ShouldOverrideUrlLoading.
-    public override bool ShouldOverrideUrlLoading(WebView view, IWebResourceRequest request)
+    public override bool ShouldOverrideUrlLoading(WebView view, IWebResourceRequest? request)
     {
-        return HandleShouldOverrideUrlLoading(request?.Url?.ToString());
+        return HandleShouldOverrideUrlLoading(request?.Url?.ToString() ?? string.Empty);
     }
 
     // Override the deprecated version of ShouldOverrideUrlLoading to ensure compatibility.
@@ -58,7 +58,7 @@ public class WebViewClientHandler : WebViewClient
     
     public override WebResourceResponse ShouldInterceptRequest(WebView view, IWebResourceRequest request)
     {
-        var url = request.Url.ToString();
+        var url = request.Url?.ToString() ?? string.Empty;
 
         var resourceLoadingArgs = new ResourceLoadingEventArgs(url);
         if (_webView.SendResourceLoading(resourceLoadingArgs))

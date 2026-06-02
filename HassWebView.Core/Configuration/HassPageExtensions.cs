@@ -12,12 +12,12 @@ namespace HassWebView.Core.Configuration
         /// <summary>
         /// 泛型快捷方式：直接指定设置页类型
         /// </summary>
-        public static MauiAppBuilder UseHassPage<TSettingsPage>(this MauiAppBuilder builder, Action<IServiceProvider, HassPageOptions> configureOptions = null) where TSettingsPage : Page
+        public static MauiAppBuilder UseHassPage<TSettingsPage>(this MauiAppBuilder builder, Action<IServiceProvider, HassPageOptions>? configureOptions = null) where TSettingsPage : Page
         {
             return builder.UseHassPage(typeof(TSettingsPage), configureOptions);
         }
 
-        public static MauiAppBuilder UseHassPage(this MauiAppBuilder builder, Type settingsPage = null, Action<IServiceProvider, HassPageOptions> configureOptions = null)
+        public static MauiAppBuilder UseHassPage(this MauiAppBuilder builder, Type? settingsPage = null, Action<IServiceProvider, HassPageOptions>? configureOptions = null)
         {
             builder.Services.TryAddSingleton<IHassApiService, HassApiService>();
 

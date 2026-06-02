@@ -8,7 +8,7 @@ public partial class Spinner : ContentView
         BindableProperty.Create(nameof(IsRunning), typeof(bool), typeof(Spinner), true);
 
     public static readonly BindableProperty ColorProperty =
-        BindableProperty.Create(nameof(Color), typeof(Color), typeof(Spinner), Color.FromHex("#007AFF"));
+        BindableProperty.Create(nameof(Color), typeof(Color), typeof(Spinner), Color.FromArgb("#007AFF"));
 
     public static readonly BindableProperty SizeProperty =
         BindableProperty.Create(nameof(Size), typeof(double), typeof(Spinner), 48.0,
@@ -49,7 +49,7 @@ public partial class Spinner : ContentView
         if (bindable is Spinner spinner)
         {
             double size = (double)newValue;
-            // 根据 Size 值设置 Scale（以 48 为基准）
+            // 根据 Size 值设�?Scale（以 48 为基准）
             spinner.SpinnerIndicator.Scale = size / 48;
         }
     }

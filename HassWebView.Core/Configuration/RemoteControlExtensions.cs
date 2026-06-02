@@ -31,13 +31,21 @@ namespace HassWebView.Core.Configuration
 #if ANDROID
                 events.AddAndroid(android =>
                 {
-                    KeyService keyService = null;
+                    KeyService? keyService = null;
 
                     android.OnCreate((activity, bundle) =>
                     {
-                        keyService ??= IPlatformApplication.Current.Services.GetRequiredService<KeyService>();
-                        var originalCallback = activity.Window.Callback;
-                        activity.Window.Callback = new KeyCallback(originalCallback, keyService);
+                        var current = IPlatformApplication.Current;
+                        if (current == null) return;
+                        
+                        keyService ??= current.Services.GetRequiredService<KeyService>();
+                        var window = activity.Window;
+                        if (window == null) return;
+                        
+                        var originalCallback = window.Callback;
+                        if (originalCallback == null) return;
+                        
+                        window.Callback = new KeyCallback(originalCallback, keyService);
                     });
 
                     android.OnBackPressed(activity =>

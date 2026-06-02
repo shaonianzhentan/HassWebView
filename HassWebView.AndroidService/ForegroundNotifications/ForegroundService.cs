@@ -16,9 +16,9 @@ namespace HassWebView.AndroidService.ForegroundNotifications
 
         private const int NotificationId = 1;
 
-        public override IBinder OnBind(Intent intent) => null;
+        public override IBinder? OnBind(Intent? intent) => null;
 
-        public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
+        public override StartCommandResult OnStartCommand(Intent? intent, StartCommandFlags flags, int startId)
         {
             if (intent?.Action == ActionStart)
             {
@@ -27,17 +27,25 @@ namespace HassWebView.AndroidService.ForegroundNotifications
 
                 NotificationChannelHelper.EnsureChannel(this);
 
-                var notification = new NotificationCompat.Builder(this, NotificationChannelHelper.ChannelId)
+#pragma warning disable CS8602 // Dereference of a possibly null reference
+                var channelId = NotificationChannelHelper.ChannelId!;
+                var builder = new NotificationCompat.Builder(this, channelId)
                     .SetContentTitle(title)
                     .SetContentText(text)
-                    .SetSmallIcon(Application.Context.ApplicationInfo.Icon)
-                    .Build();
+                    .SetSmallIcon(Application.Context.ApplicationInfo?.Icon ?? global::Android.Resource.Drawable.SymDefAppIcon);
 
-                StartForeground(NotificationId, notification);
+                var notification = builder.Build();
+                if (notification != null)
+                {
+                    StartForeground(NotificationId, notification);
+                }
+#pragma warning restore CS8602 // Dereference of a possibly null reference
             }
             else if (intent?.Action == ActionStop)
             {
+#pragma warning disable CA1422 // Validate platform compatibility
                 StopForeground(true);
+#pragma warning restore CA1422 // Validate platform compatibility
                 StopSelfResult(startId);
             }
 

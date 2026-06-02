@@ -4,13 +4,13 @@ namespace HassWebView.Core.Services
 {
     public interface IHassApiService
     {
-        HassRestApi Api { get; }
+        HassRestApi? Api { get; }
         void Initialize(HassRestApi api);
     }
 
     public class HassApiService : IHassApiService
     {
-        public HassRestApi Api { get; private set; }
+        public HassRestApi? Api { get; private set; }
 
         public void Initialize(HassRestApi api)
         {

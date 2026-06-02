@@ -21,14 +21,18 @@ public class NotificationListener : NotificationListenerService
         base.OnCreate();
         // Use GetService (not GetRequiredService) so the listener degrades gracefully
         // when the host app has not registered INotificationForwardingService.
+#pragma warning disable CS0618 // Type or member is obsolete
         _forwardingService = MauiApplication.Current.Services.GetService<INotificationForwardingService>();
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
-    public override void OnNotificationPosted(StatusBarNotification sbn)
+    public override void OnNotificationPosted(StatusBarNotification? sbn)
     {
         if (sbn?.Notification == null || _forwardingService == null) return;
 
         var extras = sbn.Notification.Extras;
+        if (extras == null) return;
+        
         var title  = extras.GetString(Notification.ExtraTitle);
         var text   = extras.GetString(Notification.ExtraText);
 
@@ -40,21 +44,43 @@ public class NotificationListener : NotificationListenerService
             PostTime    = sbn.PostTime,
             Title       = title ?? string.Empty,
             Text        = text  ?? string.Empty,
-            LargeIcon   = GetBitmapBytes(extras.GetParcelable(Notification.ExtraLargeIcon) as Bitmap),
-            Picture     = GetBitmapBytes(extras.GetParcelable(Notification.ExtraPicture) as Bitmap),
+            LargeIcon   = GetBitmapBytes(GetParcelableBitmap(extras, GetExtraLargeIconKey())),
+            Picture     = GetBitmapBytes(GetParcelableBitmap(extras, Notification.ExtraPicture)),
         };
 
         Task.Run(() => _forwardingService.ForwardNotificationAsync(notificationData));
     }
 
-    public override void OnNotificationRemoved(StatusBarNotification sbn)
+    public override void OnNotificationRemoved(StatusBarNotification? sbn)
         => base.OnNotificationRemoved(sbn);
+
+    private static string GetExtraLargeIconKey()
+    {
+#pragma warning disable CA1422 // Validate platform compatibility
+        return Notification.ExtraLargeIcon;
+#pragma warning restore CA1422 // Validate platform compatibility
+    }
+
+    private static Bitmap? GetParcelableBitmap(Bundle extras, string key)
+    {
+#pragma warning disable CA1416, CA1422 // Validate platform compatibility
+        if (Build.VERSION.SdkInt >= BuildVersionCodes.Tiramisu)
+        {
+            var obj = extras.GetParcelable(key, Java.Lang.Class.FromType(typeof(Bitmap)));
+            return obj as Bitmap;
+        }
+        else
+        {
+            return extras.GetParcelable(key) as Bitmap;
+        }
+#pragma warning restore CA1416, CA1422 // Validate platform compatibility
+    }
 
     private static byte[]? GetBitmapBytes(Bitmap? bitmap)
     {
         if (bitmap == null) return null;
         using var stream = new System.IO.MemoryStream();
-        bitmap.Compress(Bitmap.CompressFormat.Png, 100, stream);
+        bitmap.Compress(Bitmap.CompressFormat.Png!, 100, stream);
         return stream.ToArray();
     }
 }

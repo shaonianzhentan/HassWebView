@@ -109,7 +109,7 @@ public partial class AppShell : Shell
                 Console.WriteLine($"[{timestamp}] 导航失败: {_pageRoutes[_currentIndex]} - {ex}");
                 System.Diagnostics.Debug.WriteLine($"[{timestamp}] 导航失败: {_pageRoutes[_currentIndex]} - {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"[{timestamp}] 异常堆栈: {ex.StackTrace}");
-                await CurrentPage.DisplayAlert("导航失败", $"页面: {_pageRoutes[_currentIndex]}\n错误: {ex.Message}", "确定");
+                await CurrentPage.DisplayAlertAsync("导航失败", $"页面: {_pageRoutes[_currentIndex]}\n错误: {ex.Message}", "确定");
                 _currentIndex++;
             }
             finally

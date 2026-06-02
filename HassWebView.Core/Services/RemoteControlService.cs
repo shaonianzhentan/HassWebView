@@ -18,7 +18,7 @@ public interface IRemoteControlService
 /// </summary>
 public class RemoteControlService : IRemoteControlService
 {
-    private WebViewWithCursor _activeControl;
+    private WebViewWithCursor? _activeControl;
 
     public RemoteControlService(HttpServer httpServer)
     {
@@ -79,14 +79,14 @@ public class RemoteControlService : IRemoteControlService
 
                 case "text":
                     var append = query["append"] == "1";
-                    var text = query["text"];
+                    var text = query["text"] ?? string.Empty;
                     if (_activeControl.WebViewControl != null)
                     {
                         await _activeControl.WebViewControl.Web.InsertTextAsync(text, append);
                     }
                     break;
                 case "key":
-                    var key = query["key"];
+                    var key = query["key"] ?? string.Empty;
                     if (_activeControl.WebViewControl != null)
                     {
                         await _activeControl.WebViewControl.Web.SimulateKeyPressAsync(key);

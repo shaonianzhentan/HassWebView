@@ -110,15 +110,15 @@ public partial class Input : ContentView
         }
     }
 
-    private void OnFocused(object sender, FocusEventArgs e)
+    private void OnFocused(object? sender, FocusEventArgs e)
     {
-        InputBorder.Stroke = Color.FromHex("#007AFF");
-        InputBorder.BackgroundColor = Color.FromHex("#F0F7FF");
+        InputBorder.Stroke = Color.FromArgb("#007AFF");
+        InputBorder.BackgroundColor = Color.FromArgb("#F0F7FF");
     }
 
-    private void OnUnfocused(object sender, FocusEventArgs e)
+    private void OnUnfocused(object? sender, FocusEventArgs e)
     {
-        InputBorder.Stroke = Color.FromHex("#E5E5EA");
+        InputBorder.Stroke = Color.FromArgb("#E5E5EA");
         InputBorder.BackgroundColor = Colors.White;
     }
 }

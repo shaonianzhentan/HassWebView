@@ -5,9 +5,9 @@ namespace HassWebView.Core.Platforms.Android.TencentX5;
 
     public class TencentTbsListener : Java.Lang.Object, ITbsListener
     {
-        public event EventHandler<int> DownloadFinished;
-        public event EventHandler<int> DownloadProgress;
-        public event EventHandler<int> InstallFinished;
+        public event EventHandler<int>? DownloadFinished;
+        public event EventHandler<int>? DownloadProgress;
+        public event EventHandler<int>? InstallFinished;
 
         public void OnDownloadFinish(int p0)
         {

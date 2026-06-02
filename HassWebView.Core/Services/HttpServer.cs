@@ -15,13 +15,13 @@ namespace HassWebView.Core.Services
 {
     public class HttpServer : IDisposable
     {
-        public string BaseUrl { get; private set; }
+        public string? BaseUrl { get; private set; }
         private readonly HttpListener _listener = new HttpListener();
 
         public class Request
         {
             private readonly HttpListenerRequest _req;
-            private string _body;
+            private string? _body;
 
             public NameValueCollection Query { get; }
             public HttpListenerRequest OriginalRequest => _req;
@@ -45,8 +45,9 @@ namespace HassWebView.Core.Services
             public async Task<T> JsonAsync<T>()
             {
                 var body = await BodyAsync();
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                return JsonSerializer.Deserialize<T>(body, options);
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    var result = JsonSerializer.Deserialize<T>(body, options);
+                    return result!;
             }
         }
 
@@ -145,7 +146,8 @@ namespace HassWebView.Core.Services
         {
             var request = new Request(context.Request);
             var response = new Response(context.Response);
-            var path = context.Request.Url.AbsolutePath.ToLower();
+            var url = context.Request.Url;
+            var path = url?.AbsolutePath.ToLower() ?? string.Empty;
             var method = context.Request.HttpMethod.ToUpper();
 
             context.Response.Headers.Add("Access-Control-Allow-Origin", "*");

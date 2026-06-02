@@ -12,15 +12,23 @@ namespace HassWebView.AndroidService.ForegroundNotifications
         public void ShowNotification(string title, string content, int notificationId, List<NotificationAction> actions)
         {
             var context = global::Android.App.Application.Context;
+            if (context == null) return;
+
             NotificationChannelHelper.EnsureChannel(context);
 
-            var intent = context.PackageManager.GetLaunchIntentForPackage(context.PackageName);
-            var pendingIntent = PendingIntent.GetActivity(context, 0, intent, PendingIntentFlags.Immutable);
+            var intent = context.PackageManager?.GetLaunchIntentForPackage(context.PackageName ?? string.Empty);
+#pragma warning disable CA1416 // Validate platform compatibility
+            var flags = Build.VERSION.SdkInt >= BuildVersionCodes.M 
+                ? PendingIntentFlags.Immutable 
+                : PendingIntentFlags.UpdateCurrent;
+#pragma warning restore CA1416 // Validate platform compatibility
+            var pendingIntent = PendingIntent.GetActivity(context, 0, intent, flags);
 
-            var builder = new NotificationCompat.Builder(context, NotificationChannelHelper.ChannelId)
+            #pragma warning disable CS8602 // Dereference of a possibly null reference
+            var builder = new NotificationCompat.Builder(context, NotificationChannelHelper.ChannelId!)
                 .SetContentTitle(title)
                 .SetContentText(content)
-                .SetSmallIcon(context.ApplicationInfo.Icon)
+                .SetSmallIcon(context.ApplicationInfo?.Icon ?? global::Android.Resource.Drawable.SymDefAppIcon)
                 .SetContentIntent(pendingIntent)
                 .SetAutoCancel(true);
 
@@ -29,17 +37,30 @@ namespace HassWebView.AndroidService.ForegroundNotifications
             {
                 var actionIntent = new Intent(context, typeof(NotificationActionReceiver));
                 actionIntent.SetAction(action.ActionId);
-                var actionPendingIntent = PendingIntent.GetBroadcast(context, requestCode++, actionIntent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
-                builder.AddAction(new NotificationCompat.Action.Builder(0, action.Title, actionPendingIntent).Build());
+#pragma warning disable CA1416 // Validate platform compatibility
+                var actionFlags = Build.VERSION.SdkInt >= BuildVersionCodes.M 
+                    ? PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable 
+                    : PendingIntentFlags.UpdateCurrent;
+#pragma warning restore CA1416 // Validate platform compatibility
+                var actionPendingIntent = PendingIntent.GetBroadcast(context, requestCode++, actionIntent, actionFlags);
+                builder.AddAction(new NotificationCompat.Action.Builder(0, action.Title ?? string.Empty, actionPendingIntent!).Build());
             }
 
-            NotificationManagerCompat.From(context).Notify(notificationId, builder.Build());
+            var notificationManager = NotificationManagerCompat.From(context);
+            var notification = builder.Build();
+            if (notification != null)
+            {
+                notificationManager?.Notify(notificationId, notification);
+            }
+#pragma warning restore CS8602 // Dereference of a possibly null reference
         }
 
         public void CancelNotification(int notificationId)
         {
             var context = global::Android.App.Application.Context;
-            NotificationManagerCompat.From(context).Cancel(notificationId);
+            if (context == null) return;
+            var notificationManager = NotificationManagerCompat.From(context);
+            notificationManager?.Cancel(notificationId);
         }
     }
 }

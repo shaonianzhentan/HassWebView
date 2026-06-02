@@ -18,7 +18,7 @@ namespace HassWebView.Core.Platforms.Android
         {
             if (e == null)
             {
-                return _originalCallback?.DispatchKeyEvent(e) ?? false;
+                return _originalCallback.DispatchKeyEvent(e);
             }
 
             string keyName = KeyHelper.GetKeyName(e.KeyCode);
@@ -44,33 +44,43 @@ namespace HassWebView.Core.Platforms.Android
             }
 
             // If our service didn't handle the event, pass it to the original callback.
-            return _originalCallback?.DispatchKeyEvent(e) ?? false;
+            return _originalCallback.DispatchKeyEvent(e);
         }
 
 
         #region Boilerplate
-        public bool DispatchGenericMotionEvent(AndroidNative.Views.MotionEvent? e) => _originalCallback?.DispatchGenericMotionEvent(e) ?? false;
-        public bool DispatchKeyShortcutEvent(AndroidNative.Views.KeyEvent? e) => _originalCallback?.DispatchKeyShortcutEvent(e) ?? false;
-        public bool DispatchPopulateAccessibilityEvent(AndroidNative.Views.Accessibility.AccessibilityEvent? e) => _originalCallback?.DispatchPopulateAccessibilityEvent(e) ?? false;
-        public bool DispatchTouchEvent(AndroidNative.Views.MotionEvent? e) => _originalCallback?.DispatchTouchEvent(e) ?? false;
-        public bool DispatchTrackballEvent(AndroidNative.Views.MotionEvent? e) => _originalCallback?.DispatchTrackballEvent(e) ?? false;
-        public void OnActionModeFinished(AndroidNative.Views.ActionMode? mode) => _originalCallback?.OnActionModeFinished(mode);
-        public void OnActionModeStarted(AndroidNative.Views.ActionMode? mode) => _originalCallback?.OnActionModeStarted(mode);
-        public void OnAttachedToWindow() => _originalCallback?.OnAttachedToWindow();
-        public void OnContentChanged() => _originalCallback?.OnContentChanged();
-        public bool OnCreatePanelMenu(int featureId, AndroidNative.Views.IMenu? menu) => _originalCallback?.OnCreatePanelMenu(featureId, menu) ?? false;
-        public AndroidNative.Views.View? OnCreatePanelView(int featureId) => _originalCallback?.OnCreatePanelView(featureId);
-        public void OnDetachedFromWindow() => _originalCallback?.OnDetachedFromWindow();
-        public bool OnMenuItemSelected(int featureId, AndroidNative.Views.IMenuItem? item) => _originalCallback?.OnMenuItemSelected(featureId, item) ?? false;
-        public bool OnMenuOpened(int featureId, AndroidNative.Views.IMenu? menu) => _originalCallback?.OnMenuOpened(featureId, menu) ?? false;
-        public void OnPanelClosed(int featureId, AndroidNative.Views.IMenu? menu) => _originalCallback?.OnPanelClosed(featureId, menu);
-        public bool OnPreparePanel(int featureId, AndroidNative.Views.View? view, AndroidNative.Views.IMenu? menu) => _originalCallback?.OnPreparePanel(featureId, view, menu) ?? false;
-        public bool OnSearchRequested() => _originalCallback?.OnSearchRequested() ?? false;
-        public bool OnSearchRequested(AndroidNative.Views.SearchEvent? searchEvent) => _originalCallback?.OnSearchRequested(searchEvent) ?? false;
-        public void OnWindowAttributesChanged(AndroidNative.Views.WindowManagerLayoutParams? attrs) => _originalCallback?.OnWindowAttributesChanged(attrs);
-        public void OnWindowFocusChanged(bool hasFocus) => _originalCallback?.OnWindowFocusChanged(hasFocus);
-        public AndroidNative.Views.ActionMode? OnWindowStartingActionMode(AndroidNative.Views.ActionMode.ICallback? callback) => _originalCallback?.OnWindowStartingActionMode(callback);
-        public AndroidNative.Views.ActionMode? OnWindowStartingActionMode(AndroidNative.Views.ActionMode.ICallback? callback, AndroidNative.Views.ActionModeType type) => _originalCallback?.OnWindowStartingActionMode(callback, type);
+        public bool DispatchGenericMotionEvent(AndroidNative.Views.MotionEvent? e) => _originalCallback.DispatchGenericMotionEvent(e);
+        public bool DispatchKeyShortcutEvent(AndroidNative.Views.KeyEvent? e) => _originalCallback.DispatchKeyShortcutEvent(e);
+        public bool DispatchPopulateAccessibilityEvent(AndroidNative.Views.Accessibility.AccessibilityEvent? e) => _originalCallback.DispatchPopulateAccessibilityEvent(e);
+        public bool DispatchTouchEvent(AndroidNative.Views.MotionEvent? e) => _originalCallback.DispatchTouchEvent(e);
+        public bool DispatchTrackballEvent(AndroidNative.Views.MotionEvent? e) => _originalCallback.DispatchTrackballEvent(e);
+        public void OnActionModeFinished(AndroidNative.Views.ActionMode? mode) => _originalCallback.OnActionModeFinished(mode);
+        public void OnActionModeStarted(AndroidNative.Views.ActionMode? mode) => _originalCallback.OnActionModeStarted(mode);
+        public void OnAttachedToWindow() => _originalCallback.OnAttachedToWindow();
+        public void OnContentChanged() => _originalCallback.OnContentChanged();
+        public bool OnCreatePanelMenu(int featureId, AndroidNative.Views.IMenu? menu) => _originalCallback.OnCreatePanelMenu(featureId, menu ?? throw new ArgumentNullException(nameof(menu)));
+        public AndroidNative.Views.View? OnCreatePanelView(int featureId) => _originalCallback.OnCreatePanelView(featureId);
+        public void OnDetachedFromWindow() => _originalCallback.OnDetachedFromWindow();
+        public bool OnMenuItemSelected(int featureId, AndroidNative.Views.IMenuItem? item) => _originalCallback.OnMenuItemSelected(featureId, item ?? throw new ArgumentNullException(nameof(item)));
+        public bool OnMenuOpened(int featureId, AndroidNative.Views.IMenu? menu) => _originalCallback.OnMenuOpened(featureId, menu ?? throw new ArgumentNullException(nameof(menu)));
+        public void OnPanelClosed(int featureId, AndroidNative.Views.IMenu? menu) => _originalCallback.OnPanelClosed(featureId, menu ?? throw new ArgumentNullException(nameof(menu)));
+        public bool OnPreparePanel(int featureId, AndroidNative.Views.View? view, AndroidNative.Views.IMenu? menu) => _originalCallback.OnPreparePanel(featureId, view, menu ?? throw new ArgumentNullException(nameof(menu)));
+        public bool OnSearchRequested() => _originalCallback.OnSearchRequested();
+        public bool OnSearchRequested(AndroidNative.Views.SearchEvent? searchEvent)
+        {
+#pragma warning disable CA1416 // 验证平台兼容性
+            return _originalCallback.OnSearchRequested(searchEvent);
+#pragma warning restore CA1416
+        }
+        public void OnWindowAttributesChanged(AndroidNative.Views.WindowManagerLayoutParams? attrs) => _originalCallback.OnWindowAttributesChanged(attrs);
+        public void OnWindowFocusChanged(bool hasFocus) => _originalCallback.OnWindowFocusChanged(hasFocus);
+        public AndroidNative.Views.ActionMode? OnWindowStartingActionMode(AndroidNative.Views.ActionMode.ICallback? callback) => _originalCallback.OnWindowStartingActionMode(callback);
+        public AndroidNative.Views.ActionMode? OnWindowStartingActionMode(AndroidNative.Views.ActionMode.ICallback? callback, AndroidNative.Views.ActionModeType type)
+        {
+#pragma warning disable CA1416 // 验证平台兼容性
+            return _originalCallback.OnWindowStartingActionMode(callback, type);
+#pragma warning restore CA1416
+        }
         #endregion
     }
 }

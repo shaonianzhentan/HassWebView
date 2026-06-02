@@ -30,14 +30,15 @@ public static class MauiProgram
                     var pageOptions = sp.GetRequiredService<HassPageOptions>();
                     var payload = await req.JsonAsync<NotificationPayload>();
 
-                    if (payload.Title == "url" && payload.Message.StartsWith("http"))
+                    var msg = payload.Message;
+                    if (payload.Title == "url" && msg?.StartsWith("http") == true)
                     {
-                        pageOptions.OpenWebPage?.Invoke(payload.Message);
+                        pageOptions.OpenWebPage?.Invoke(msg);
                     }
-                    else if (payload.Title == "config" && payload.Message.StartsWith("http"))
+                    else if (payload.Title == "config" && msg?.StartsWith("http") == true)
                     {
                         // 加载远程配置
-                        await pageOptions.LoadRemoteConfigsAsync(payload.Message);
+                        await pageOptions.LoadRemoteConfigsAsync(msg);
                     }
                     else if (payload.Title == "video")
                     {
@@ -45,12 +46,12 @@ public static class MauiProgram
                         {
                             var baseUrl = string.Empty;
                             var data = payload.Data;
-                            if (data != null && data.TryGetValue("baseUrl", out object baseUrlObject) && baseUrlObject != null)
+                            if (data != null && data.TryGetValue("baseUrl", out object? baseUrlObject) && baseUrlObject != null)
                             {
-                                baseUrl = baseUrlObject.ToString();
+                                baseUrl = baseUrlObject.ToString() ?? string.Empty;
                             }
                             // 保留修正：添加 'external: false' 参数以匹配委托签名
-                            await pageOptions.PlayVideo(payload.Message, baseUrl, false);
+                            await pageOptions.PlayVideo(payload.Message ?? string.Empty, baseUrl, false);
                         }
                     }
                     await res.Text("", System.Net.HttpStatusCode.Created);

@@ -81,7 +81,7 @@ public partial class EntityRow : ContentView
     }
 
     public static readonly BindableProperty IconBackgroundColorProperty =
-        BindableProperty.Create(nameof(IconBackgroundColor), typeof(Color), typeof(EntityRow), Color.FromHex("#EFEFF4"));
+        BindableProperty.Create(nameof(IconBackgroundColor), typeof(Color), typeof(EntityRow), Color.FromArgb("#EFEFF4"));
 
     public Color StateColor
     {
@@ -90,7 +90,7 @@ public partial class EntityRow : ContentView
     }
 
     public static readonly BindableProperty StateColorProperty =
-        BindableProperty.Create(nameof(StateColor), typeof(Color), typeof(EntityRow), Color.FromHex("#636366"));
+        BindableProperty.Create(nameof(StateColor), typeof(Color), typeof(EntityRow), Color.FromArgb("#636366"));
 
     private void SafeUpdateColors()
     {
@@ -108,13 +108,13 @@ public partial class EntityRow : ContentView
             
             if (IsActive || State?.ToLower() == "on")
             {
-                IconBackgroundColor = Color.FromHex("#34C759");
-                StateColor = Color.FromHex("#34C759");
+                IconBackgroundColor = Color.FromArgb("#34C759");
+                StateColor = Color.FromArgb("#34C759");
             }
             else
             {
-                IconBackgroundColor = isDark ? Color.FromHex("#3A3A3C") : Color.FromHex("#EFEFF4");
-                StateColor = isDark ? Color.FromHex("#8E8E93") : Color.FromHex("#636366");
+                IconBackgroundColor = isDark ? Color.FromArgb("#3A3A3C") : Color.FromArgb("#EFEFF4");
+                StateColor = isDark ? Color.FromArgb("#8E8E93") : Color.FromArgb("#636366");
             }
         }
         catch (Exception ex)

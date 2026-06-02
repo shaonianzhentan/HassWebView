@@ -19,9 +19,9 @@ using WebView = WKWebView;
 
 public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
 {
-    private JsBridgeHandler _jsBridgeHandler;
-    private string _pendingHtml;
-    private string _pendingBaseUrl;
+    private JsBridgeHandler? _jsBridgeHandler;
+    private string? _pendingHtml;
+    private string? _pendingBaseUrl;
 
     // --- Manual History Tracking (for GetBackForwardListAsync only) ---
     private readonly List<WebViewHistoryItem> _history = new();
@@ -139,10 +139,14 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     {
         var configuration = new WKWebViewConfiguration();
         configuration.AllowsInlineMediaPlayback = true;
+#pragma warning disable CA1422 // Type or member is obsolete
         configuration.MediaPlaybackRequiresUserAction = false;
+#pragma warning restore CA1422
         
         // Enable JavaScript
+#pragma warning disable CA1422 // Type or member is obsolete
         configuration.Preferences.JavaScriptEnabled = true;
+#pragma warning restore CA1422
         configuration.Preferences.JavaScriptCanOpenWindowsAutomatically = false;
         
         // Configure web content settings
@@ -250,7 +254,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             }
             else
             {
-                PlatformView.LoadHtmlString(htmlSource.Html, null);
+                PlatformView.LoadHtmlString(htmlSource.Html, null!);
             }
         }
     }
@@ -258,7 +262,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     protected override void DisconnectHandler(WebView platformView)
     {
         platformView.Configuration.UserContentController.RemoveScriptMessageHandler("hassBridge");
-        platformView.NavigationDelegate = null;
+        platformView.NavigationDelegate = null!;
         _jsBridgeHandler = null;
         
         // Cleanup history
@@ -375,8 +379,11 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
                 var jsonData = NSJsonSerialization.Serialize(dict, 0, out var error);
                 if (jsonData != null)
                 {
-                    var jsonString = NSString.FromData(jsonData, NSStringEncoding.UTF8).ToString();
-                    _ = _jsBridgeHandler.HandleMessageAsync(jsonString);
+                    var jsonString = NSString.FromData(jsonData, NSStringEncoding.UTF8)?.ToString();
+                    if (jsonString != null && _jsBridgeHandler != null)
+                    {
+                        _ = _jsBridgeHandler.HandleMessageAsync(jsonString);
+                    }
                 }
             }
             else if (message.Body is NSString str)

@@ -13,15 +13,15 @@ namespace HassWebView.Core.Views;
 
 public partial class HassWebPage : ContentPage, IKeyHandler
 {
-    private readonly HttpServer _httpServer;
+    private readonly HttpServer? _httpServer;
     private readonly IRemoteControlService _remoteControlService; // 修正：注入遥控服务
     private readonly HassPageOptions _pageOptions;
-    private string _defaultUserAgent;
+    private string? _defaultUserAgent;
 
-    public string Url { get; set; }
+    public string? Url { get; set; }
 
     // 构造函数已修正
-    public HassWebPage(HassPageOptions pageOptions, IRemoteControlService remoteControlService, HttpServer httpServer = null)
+    public HassWebPage(HassPageOptions pageOptions, IRemoteControlService remoteControlService, HttpServer? httpServer = null)
     {
         InitializeComponent();
 
@@ -72,8 +72,8 @@ public partial class HassWebPage : ContentPage, IKeyHandler
                 .Value;
 
             string targetUserAgent = (config != null && !string.IsNullOrWhiteSpace(config.UserAgent))
-                ? config.UserAgent
-                : _defaultUserAgent;
+                ? config.UserAgent ?? string.Empty
+                : _defaultUserAgent ?? string.Empty;
 
             if (wv.UserAgent != targetUserAgent && !string.IsNullOrEmpty(targetUserAgent))
             {
@@ -90,7 +90,7 @@ public partial class HassWebPage : ContentPage, IKeyHandler
         }
     }
 
-    private async void OnWebViewNavigated(object sender, WebNavigatedEventArgs e)
+    private async void OnWebViewNavigated(object? sender, WebNavigatedEventArgs e)
     {
         var wv = webView.WebViewControl;
         if (e.Result != WebNavigationResult.Success || e.Source is not UrlWebViewSource urlSource) return;
@@ -125,7 +125,7 @@ public partial class HassWebPage : ContentPage, IKeyHandler
         }
     }
 
-    private async void OnWebViewResourceLoading(object sender, ResourceLoadingEventArgs e)
+    private async void OnWebViewResourceLoading(object? sender, ResourceLoadingEventArgs e)
     {
         var wv = webView.WebViewControl;
         var urlString = e.Url.ToString();
@@ -138,7 +138,7 @@ public partial class HassWebPage : ContentPage, IKeyHandler
         }
     }
 
-    private void OnExternalBusMessageReceived(object sender, string message)
+    private void OnExternalBusMessageReceived(object? sender, string message)
     {
         if (string.IsNullOrEmpty(message)) return;
 
@@ -152,7 +152,7 @@ public partial class HassWebPage : ContentPage, IKeyHandler
                     var videoUrl = msg?["data"]?.GetValue<string>();
                     var origin = msg?["origin"]?.GetValue<string>();
                     var external = msg?["external"]?.GetValue<bool>() ?? false;
-                    if (!string.IsNullOrEmpty(videoUrl)) _pageOptions.PlayVideo(videoUrl, origin, external);
+                    if (!string.IsNullOrEmpty(videoUrl)) _pageOptions.PlayVideo?.Invoke(videoUrl, origin ?? string.Empty, external);
                     break;
             }
         }

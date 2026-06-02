@@ -17,17 +17,17 @@ public partial class HassPage : ContentPage, IKeyHandler
     private enum PageState { Initializing, Authenticated }
     private PageState _state = PageState.Initializing;
 
-    private readonly HttpServer _httpServer;
-    private readonly KeyService _keyService;
-    private readonly IRemoteControlService _remoteControlService;
+    private readonly HttpServer? _httpServer;
+    private readonly KeyService? _keyService;
+    private readonly IRemoteControlService? _remoteControlService;
     private readonly HassPageOptions _pageOptions;
-    private readonly IAuthStore _authStore;
+    private readonly IAuthStore? _authStore;
     private readonly IHassApiService _hassApiService;
     private DateTime? _lastBackPressTime;
     private bool _isAuthPagePresented = false; // Prevents re-entrant navigation
     private bool _authDismissed = false; // Prevents re-showing auth after user dismissed it
 
-    public HassPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService keyService = null, HttpServer httpServer = null, IRemoteControlService remoteControlService = null)
+    public HassPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService? keyService = null, HttpServer? httpServer = null, IRemoteControlService? remoteControlService = null)
     {
         InitializeComponent();
 
@@ -59,14 +59,14 @@ public partial class HassPage : ContentPage, IKeyHandler
         await CheckAuthAndLoadAsync();
     }
 
-    private async void OnPageLoaded(object sender, EventArgs e)
+    private async void OnPageLoaded(object? sender, EventArgs e)
     {
         // 校验 PushUrl，若为空则弹出警告并退出
         var pushUrl = _pageOptions.GetPushUrl?.Invoke();
         if (string.IsNullOrEmpty(pushUrl))
         {
             await webView.ShowAlert("配置错误", "未配置 HttpServer，PushUrl 为空，应用无法正常运行。");
-            Application.Current.Quit();
+            Application.Current?.Quit();
             return;
         }
     }
@@ -78,6 +78,12 @@ public partial class HassPage : ContentPage, IKeyHandler
 
         // If user explicitly dismissed auth, don't re-show it.
         if (_authDismissed) return;
+
+        if (_authStore == null)
+        {
+            await webView.ShowAlert("配置错误", "认证存储未初始化。");
+            return;
+        }
 
         var hassUrl = await _authStore.GetHassUrlAsync();
         var refreshToken = await _authStore.GetRefreshTokenAsync();
@@ -111,12 +117,14 @@ public partial class HassPage : ContentPage, IKeyHandler
 
     private async Task UpdateDeviceRegistration()
     {
+        if (_authStore == null) return;
+
         var hassUrl = await _authStore.GetHassUrlAsync();
         var webhookId = await _authStore.GetWebhookIdAsync();
         var deviceId = await _authStore.GetDeviceIdAsync();
-        var pushUrl = _pageOptions.GetPushUrl();
+        var pushUrl = _pageOptions.GetPushUrl?.Invoke();
 
-        var mobileApp = new MobileApp(hassUrl, webhookId);
+        var mobileApp = new MobileApp(hassUrl ?? string.Empty, webhookId ?? string.Empty);
         await mobileApp.UpdateRegistrationAsync(new UpdateRegistrationRequest
         {
             AppVersion = AppInfo.Current.VersionString,
@@ -124,11 +132,11 @@ public partial class HassPage : ContentPage, IKeyHandler
             Model = DeviceInfo.Current.Model,
             Manufacturer = DeviceInfo.Current.Manufacturer,
             OsVersion = DeviceInfo.Current.VersionString,
-            AppData = new MobileAppData(deviceId, pushUrl)
+            AppData = new MobileAppData(deviceId ?? string.Empty, pushUrl ?? string.Empty)
         });
     }
 
-    private void Wv_Navigated(object sender, WebNavigatedEventArgs e)
+    private void Wv_Navigated(object? sender, WebNavigatedEventArgs e)
     {
     }
 
@@ -136,6 +144,8 @@ public partial class HassPage : ContentPage, IKeyHandler
     {
         if (_state == PageState.Authenticated && Uri.TryCreate(e.Url, UriKind.Absolute, out var navUri))
         {
+            if (_authStore == null) return;
+
             var hassUrl = await _authStore.GetHassUrlAsync();
             if (Uri.TryCreate(hassUrl, UriKind.Absolute, out var hassUri) && navUri.Host != hassUri.Host)
             {
@@ -145,7 +155,7 @@ public partial class HassPage : ContentPage, IKeyHandler
         }
     }
 
-    private async void OnExternalBusMessageReceived(object sender, string message)
+    private async void OnExternalBusMessageReceived(object? sender, string message)
     {
         if (string.IsNullOrEmpty(message)) return;
         Console.WriteLine(message);
@@ -164,8 +174,12 @@ public partial class HassPage : ContentPage, IKeyHandler
                     await _pageOptions.ShowSettingsScreen();
                 break;
             case "webview/config":
-                var hassUrl = await _authStore.GetHassUrlAsync();
-                string remoteUrl = _httpServer != null ? _httpServer.BaseUrl + "webview/remote" : null;
+                string? hassUrl = null;
+                if (_authStore != null)
+                {
+                    hassUrl = await _authStore.GetHassUrlAsync();
+                }
+                string? remoteUrl = _httpServer != null ? _httpServer.BaseUrl + "webview/remote" : null;
                 wv.WindowExternalBus(new { type = "webview/config", data = new { hassUrl, remoteUrl } });
                 break;
         }
@@ -178,8 +192,10 @@ public partial class HassPage : ContentPage, IKeyHandler
         base.OnDisappearing();
     }
 
-    private async void OnWebViewAuthTokenRequested(object sender, EventArgs e)
+    private async void OnWebViewAuthTokenRequested(object? sender, EventArgs e)
     {
+        if (_authStore == null) return;
+
         var token = await RefreshAccessTokenAsync(forceRefresh: false);
         if (token != null)
         {
@@ -196,6 +212,8 @@ public partial class HassPage : ContentPage, IKeyHandler
 
     private async void OnWebViewLogoutRequested(object? sender, EventArgs e)
     {
+        if (_authStore == null) return;
+
         await _authStore.ClearTokensAsync();
         _state = PageState.Initializing; // Reset state
         await NavigateToAuthPage("已成功登出。");
@@ -225,8 +243,10 @@ public partial class HassPage : ContentPage, IKeyHandler
         _isAuthPagePresented = false; // Reset after navigation
     }
 
-    public async Task<AuthorizationResult> RefreshAccessTokenAsync(bool forceRefresh = false)
+    public async Task<AuthorizationResult?> RefreshAccessTokenAsync(bool forceRefresh = false)
     {
+        if (_authStore == null) return null;
+
         var accessToken = await _authStore.GetAccessTokenAsync();
         var tokenExpiry = await _authStore.GetTokenExpiryUtcAsync();
 
@@ -275,7 +295,7 @@ public partial class HassPage : ContentPage, IKeyHandler
             else
             {
                 if (_lastBackPressTime.HasValue && (DateTime.UtcNow - _lastBackPressTime.Value).TotalSeconds < 2)
-                    Application.Current.Quit();
+                    Application.Current?.Quit();
                 else
                 {
                     _lastBackPressTime = DateTime.UtcNow;
@@ -296,7 +316,6 @@ public partial class HassPage : ContentPage, IKeyHandler
     {
         _lastBackPressTime = null;
         if (webView.OnLongClick(args.KeyName)) return;
-
     }
 
     #endregion

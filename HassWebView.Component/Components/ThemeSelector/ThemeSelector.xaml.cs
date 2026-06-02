@@ -46,13 +46,13 @@ public partial class ThemeSelector : ContentView
         
         if (isSelected)
         {
-            button.BackgroundColor = Color.FromHex("#007AFF");
+            button.BackgroundColor = Color.FromArgb("#007AFF");
             button.TextColor = Colors.White;
         }
         else
         {
-            button.BackgroundColor = Color.FromHex("#F2F2F7");
-            button.TextColor = Color.FromHex("#636366");
+            button.BackgroundColor = Color.FromArgb("#F2F2F7");
+            button.TextColor = Color.FromArgb("#636366");
         }
     }
 }

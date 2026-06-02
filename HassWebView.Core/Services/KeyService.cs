@@ -14,13 +14,13 @@ public class KeyService
     private readonly int _longPressTimeout;
     private readonly int _doubleClickTimeout;
 
-    private Timer _longPressTimer;
-    private Timer _doubleClickTimer;
-    private string _lastSourceKey;
+    private Timer? _longPressTimer;
+    private Timer? _doubleClickTimer;
+    private string? _lastSourceKey;
     private int _pressCount = 0;
     private bool _longPressHasFired = false;
-    private Timer _repeatingActionTimer;
-    private Action _repeatingAction;
+    private Timer? _repeatingActionTimer;
+    private Action? _repeatingAction;
 
     public KeyService(int longPressTimeout = 750, int doubleClickTimeout = 300)
     {
@@ -28,7 +28,7 @@ public class KeyService
         _doubleClickTimeout = doubleClickTimeout;
     }
 
-    private IKeyHandler GetCurrentHandler()
+    private IKeyHandler? GetCurrentHandler()
     {
         if (!MainThread.IsMainThread)
             return MainThread.InvokeOnMainThreadAsync(GetCurrentHandlerInternal).Result;
@@ -36,7 +36,7 @@ public class KeyService
         return GetCurrentHandlerInternal();
     }
     
-    private IKeyHandler GetCurrentHandlerInternal()
+    private IKeyHandler? GetCurrentHandlerInternal()
     {
         var navigation = Shell.Current?.Navigation;
         if (navigation == null) return null;
@@ -46,7 +46,7 @@ public class KeyService
             return navigation.ModalStack.LastOrDefault() as IKeyHandler;
         }
 
-        return Shell.Current.CurrentPage as IKeyHandler;
+        return Shell.Current?.CurrentPage as IKeyHandler;
     }
 
     public void StartRepeatingAction(Action action, int interval = 100)
@@ -56,7 +56,7 @@ public class KeyService
         _repeatingActionTimer = new Timer(RepeatingActionCallback, null, 0, interval);
     }
 
-    private void RepeatingActionCallback(object state)
+    private void RepeatingActionCallback(object? state)
     {
         MainThread.BeginInvokeOnMainThread(() => _repeatingAction?.Invoke());
     }
@@ -139,7 +139,7 @@ public class KeyService
         {
             _doubleClickTimer = new Timer(DoubleClickTimerCallback, _lastSourceKey, _doubleClickTimeout, Timeout.Infinite);
         }
-        else if (_pressCount >= 2)
+        else if (_pressCount >= 2 && _lastSourceKey != null)
         {
             handler?.OnDoubleClick(new RemoteKeyEventArgs(_lastSourceKey));
             ResetDoubleClickState();
@@ -148,22 +148,30 @@ public class KeyService
         return true;
     }
 
-    private void LongPressTimerCallback(object state)
+    private void LongPressTimerCallback(object? state)
     {        
         MainThread.BeginInvokeOnMainThread(() => {
             if (_longPressHasFired) return;
             _longPressHasFired = true;
             
             var handler = GetCurrentHandler();
-            handler?.OnLongClick(new RemoteKeyEventArgs((string)state));
+            var keyName = state as string;
+            if (!string.IsNullOrEmpty(keyName))
+            {
+                handler?.OnLongClick(new RemoteKeyEventArgs(keyName));
+            }
         });
     }
 
-    private void DoubleClickTimerCallback(object state)
+    private void DoubleClickTimerCallback(object? state)
     {
         MainThread.BeginInvokeOnMainThread(() => {
             var handler = GetCurrentHandler();
-            handler?.OnSingleClick(new RemoteKeyEventArgs((string)state));
+            var keyName = state as string;
+            if (!string.IsNullOrEmpty(keyName))
+            {
+                handler?.OnSingleClick(new RemoteKeyEventArgs(keyName));
+            }
             ResetDoubleClickState();
         });
     }

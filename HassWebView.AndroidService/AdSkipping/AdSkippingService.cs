@@ -16,14 +16,14 @@ public class AdSkippingService : AccessibilityService
 {
     public static GkdRuleManager RuleManager { get; } = new();
 
-    public override void OnAccessibilityEvent(AccessibilityEvent e)
+    public override void OnAccessibilityEvent(AccessibilityEvent? e)
     {
-        if (e.Source == null || string.IsNullOrEmpty(e.PackageName)) return;
+        if (e?.Source == null || string.IsNullOrEmpty(e.PackageName)) return;
 
         var appRules = RuleManager.GetRulesForApp(e.PackageName);
         if (appRules == null || appRules.Groups.Count == 0)
         {
-            e.Source.Recycle();
+            RecycleNode(e.Source);
             return;
         }
 
@@ -39,14 +39,38 @@ public class AdSkippingService : AccessibilityService
                 {
                     var nodeToClick = nodes[0];
                     nodeToClick.PerformAction(Action.Click);
-                    nodeToClick.Recycle();
-                    foreach (var node in nodes.Skip(1)) node.Recycle();
-                    rootNode.Recycle();
+                    RecycleNode(nodeToClick);
+                    foreach (var node in nodes.Skip(1)) RecycleNode(node);
+                    RecycleNode(rootNode);
                     return;
                 }
             }
         }
-        rootNode.Recycle();
+        RecycleNode(rootNode);
+    }
+
+    private static void RecycleNode(AccessibilityNodeInfo? node)
+    {
+        if (node == null) return;
+        // Recycle() is obsolete on Android 33+; system manages lifecycle automatically
+#pragma warning disable CA1422 // Validate platform compatibility
+        if (Build.VERSION.SdkInt < BuildVersionCodes.Tiramisu)
+        {
+            node.Recycle();
+        }
+        else
+        {
+            node.Dispose();
+        }
+#pragma warning restore CA1422 // Validate platform compatibility
+    }
+
+    private static AccessibilityNodeInfo? ObtainNode(AccessibilityNodeInfo? node)
+    {
+        if (node == null) return null;
+#pragma warning disable CA1422 // Validate platform compatibility
+        return AccessibilityNodeInfo.Obtain(node);
+#pragma warning restore CA1422 // Validate platform compatibility
     }
 
     private static List<AccessibilityNodeInfo> FindNodesBySelector(AccessibilityNodeInfo root, string selector)
@@ -58,8 +82,8 @@ public class AdSkippingService : AccessibilityService
         var descMatch = Regex.Match(selector, @"desc='([^']*)'" );
         var idMatch   = Regex.Match(selector, @"id='([^']*)'"  );
 
-        var queue = new Queue<AccessibilityNodeInfo>();
-        queue.Enqueue(AccessibilityNodeInfo.Obtain(root));
+        var queue = new Queue<AccessibilityNodeInfo?>();
+        queue.Enqueue(ObtainNode(root));
 
         while (queue.Count > 0)
         {
@@ -72,24 +96,29 @@ public class AdSkippingService : AccessibilityService
             if (idMatch.Success   && node.ViewIdResourceName  != idMatch.Groups[1].Value)   matches = false;
 
             if (matches)
-                nodes.Add(AccessibilityNodeInfo.Obtain(node));
+            {
+                var obtained = ObtainNode(node);
+                if (obtained != null) nodes.Add(obtained);
+            }
 
             for (int i = 0; i < node.ChildCount; i++)
             {
                 var child = node.GetChild(i);
-                if (child != null) queue.Enqueue(child);
+                queue.Enqueue(child);
             }
-            node.Recycle();
+            RecycleNode(node);
         }
         return nodes;
     }
 
     private static AccessibilityNodeInfo? FindRootNode(AccessibilityNodeInfo node)
     {
-        var current = AccessibilityNodeInfo.Obtain(node);
+        var current = ObtainNode(node);
+        if (current == null) return null;
+        
         while (current.Parent is { } parent)
         {
-            current.Recycle();
+            RecycleNode(current);
             current = parent;
         }
         return current;

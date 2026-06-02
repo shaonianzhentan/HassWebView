@@ -9,8 +9,8 @@ namespace HassWebView.Core.Platforms.Android;
 class WebChromeClientHandler : WebChromeClient
 {
     private readonly HassWebView _webView;
-    public AndroidViews.View _customView;
-    private IX5WebChromeClientCustomViewCallback _customViewCallback;
+    public AndroidViews.View? _customView;
+    private IX5WebChromeClientCustomViewCallback? _customViewCallback;
 
     public WebChromeClientHandler(HassWebView webView)
     {
@@ -41,22 +41,24 @@ class WebChromeClientHandler : WebChromeClient
         request.Grant(request.GetResources());
     }
 
-    public override void OnShowCustomView(AndroidViews.View view, IX5WebChromeClientCustomViewCallback callback)
+    public override void OnShowCustomView(AndroidViews.View? view, IX5WebChromeClientCustomViewCallback? callback)
     {
-        if (_customView != null)
+        if (_customView != null || view == null)
         {
-            callback.OnCustomViewHidden();
+            callback?.OnCustomViewHidden();
             return;
         }
 
         _customView = view;
         _customViewCallback = callback;
         var activity = Platform.CurrentActivity;
-        var decorView = (FrameLayout)activity.Window.DecorView;
-
-        decorView.AddView(_customView, new FrameLayout.LayoutParams(
-            AndroidViews.ViewGroup.LayoutParams.MatchParent,
-            AndroidViews.ViewGroup.LayoutParams.MatchParent));
+        if (activity != null && _customView != null)
+        {
+            var decorView = activity.Window?.DecorView as FrameLayout;
+            decorView?.AddView(_customView, new FrameLayout.LayoutParams(
+                AndroidViews.ViewGroup.LayoutParams.MatchParent,
+                AndroidViews.ViewGroup.LayoutParams.MatchParent));
+        }
 
         _webView.SetIsVideoFullscreen(true);
     }
@@ -69,8 +71,11 @@ class WebChromeClientHandler : WebChromeClient
         }
 
         var activity = Platform.CurrentActivity;
-        var decorView = (FrameLayout)activity.Window.DecorView;
-        decorView.RemoveView(_customView);
+        if (activity != null && _customView != null)
+        {
+            var decorView = activity.Window?.DecorView as FrameLayout;
+            decorView?.RemoveView(_customView);
+        }
         _customView = null;
         _customViewCallback?.OnCustomViewHidden();
         _customViewCallback = null;

@@ -8,7 +8,7 @@ namespace HassWebView.Core.Configuration
 {
     public static class HttpServerExtensions
     {
-        public static MauiAppBuilder UseHttpServer(this MauiAppBuilder builder, int port, Action<IServiceProvider, HttpServer> setupRoutes = null)
+        public static MauiAppBuilder UseHttpServer(this MauiAppBuilder builder, int port, Action<IServiceProvider, HttpServer>? setupRoutes = null)
         {
             builder.Services.AddSingleton<HttpServer>(serviceProvider =>
             {
@@ -22,14 +22,14 @@ namespace HassWebView.Core.Configuration
             {
 #if ANDROID
                 events.AddAndroid(a => a
-                    .OnCreate((activity, bundle) => Task.Run(() => IPlatformApplication.Current.Services.GetService<HttpServer>()?.StartAsync()))
-                    .OnDestroy(activity => IPlatformApplication.Current.Services.GetService<HttpServer>()?.Stop())
+                    .OnCreate((activity, bundle) => Task.Run(() => IPlatformApplication.Current?.Services?.GetService<HttpServer>()?.StartAsync()))
+                    .OnDestroy(activity => IPlatformApplication.Current?.Services?.GetService<HttpServer>()?.Stop())
                 );
 #endif
 #if WINDOWS
                 events.AddWindows(w => w
-                    .OnLaunched((window, args) => Task.Run(() => IPlatformApplication.Current.Services.GetService<HttpServer>()?.StartAsync()))
-                    .OnClosed((window, args) => IPlatformApplication.Current.Services.GetService<HttpServer>()?.Stop())
+                    .OnLaunched((window, args) => Task.Run(() => IPlatformApplication.Current?.Services?.GetService<HttpServer>()?.StartAsync()))
+                    .OnClosed((window, args) => IPlatformApplication.Current?.Services?.GetService<HttpServer>()?.Stop())
                 );
 #endif
             });

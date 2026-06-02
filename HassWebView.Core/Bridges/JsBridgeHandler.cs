@@ -11,9 +11,9 @@ namespace HassWebView.Core.Bridges
     // Data Transfer Object for messages from JavaScript
     public class JsBridgeMessage
     {
-        public string BridgeName { get; set; }
-        public string MethodName { get; set; }
-        public JsonElement[] Arguments { get; set; }
+        public string BridgeName { get; set; } = string.Empty;
+        public string MethodName { get; set; } = string.Empty;
+        public JsonElement[] Arguments { get; set; } = Array.Empty<JsonElement>();
     }
 
     // This class is now a helper specifically for the Windows implementation.
@@ -56,7 +56,7 @@ namespace HassWebView.Core.Bridges
 
                 var parameters = ConvertArguments(method.GetParameters(), message.Arguments);
 
-                object result = method.Invoke(bridgeInstance, parameters);
+                object? result = method.Invoke(bridgeInstance, parameters);
 
                 if (result is Task task)
                 {
@@ -69,7 +69,7 @@ namespace HassWebView.Core.Bridges
             }
         }
 
-        private MethodInfo FindMethod(Type bridgeType, string methodName, JsonElement[] args)
+        private MethodInfo? FindMethod(Type bridgeType, string methodName, JsonElement[] args)
         {
             // Find a method that matches name and parameter count. This is a simplification.
             // A more robust solution would check parameter types.
@@ -77,10 +77,10 @@ namespace HassWebView.Core.Bridges
                 .FirstOrDefault(m => m.Name.Equals(methodName, StringComparison.OrdinalIgnoreCase) && m.GetParameters().Length == args.Length);
         }
 
-        private object[] ConvertArguments(ParameterInfo[] parameterInfos, JsonElement[] args)
+        private object?[] ConvertArguments(ParameterInfo[] parameterInfos, JsonElement[] args)
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, AllowTrailingCommas = true };
-            var convertedArgs = new object[parameterInfos.Length];
+            var convertedArgs = new object?[parameterInfos.Length];
             for (int i = 0; i < parameterInfos.Length; i++)
             {
                 var paramType = parameterInfos[i].ParameterType;

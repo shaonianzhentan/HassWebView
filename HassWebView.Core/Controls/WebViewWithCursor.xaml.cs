@@ -8,17 +8,17 @@ public partial class WebViewWithCursor : ContentView
     public HassWebView WebViewControl => wv;
     public Border CursorControl => cursor;
     public AbsoluteLayout RootControl => root;
-    public readonly KeyService _keyService;
-    public readonly CursorControl _cursorControl;
-    private readonly IRemoteControlService _remoteControlService;
+    public readonly KeyService? _keyService;
+    public readonly CursorControl? _cursorControl;
+    private readonly IRemoteControlService? _remoteControlService;
 
     // Toast 相关
-    private CancellationTokenSource _toastCts;
+    private CancellationTokenSource? _toastCts;
     private const int ToastDurationMs = 2500;
     private const uint ToastFadeMs = 200;
 
     // Alert 相关
-    private TaskCompletionSource<bool> _alertTcs;
+    private TaskCompletionSource<bool>? _alertTcs;
     private const uint AlertFadeMs = 200;
     private bool _isAlertVisible = false;
     private bool _isAlertCancelBtnFocused = false;
@@ -27,8 +27,12 @@ public partial class WebViewWithCursor : ContentView
     {
         InitializeComponent();
 
-        _keyService = IPlatformApplication.Current.Services.GetService<KeyService>();
-        _remoteControlService = IPlatformApplication.Current.Services.GetService<IRemoteControlService>();
+        var current = IPlatformApplication.Current;
+        if (current != null)
+        {
+            _keyService = current.Services.GetService<KeyService>();
+            _remoteControlService = current.Services.GetService<IRemoteControlService>();
+        }
 
         if (_keyService != null)
         {
@@ -44,9 +48,9 @@ public partial class WebViewWithCursor : ContentView
     }
 
     // Loading 进度条相关
-    private CancellationTokenSource _loadingCts;
+    private CancellationTokenSource? _loadingCts;
 
-    private void OnNavigating(object sender, WebNavigatingEventArgs e)
+    private void OnNavigating(object? sender, WebNavigatingEventArgs e)
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
@@ -56,7 +60,7 @@ public partial class WebViewWithCursor : ContentView
         });
     }
 
-    private void OnNavigated(object sender, WebNavigatedEventArgs e)
+    private void OnNavigated(object? sender, WebNavigatedEventArgs e)
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
@@ -101,17 +105,17 @@ public partial class WebViewWithCursor : ContentView
     {
         AbsoluteLayout.SetLayoutBounds(loadingBar, new Rect(0, 0, 1, 3));
         await Task.Delay(150);
-        await loadingBar.FadeTo(0, 200);
+        await loadingBar.FadeToAsync(0, 200);
         loadingBar.IsVisible = false;
         loadingBar.Opacity = 1;
     }
 
-    private void OnLoaded(object sender, EventArgs e)
+    private void OnLoaded(object? sender, EventArgs e)
     {
         _remoteControlService?.SetActiveControl(this);
     }
 
-    private void OnUnloaded(object sender, EventArgs e)
+    private void OnUnloaded(object? sender, EventArgs e)
     {
         _remoteControlService?.ClearActiveControl(this);
     }
@@ -134,12 +138,12 @@ public partial class WebViewWithCursor : ContentView
             toastPanel.IsVisible = true;
 
             toastPanel.Opacity = 0;
-            await toastPanel.FadeTo(1, ToastFadeMs);
+            await toastPanel.FadeToAsync(1, ToastFadeMs);
 
             try
             {
                 await Task.Delay(durationMs, token);
-                await toastPanel.FadeTo(0, ToastFadeMs);
+                await toastPanel.FadeToAsync(0, ToastFadeMs);
                 toastPanel.IsVisible = false;
             }
             catch (TaskCanceledException)
@@ -153,7 +157,7 @@ public partial class WebViewWithCursor : ContentView
     /// </summary>
     public async Task ShowAlert(string title, string message, string accept = "确定")
     {
-        _alertTcs = new TaskCompletionSource<bool>();
+        var tcs = _alertTcs = new TaskCompletionSource<bool>();
 
         await MainThread.InvokeOnMainThreadAsync(() =>
         {
@@ -174,7 +178,7 @@ public partial class WebViewWithCursor : ContentView
             _ = AnimateAlertInAsync();
         });
 
-        await _alertTcs.Task;
+        await tcs.Task;
     }
 
     /// <summary>
@@ -183,7 +187,7 @@ public partial class WebViewWithCursor : ContentView
     /// </summary>
     public async Task<bool> ShowConfirm(string title, string message, string cancel = "取消", string accept = "确定")
     {
-        _alertTcs = new TaskCompletionSource<bool>();
+        var tcs = _alertTcs = new TaskCompletionSource<bool>();
 
         await MainThread.InvokeOnMainThreadAsync(() =>
         {
@@ -205,22 +209,22 @@ public partial class WebViewWithCursor : ContentView
             _ = AnimateAlertInAsync();
         });
 
-        return await _alertTcs.Task;
+        return await tcs.Task;
     }
 
     private async Task AnimateAlertInAsync()
     {
         await Task.WhenAll(
-            alertOverlay.FadeTo(1, AlertFadeMs),
-            alertPanel.FadeTo(1, AlertFadeMs)
+            alertOverlay.FadeToAsync(1, AlertFadeMs),
+            alertPanel.FadeToAsync(1, AlertFadeMs)
         );
     }
 
     private async Task AnimateAlertOutAsync()
     {
         await Task.WhenAll(
-            alertOverlay.FadeTo(0, AlertFadeMs),
-            alertPanel.FadeTo(0, AlertFadeMs)
+            alertOverlay.FadeToAsync(0, AlertFadeMs),
+            alertPanel.FadeToAsync(0, AlertFadeMs)
         );
 
         alertOverlay.IsVisible = false;
@@ -241,17 +245,21 @@ public partial class WebViewWithCursor : ContentView
         _alertTcs?.SetResult(true);
     }
 
+    private async void OnAlertCancelClicked() => await AnimateAlertOutAsync();
+
+    private async void OnAlertAcceptClicked() => await AnimateAlertOutAsync();
+
     private void UpdateAlertButtonFocus()
     {
         if (_isAlertCancelBtnFocused && alertCancelBtn.IsVisible)
         {
-            alertCancelBtn.BackgroundColor = Color.FromHex("#E0E0E0");
-            alertAcceptBtn.BackgroundColor = Color.FromHex("#F2F2F7");
+            alertCancelBtn.BackgroundColor = Color.FromArgb("#E0E0E0");
+            alertAcceptBtn.BackgroundColor = Color.FromArgb("#F2F2F7");
         }
         else
         {
-            alertCancelBtn.BackgroundColor = Color.FromHex("#F2F2F7");
-            alertAcceptBtn.BackgroundColor = Color.FromHex("#007BFF");
+            alertCancelBtn.BackgroundColor = Color.FromArgb("#F2F2F7");
+            alertAcceptBtn.BackgroundColor = Color.FromArgb("#007BFF");
         }
     }
 
@@ -322,11 +330,11 @@ public partial class WebViewWithCursor : ContentView
                 // 按 Enter 键触发当前聚焦的按钮
                 if (_isAlertCancelBtnFocused && alertCancelBtn.IsVisible)
                 {
-                    OnAlertCancelClicked(null, null);
+                    OnAlertCancelClicked();
                 }
                 else
                 {
-                    OnAlertAcceptClicked(null, null);
+                    OnAlertAcceptClicked();
                 }
                 return true;
             case "Left":
@@ -340,7 +348,7 @@ public partial class WebViewWithCursor : ContentView
                 return true;
             case "Back":
                 // 按 Back 键关闭对话框（相当于取消）
-                OnAlertCancelClicked(null, null);
+                OnAlertCancelClicked();
                 return true;
             default:
                 return false;
@@ -385,7 +393,7 @@ public partial class WebViewWithCursor : ContentView
             case "Up": _keyService.StartRepeatingAction(() => _cursorControl?.MoveUpBy(), repeatInterval); break;
             case "Down": _keyService.StartRepeatingAction(() => _cursorControl?.MoveDownBy(), repeatInterval); break;
             case "Left": _keyService.StartRepeatingAction(() => _cursorControl?.MoveLeftBy(), repeatInterval); break;
-            case "Right": _keyService.StartRepeatingAction(() => _cursorControl.MoveRightBy(), repeatInterval); break;
+            case "Right": _keyService.StartRepeatingAction(() => _cursorControl?.MoveRightBy(), repeatInterval); break;
             default:
                 return false;
         }

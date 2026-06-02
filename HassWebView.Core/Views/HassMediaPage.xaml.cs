@@ -7,8 +7,8 @@ namespace HassWebView.Core.Views;
 
 public partial class HassMediaPage : ContentPage, IKeyHandler
 {
-    public string BaseUrl { get; set; }
-    public string Url { get; set; }
+    public string? BaseUrl { get; set; }
+    public string? Url { get; set; }
 
     private readonly KeyService _keyService;
     private readonly IRemoteControlService _remoteControlService;
@@ -32,7 +32,7 @@ public partial class HassMediaPage : ContentPage, IKeyHandler
         webViewWithCursor.CursorControl.IsVisible = false;
         _isCursorModeActive = false;
 
-        _ = LoadUrl(Url, BaseUrl);
+        _ = LoadUrl(Url ?? string.Empty, BaseUrl ?? string.Empty);
     }
 
     protected override void OnDisappearing()
@@ -113,7 +113,7 @@ public partial class HassMediaPage : ContentPage, IKeyHandler
                 break;
 
             case "Back":
-                MainThread.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PopModalAsync());
+                MainThread.BeginInvokeOnMainThread(() => Shell.Current?.Navigation.PopModalAsync());
                 break;
 
             case "Left":

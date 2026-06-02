@@ -22,16 +22,16 @@ using WebView = Microsoft.UI.Xaml.Controls.WebView2;
 
 public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
 {
-    private JsBridgeHandler _jsBridgeHandler;
-    private string _pendingHtml;
-    private string _pendingBaseUrl;
+    private JsBridgeHandler? _jsBridgeHandler;
+    private string? _pendingHtml;
+    private string? _pendingBaseUrl;
 
     // --- Manual History Tracking (for GetBackForwardListAsync only) ---
     // 注意：此栈仅追踪真实页面导航，不含 SPA pushState 条目。
     // CanGoBack/CanGoForward 由 Core_HistoryChanged 统一更新。
     private readonly List<WebViewHistoryItem> _history = new();
     private int _currentIndex = -1;
-    private CoreWebView2NavigationKind _navigationKind;
+    private CoreWebView2NavigationKind _navigationKind = default;
     // --------------------------------------------------------------------
 
     public static PropertyMapper Mapper = new PropertyMapper<HassWebView>()
@@ -213,7 +213,8 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
     {
         if (!string.IsNullOrEmpty(_pendingBaseUrl) && args.Request.Uri == _pendingBaseUrl)
         {
-            var htmlBytes = Encoding.UTF8.GetBytes(_pendingHtml);
+            var html = _pendingHtml ?? string.Empty;
+            var htmlBytes = Encoding.UTF8.GetBytes(html);
             var memoryStream = new MemoryStream(htmlBytes);
             var randomAccessStream = new InMemoryRandomAccessStream();
             using (var dataWriter = new DataWriter(randomAccessStream))
@@ -350,7 +351,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             platformView.CoreWebView2.HistoryChanged -= Core_HistoryChanged;
             platformView.CoreWebView2.WebResourceRequested -= Core_WebResourceRequested;
         }
-        _jsBridgeHandler = null;
+            _jsBridgeHandler = null;
 
         // --- Cleanup for manual history ---
         _history.Clear();

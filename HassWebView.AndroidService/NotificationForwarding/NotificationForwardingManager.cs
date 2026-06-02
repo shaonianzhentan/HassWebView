@@ -1,6 +1,7 @@
 using Android.Content;
 using Android.Content.PM;
 using Android.Graphics.Drawables;
+using Android.OS;
 using Android.Provider;
 using HassWebView.AndroidService.Models;
 using Microsoft.Maui.ApplicationModel;
@@ -17,8 +18,8 @@ public class NotificationForwardingManager : INotificationForwardingManager
     public bool IsPermissionEnabled()
     {
         var context          = Platform.AppContext;
-        var enabledListeners = Settings.Secure.GetString(context.ContentResolver, "enabled_notification_listeners");
-        return !string.IsNullOrEmpty(enabledListeners) && enabledListeners.Contains(context.PackageName);
+        var enabledListeners = Settings.Secure.GetString(context?.ContentResolver, "enabled_notification_listeners");
+        return !string.IsNullOrEmpty(enabledListeners) && enabledListeners.Contains(context?.PackageName ?? string.Empty);
     }
 
     public void RequestPermission()
@@ -84,7 +85,11 @@ public class NotificationForwardingManager : INotificationForwardingManager
         var pm     = Android.App.Application.Context.PackageManager;
         if (pm is null) return result;
 
-        foreach (var appInfo in pm.GetInstalledApplications(PackageInfoFlags.MatchAll))
+#pragma warning disable CA1416 // Validate platform compatibility
+        var flags = PackageInfoFlags.MatchAll;
+#pragma warning restore CA1416 // Validate platform compatibility
+
+        foreach (var appInfo in pm.GetInstalledApplications(flags))
         {
             if ((appInfo.Flags & ApplicationInfoFlags.System) != 0) continue;
 

@@ -56,7 +56,7 @@ public partial class DetailCard : ContentView
     }
 
     public static readonly BindableProperty StateColorProperty =
-        BindableProperty.Create(nameof(StateColor), typeof(Color), typeof(DetailCard), Color.FromHex("#34C759"));
+        BindableProperty.Create(nameof(StateColor), typeof(Color), typeof(DetailCard), Color.FromArgb("#34C759"));
 
     private void UpdateStateColor()
     {
@@ -64,12 +64,12 @@ public partial class DetailCard : ContentView
         {
             Color color = State?.ToLower() switch
             {
-                "on" => Color.FromHex("#34C759"),
-                "open" => Color.FromHex("#34C759"),
-                "off" => Color.FromHex("#8E8E93"),
-                "closed" => Color.FromHex("#8E8E93"),
-                "unavailable" => Color.FromHex("#FF3B30"),
-                _ => Color.FromHex("#34C759")
+                "on" => Color.FromArgb("#34C759"),
+                "open" => Color.FromArgb("#34C759"),
+                "off" => Color.FromArgb("#8E8E93"),
+                "closed" => Color.FromArgb("#8E8E93"),
+                "unavailable" => Color.FromArgb("#FF3B30"),
+                _ => Color.FromArgb("#34C759")
             };
             StateColor = color;
         }

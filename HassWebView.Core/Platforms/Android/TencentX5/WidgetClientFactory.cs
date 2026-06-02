@@ -15,21 +15,21 @@ using WebView = Com.Tencent.Smtt.Sdk.WebView;
 
 public class VideoItem
 {
-    public string id { get; set;  }
-    public string src { get; set; }
-    public string type { get; set; }
+    public string id { get; set; } = string.Empty;
+    public string src { get; set; } = string.Empty;
+    public string type { get; set; } = string.Empty;
 }
 
 public class WidgetClientFactory : Java.Lang.Object, IEmbeddedWidgetClientFactory
 {
-    private readonly DisplayMetrics _metrics;
+    private readonly DisplayMetrics? _metrics;
 
-    public WidgetClientFactory(WebView wv)
+    public WidgetClientFactory(WebView? wv)
     {
-        _metrics = wv.Context.Resources.DisplayMetrics;
+        _metrics = wv?.Context?.Resources?.DisplayMetrics;
     }
 
-    public IEmbeddedWidgetClient CreateWidgetClient(
+    public IEmbeddedWidgetClient? CreateWidgetClient(
         string tag,
         IDictionary<string, string> attrs,
         IEmbeddedWidget widget)
@@ -49,11 +49,14 @@ public class WidgetClientFactory : Java.Lang.Object, IEmbeddedWidgetClientFactor
             {
                 var x5source = attrs["x5-source"];
                 var dynamicList = JsonSerializer.Deserialize<VideoItem[]>(x5source);
-                foreach (var item in dynamicList)
+                if (dynamicList != null)
                 {
-                    if (!string.IsNullOrEmpty(item.src))
+                    foreach (var item in dynamicList)
                     {
-                        return new VideoWidget(tag, item.src, widget);
+                        if (!string.IsNullOrEmpty(item.src))
+                        {
+                            return new VideoWidget(tag, item.src, widget);
+                        }
                     }
                 }
             }

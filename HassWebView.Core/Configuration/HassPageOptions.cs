@@ -14,12 +14,12 @@ namespace HassWebView.Core.Configuration
 {
     public class HassPageOptions
     {
-        public IAuthStore AuthStore { get; set; }
-        public Func<string, string?, bool, Task> PlayVideo { get; set; }
-        public Func<Task> ShowSettingsScreen { get; set; }
-        public Action<string> OpenWebPage { get; set; }
-        public Func<string> GetPushUrl { get; set; }
-        public Func<string> GetX5ApkUrl { get; set; }
+        public IAuthStore? AuthStore { get; set; }
+        public Func<string, string?, bool, Task>? PlayVideo { get; set; }
+        public Func<Task>? ShowSettingsScreen { get; set; }
+        public Action<string>? OpenWebPage { get; set; }
+        public Func<string?>? GetPushUrl { get; set; }
+        public Func<string>? GetX5ApkUrl { get; set; }
 
         private const string DomainConfigsCacheFile = "domain_configs.yaml";
 

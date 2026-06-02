@@ -6,9 +6,6 @@ namespace HassWebView.DemoAndroid;
 
 public partial class SettingsPage : ContentPage, INotifyPropertyChanged
 {
-    // ─────────────────────────────────────────────
-    // Preferences keys
-    // ─────────────────────────────────────────────
     private const string KeyGpsInterval         = "gps_interval";
     private const string KeyGpsWifiStop         = "gps_wifi_stop";
     private const string KeyScreenEvent         = "screen_event_push";
@@ -18,37 +15,34 @@ public partial class SettingsPage : ContentPage, INotifyPropertyChanged
     private const string KeyKeyControl          = "key_control";
     private const string KeyLanAutoSwitch       = "lan_auto_switch";
 
-    // ─────────────────────────────────────────────
-    // INotifyPropertyChanged
-    // ─────────────────────────────────────────────
     public new event PropertyChangedEventHandler? PropertyChanged;
 
-    private void OnPropertyChanged([CallerMemberName] string? name = null)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    protected override void OnPropertyChanged(string propertyName)
+    {
+        base.OnPropertyChanged(propertyName);
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 
     private void Set<T>(ref T field, T value, [CallerMemberName] string? name = null)
     {
         if (EqualityComparer<T>.Default.Equals(field, value)) return;
         field = value;
-        OnPropertyChanged(name);
+        // Use the caller-supplied name if provided; otherwise pass empty string to PropertyChanged
+        OnPropertyChanged(name ?? string.Empty);
     }
-
-    // ─────────────────────────────────────────────
-    // Bindable state properties
-    // ─────────────────────────────────────────────
 
     private string _gpsPermissionStatus = "检查中…";
     public string GpsPermissionStatus
     {
         get => _gpsPermissionStatus;
-        private set => Set(ref _gpsPermissionStatus, value);
+        private set { Set(ref _gpsPermissionStatus, value); UpdateGpsButtons(); }
     }
 
     private bool _gpsGranted;
     public bool GpsGranted
     {
         get => _gpsGranted;
-        private set { Set(ref _gpsGranted, value); OnPropertyChanged(nameof(GpsNotGranted)); }
+        private set { Set(ref _gpsGranted, value); OnPropertyChanged(nameof(GpsNotGranted)); UpdateGpsButtons(); }
     }
     public bool GpsNotGranted => !_gpsGranted;
 
@@ -70,14 +64,14 @@ public partial class SettingsPage : ContentPage, INotifyPropertyChanged
     public string SmsPermissionStatus
     {
         get => _smsPermissionStatus;
-        private set => Set(ref _smsPermissionStatus, value);
+        private set { Set(ref _smsPermissionStatus, value); UpdateSmsButtons(); }
     }
 
     private bool _smsGranted;
     public bool SmsGranted
     {
         get => _smsGranted;
-        private set { Set(ref _smsGranted, value); OnPropertyChanged(nameof(SmsNotGranted)); }
+        private set { Set(ref _smsGranted, value); OnPropertyChanged(nameof(SmsNotGranted)); UpdateSmsButtons(); }
     }
     public bool SmsNotGranted => !_smsGranted;
 
@@ -88,10 +82,6 @@ public partial class SettingsPage : ContentPage, INotifyPropertyChanged
         private set => Set(ref _widgetCount, value);
     }
 
-    // ─────────────────────────────────────────────
-    // Constructor
-    // ─────────────────────────────────────────────
-
     public SettingsPage()
     {
         InitializeComponent();
@@ -99,19 +89,22 @@ public partial class SettingsPage : ContentPage, INotifyPropertyChanged
         RestoreSwitchStates();
     }
 
-    // ─────────────────────────────────────────────
-    // Lifecycle
-    // ─────────────────────────────────────────────
+    private void UpdateGpsButtons()
+    {
+        GpsAuthButton.IsVisible = !GpsGranted;
+        GpsSettingsButton.IsVisible = GpsGranted;
+    }
+
+    private void UpdateSmsButtons()
+    {
+        SmsAuthButton.IsVisible = !SmsGranted;
+    }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
         await RefreshAllStatusAsync();
     }
-
-    // ─────────────────────────────────────────────
-    // Permission checks
-    // ─────────────────────────────────────────────
 
     private async Task RefreshAllStatusAsync()
     {
@@ -151,31 +144,22 @@ public partial class SettingsPage : ContentPage, INotifyPropertyChanged
 
     private void RefreshWidgetCount()
     {
-        // Placeholder — replace with actual widget query when widgets are implemented
         WidgetCount = "0 个";
     }
 
-    // ─────────────────────────────────────────────
-    // Restore switch states from Preferences
-    // ─────────────────────────────────────────────
-
     private void RestoreSwitchStates()
     {
-        GpsIntervalSlider.Value        = Preferences.Get(KeyGpsInterval, 30.0);
-        GpsWifiSwitch.IsToggled        = Preferences.Get(KeyGpsWifiStop, false);
-        ScreenEventSwitch.IsToggled    = Preferences.Get(KeyScreenEvent, false);
-        SmsForwardSwitch.IsToggled     = Preferences.Get(KeySmsForward, false);
+        GpsIntervalSlider.Value = Preferences.Get(KeyGpsInterval, 30.0);
+        GpsWifiSwitch.IsToggled = Preferences.Get(KeyGpsWifiStop, false);
+        ScreenEventSwitch.IsToggled = Preferences.Get(KeyScreenEvent, false);
+        SmsForwardSwitch.IsToggled = Preferences.Get(KeySmsForward, false);
         WidgetAutoRefreshSwitch.IsToggled = Preferences.Get(KeyWidgetAutoRefresh, false);
         WidgetRefreshIntervalSlider.Value = Preferences.Get(KeyWidgetRefreshMins, 15.0);
         ScreenEventGlobalSwitch.IsToggled = Preferences.Get(KeyScreenEvent, false);
-        WifiStopGpsSwitch.IsToggled    = Preferences.Get(KeyGpsWifiStop, false);
-        KeyControlSwitch.IsToggled     = Preferences.Get(KeyKeyControl, false);
-        LanAutoSwitchCard.IsToggled    = Preferences.Get(KeyLanAutoSwitch, false);
+        WifiStopGpsSwitch.IsToggled = Preferences.Get(KeyGpsWifiStop, false);
+        KeyControlSwitch.IsToggled = Preferences.Get(KeyKeyControl, false);
+        LanAutoSwitchCard.IsToggled = Preferences.Get(KeyLanAutoSwitch, false);
     }
-
-    // ─────────────────────────────────────────────
-    // GPS handlers
-    // ─────────────────────────────────────────────
 
     private async void OnGpsAuthClicked(object? sender, EventArgs e)
     {
@@ -185,17 +169,16 @@ public partial class SettingsPage : ContentPage, INotifyPropertyChanged
     }
 
     private void OnGpsIntervalChanged(object? sender, ValueChangedEventArgs e)
-        => Preferences.Set(KeyGpsInterval, e.NewValue);
+    {
+        GpsIntervalLabel.Text = $"{e.NewValue:F0} 秒";
+        Preferences.Set(KeyGpsInterval, e.NewValue);
+    }
 
     private void OnGpsWifiSwitchToggled(object? sender, ToggledEventArgs e)
     {
         Preferences.Set(KeyGpsWifiStop, e.Value);
-        WifiStopGpsSwitch.IsToggled = e.Value;   // keep in sync with group 5
+        WifiStopGpsSwitch.IsToggled = e.Value;
     }
-
-    // ─────────────────────────────────────────────
-    // Notify handlers
-    // ─────────────────────────────────────────────
 
     private async void OnNotifyAppsTapped(object? sender, TappedEventArgs e)
     {
@@ -212,12 +195,8 @@ public partial class SettingsPage : ContentPage, INotifyPropertyChanged
     private void OnScreenEventSwitchToggled(object? sender, ToggledEventArgs e)
     {
         Preferences.Set(KeyScreenEvent, e.Value);
-        ScreenEventGlobalSwitch.IsToggled = e.Value;  // keep in sync with group 5
+        ScreenEventGlobalSwitch.IsToggled = e.Value;
     }
-
-    // ─────────────────────────────────────────────
-    // SMS handlers
-    // ─────────────────────────────────────────────
 
     private async void OnSmsAuthClicked(object? sender, EventArgs e)
     {
@@ -229,35 +208,29 @@ public partial class SettingsPage : ContentPage, INotifyPropertyChanged
     private void OnSmsForwardSwitchToggled(object? sender, ToggledEventArgs e)
         => Preferences.Set(KeySmsForward, e.Value);
 
-    // ─────────────────────────────────────────────
-    // Widget handlers
-    // ─────────────────────────────────────────────
-
     private void OnManageWidgetsClicked(object? sender, EventArgs e)
     {
-        // TODO: navigate to widget management page
     }
 
     private void OnWidgetAutoRefreshToggled(object? sender, ToggledEventArgs e)
         => Preferences.Set(KeyWidgetAutoRefresh, e.Value);
 
     private void OnWidgetRefreshIntervalChanged(object? sender, ValueChangedEventArgs e)
-        => Preferences.Set(KeyWidgetRefreshMins, e.NewValue);
-
-    // ─────────────────────────────────────────────
-    // Feature toggle handlers (Group 5)
-    // ─────────────────────────────────────────────
+    {
+        WidgetRefreshIntervalLabel.Text = $"{e.NewValue:F0} 分钟";
+        Preferences.Set(KeyWidgetRefreshMins, e.NewValue);
+    }
 
     private void OnScreenEventGlobalToggled(object? sender, ToggledEventArgs e)
     {
         Preferences.Set(KeyScreenEvent, e.Value);
-        ScreenEventSwitch.IsToggled = e.Value;   // keep in sync with group 2
+        ScreenEventSwitch.IsToggled = e.Value;
     }
 
     private void OnWifiStopGpsToggled(object? sender, ToggledEventArgs e)
     {
         Preferences.Set(KeyGpsWifiStop, e.Value);
-        GpsWifiSwitch.IsToggled = e.Value;       // keep in sync with group 1
+        GpsWifiSwitch.IsToggled = e.Value;
     }
 
     private void OnKeyControlToggled(object? sender, ToggledEventArgs e)
@@ -266,12 +239,11 @@ public partial class SettingsPage : ContentPage, INotifyPropertyChanged
     private void OnLanAutoSwitchToggled(object? sender, ToggledEventArgs e)
         => Preferences.Set(KeyLanAutoSwitch, e.Value);
 
-    // ─────────────────────────────────────────────
-    // System permission tap (generic)
-    // ─────────────────────────────────────────────
-
     private void OnOpenSystemPermissionTapped(object? sender, TappedEventArgs e)
-        => AndroidPermissionHelper.OpenSystemPermission(e.Parameter as string ?? string.Empty);
+    {
+        if (sender is TapGestureRecognizer tgr)
+            AndroidPermissionHelper.OpenSystemPermission(tgr.CommandParameter as string ?? string.Empty);
+    }
 
     private void OnOpenGpsSystemSettingsClicked(object? sender, EventArgs e)
         => AndroidPermissionHelper.OpenAppDetailsSettings();

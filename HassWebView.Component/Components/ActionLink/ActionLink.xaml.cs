@@ -17,5 +17,5 @@ public partial class ActionLink : ContentView
         set => SetValue(TextProperty, value);
     }
 
-    public event EventHandler Clicked;
+    public event EventHandler? Clicked;
 }

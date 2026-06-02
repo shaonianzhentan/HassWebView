@@ -20,4 +20,10 @@ public partial class SettingsPage : ContentPage
         _pageOptions = pageOptions;
         BindingContext = this;
     }
+
+    // Ensure we properly override Element.OnPropertyChanged to avoid hiding warnings from generated code
+    protected override void OnPropertyChanged(string? propertyName)
+    {
+        base.OnPropertyChanged(propertyName);
+    }
 }

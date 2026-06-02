@@ -140,7 +140,13 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             int[] location = new int[2];
             platformView.GetLocationOnScreen(location);
 
-            var density = platformView.Resources.DisplayMetrics.Density;
+            var resources = platformView.Resources;
+            if (resources == null) return;
+            
+            var displayMetrics = resources.DisplayMetrics;
+            if (displayMetrics == null) return;
+            
+            var density = displayMetrics.Density;
             float x = request.X * density;
             float y = request.Y * density;
 
@@ -154,20 +160,31 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             var eventTime = SystemClock.UptimeMillis();
 
             var motionEventDown = MotionEvent.Obtain(downTime, eventTime, MotionEventActions.Down, x, y, 0);
-            platformView.DispatchTouchEvent(motionEventDown);
+            if (motionEventDown != null)
+            {
+                platformView.DispatchTouchEvent(motionEventDown);
+                motionEventDown.Recycle();
+            }
 
             var motionEventUp = MotionEvent.Obtain(downTime, eventTime, MotionEventActions.Up, x, y, 0);
-            platformView.DispatchTouchEvent(motionEventUp);
-
-            motionEventDown.Recycle();
-            motionEventUp.Recycle();
+            if (motionEventUp != null)
+            {
+                platformView.DispatchTouchEvent(motionEventUp);
+                motionEventUp.Recycle();
+            }
         },
         [nameof(HassWebView.SimulateTouchSlide)] = (handler, _, args) =>
         {
             if (args is not HassWebView.SimulateTouchSlideRequest request) return;
             if (handler.PlatformView is not WebView platformView) return;
 
-            var density = platformView.Resources.DisplayMetrics.Density;
+            var resources = platformView.Resources;
+            if (resources == null) return;
+            
+            var displayMetrics = resources.DisplayMetrics;
+            if (displayMetrics == null) return;
+            
+            var density = displayMetrics.Density;
             float x1 = request.X1 * density;
             float y1 = request.Y1 * density;
             float x2 = request.X2 * density;
@@ -178,6 +195,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             var eventTime = SystemClock.UptimeMillis();
 
             var motionEventDown = MotionEvent.Obtain(downTime, eventTime, MotionEventActions.Down, x1, y1, 0);
+            if (motionEventDown == null) return;
             platformView.DispatchTouchEvent(motionEventDown);
 
             int steps = 10;
@@ -191,13 +209,21 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
                 float currentX = x1 + xStep * (i + 1);
                 float currentY = y1 + yStep * (i + 1);
                 var motionEventMove = MotionEvent.Obtain(downTime, eventTime, MotionEventActions.Move, currentX, currentY, 0);
-                platformView.DispatchTouchEvent(motionEventMove);
-                motionEventMove.Recycle();
+                if (motionEventMove != null)
+                {
+                    platformView.DispatchTouchEvent(motionEventMove);
+                    motionEventMove.Recycle();
+                }
                 SystemClock.Sleep(stepDuration);
             }
 
             eventTime += stepDuration;
             var motionEventUp = MotionEvent.Obtain(downTime, eventTime, MotionEventActions.Up, x2, y2, 0);
+            if (motionEventUp == null)
+            {
+                motionEventDown.Recycle();
+                return;
+            }
             platformView.DispatchTouchEvent(motionEventUp);
 
             motionEventDown.Recycle();
@@ -211,7 +237,13 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
 
     protected override WebView CreatePlatformView()
     {
-        var webView = new BackInterceptWebView(MauiApplication.Current.ApplicationContext);
+        var context = MauiApplication.Current?.ApplicationContext;
+        if (context == null)
+        {
+            throw new InvalidOperationException("Application context is null");
+        }
+        
+        var webView = new BackInterceptWebView(context);
         webView.Settings.JavaScriptEnabled = true;
         webView.Settings.JavaScriptCanOpenWindowsAutomatically = false;
         webView.Settings.MixedContentMode = 1;
@@ -223,8 +255,10 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         webView.Settings.SetAllowUniversalAccessFromFileURLs(true);
         webView.Settings.BlockNetworkImage = false;
         webView.Settings.LoadsImagesAutomatically = true;
+#pragma warning disable CS0618 // Type or member is obsolete
         webView.Settings.SavePassword = false;
         webView.Settings.SaveFormData = false;
+#pragma warning restore CS0618
         webView.Settings.MediaPlaybackRequiresUserGesture = false;
         webView.Settings.LoadWithOverviewMode = true;
         webView.Settings.UseWideViewPort = true;
@@ -242,7 +276,8 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
         var x5object = webView.X5WebViewExtension;
         if (x5object != null)
         {
-            webView.SettingsExtension.SetContentCacheEnable(true);
+            var settingsExtension = webView.SettingsExtension;
+            settingsExtension?.SetContentCacheEnable(true);
 
             Console.WriteLine("X5WebViewExtension对象不为null，此为x5webview");
             Bundle data = new Bundle();
@@ -251,14 +286,16 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             data.PutInt("DefaultVideoScreen", 1);
             x5object.InvokeMiscMethod("setVideoParams", data);
 
-            var sharedPrefs = webView.Context.GetSharedPreferences("tbs_public_settings", FileCreationMode.Private);
-            using var editor = sharedPrefs.Edit();
-            // 强制开启 EMBEDDED 云控开关
-            editor.PutInt("MTT_CORE_EMBEDDED_WIDGET_ENABLE", 1);
-            editor.Apply(); // 异步提交（或用 Commit() 同步提交）
+            var sharedPrefs = webView.Context?.GetSharedPreferences("tbs_public_settings", FileCreationMode.Private);
+            if (sharedPrefs != null)
+            {
+                using var editor = sharedPrefs.Edit();
+                editor?.PutInt("MTT_CORE_EMBEDDED_WIDGET_ENABLE", 1);
+                editor?.Apply();
+            }
 
             string[] tags = { "hass-video" };
-            webView.X5WebViewExtension.RegisterEmbeddedWidget(tags, new WidgetClientFactory(webView));
+            webView.X5WebViewExtension?.RegisterEmbeddedWidget(tags, new WidgetClientFactory(webView));
         }
         else
         {
@@ -287,11 +324,11 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             }
         }
 
-        if (VirtualView.Source is UrlWebViewSource urlSource && !string.IsNullOrEmpty(urlSource.Url))
+        if (VirtualView?.Source is UrlWebViewSource urlSource && !string.IsNullOrEmpty(urlSource.Url))
         {
             platformView.LoadUrl(urlSource.Url);
         }
-        else if (VirtualView.Source is HtmlWebViewSource htmlSource && !string.IsNullOrEmpty(htmlSource.Html))
+        else if (VirtualView?.Source is HtmlWebViewSource htmlSource && !string.IsNullOrEmpty(htmlSource.Html))
         {
             platformView.LoadDataWithBaseURL(htmlSource.BaseUrl, htmlSource.Html, "text/html", "UTF-8", null);
         }
@@ -338,7 +375,7 @@ public class HassWebViewHandler : ViewHandler<HassWebView, WebView>
             base.OnMeasure(widthMeasureSpec, heightMeasureSpec);
         }
 
-        public override bool DispatchKeyEvent(KeyEvent e)
+        public override bool DispatchKeyEvent(KeyEvent? e)
         {
             if (e == null) return base.DispatchKeyEvent(e);
 

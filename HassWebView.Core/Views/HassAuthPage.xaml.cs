@@ -24,13 +24,13 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
     public bool IsAuthenticated { get; private set; } = false;
 
     private readonly HassPageOptions _pageOptions;
-    private readonly IAuthStore _authStore;
+    private readonly IAuthStore? _authStore;
     private readonly IHassApiService _hassApiService;
-    private readonly HttpServer _httpServer;
-    private readonly KeyService _keyService;
+    private readonly HttpServer? _httpServer;
+    private readonly KeyService? _keyService;
 
     // Constructor to accept all necessary services from HassPage
-    public HassAuthPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService keyService = null, HttpServer httpServer = null)
+    public HassAuthPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService? keyService = null, HttpServer? httpServer = null)
     {
         InitializeComponent();
         
@@ -65,8 +65,14 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
 
             e.Cancel = true; // Stop navigation, we have the code
 
+            if (_authStore == null)
+            {
+                await ShowErrorAndStay("认证存储未初始化。");
+                return;
+            }
+
             var hassUrl = await _authStore.GetHassUrlAsync();
-            var hassAuth = new HassAuth(hassUrl);
+            var hassAuth = new HassAuth(hassUrl ?? string.Empty);
             var tokenResult = await hassAuth.GetRefreshTokenAsync(code);
             if (tokenResult == null)
             {
@@ -74,11 +80,15 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
                 return;
             }
 
-            await _authStore.SetAccessTokenAsync(tokenResult.AccessToken);
-            await _authStore.SetRefreshTokenAsync(tokenResult.RefreshToken);
+            await _authStore.SetAccessTokenAsync(tokenResult.AccessToken ?? string.Empty);
+            await _authStore.SetRefreshTokenAsync(tokenResult.RefreshToken ?? string.Empty);
             await _authStore.SetTokenExpiryUtcAsync(DateTime.UtcNow.AddSeconds(tokenResult.ExpiresIn));
 
-            var hassApi = new HassRestApi(hassUrl, async (force) => await _authStore.GetAccessTokenAsync());
+            var hassApi = new HassRestApi(hassUrl ?? string.Empty, async (force) => 
+            {
+                if (_authStore == null) return string.Empty;
+                return await _authStore.GetAccessTokenAsync() ?? string.Empty;
+            });
             _hassApiService.Initialize(hassApi);
 
             var deviceId = await _authStore.GetDeviceIdAsync();
@@ -87,14 +97,14 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
                 AppId = AppInfo.Current.PackageName,
                 AppName = AppInfo.Current.Name,
                 AppVersion = AppInfo.Current.VersionString,
-                DeviceId = deviceId,
+                DeviceId = deviceId ?? string.Empty,
                 DeviceName = $"{DeviceInfo.Current.Platform} {DeviceInfo.Name}",
                 Model = DeviceInfo.Current.Model,
                 Manufacturer = DeviceInfo.Current.Manufacturer,
                 OsName = DeviceInfo.Current.Platform.ToString(),
                 OsVersion = DeviceInfo.Current.VersionString,
                 SupportsEncryption = false,
-                AppData = new MobileAppData(deviceId, _pageOptions.GetPushUrl())
+                AppData = new MobileAppData(deviceId ?? string.Empty, _pageOptions.GetPushUrl?.Invoke() ?? string.Empty)
             };
 
             var registrationResult = await hassApi.RegisterMobileAppAsync(registrationRequest);
@@ -112,7 +122,7 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
         }
     }
 
-    private async void OnExternalBusMessageReceived(object sender, string message)
+    private async void OnExternalBusMessageReceived(object? sender, string message)
     {
         if (string.IsNullOrEmpty(message)) return;
         var wv = webView.WebViewControl;
@@ -126,10 +136,13 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
             {
                 case "webview/auth":
                     var urlFromForm = msg?["data"]?.GetValue<string>();
-                    var auth = new HassAuth(urlFromForm);
+                    var auth = new HassAuth(urlFromForm ?? string.Empty);
                     if (await auth.CheckApiStatusAsync())
                     {
-                        await _authStore.SetHassUrlAsync(auth.BaseUrl);
+                        if (_authStore != null)
+                        {
+                            await _authStore.SetHassUrlAsync(auth.BaseUrl);
+                        }
                         await MainThread.InvokeOnMainThreadAsync(() =>
                         {
                             _state = PageState.InLoginFlow;
@@ -143,9 +156,9 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
                     break;
                 
                 case "webview/config":
-                     var hassUrl = await _authStore.GetHassUrlAsync();
-                     string remoteUrl = null;
-                     string remoteUrlQrCode = null;
+                     var hassUrl = _authStore != null ? await _authStore.GetHassUrlAsync() : null;
+                     string? remoteUrl = null;
+                     string? remoteUrlQrCode = null;
                      
                      // 构建完整的远程访问 URL
                      if (_httpServer != null && !string.IsNullOrEmpty(_httpServer.BaseUrl))

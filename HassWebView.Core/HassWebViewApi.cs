@@ -32,7 +32,7 @@ public class HassWebViewApi
     /// </summary>
     /// <param name="css">The CSS content to inject.</param>
     /// <param name="host">An optional identifier for the injection source (for logging).</param>
-    public Task InjectCssAsync(string css, string host = null)
+    public Task InjectCssAsync(string css, string? host = null)
     { 
         var cssJson = JsonSerializer.Serialize(css);
         var hostJson = JsonSerializer.Serialize(host);

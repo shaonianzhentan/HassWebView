@@ -73,16 +73,16 @@ public partial class ControlSwitch : ContentView
         if (Disabled)
         {
             SwitchBorder.BackgroundColor = IsToggled 
-                ? Color.FromHex("#B3B3B3") 
-                : Color.FromHex("#D1D1D6");
-            Thumb.Fill = Color.FromHex("#EFEFF4");
+                ? Color.FromArgb("#B3B3B3") 
+                : Color.FromArgb("#D1D1D6");
+            Thumb.Fill = Color.FromArgb("#EFEFF4");
             Thumb.Opacity = 0.6;
         }
         else
         {
             SwitchBorder.BackgroundColor = IsToggled 
-                ? Color.FromHex("#007AFF") 
-                : Color.FromHex("#EFEFF4");
+                ? Color.FromArgb("#007AFF") 
+                : Color.FromArgb("#EFEFF4");
             Thumb.Fill = Colors.White;
             Thumb.Opacity = 1;
         }

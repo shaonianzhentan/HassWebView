@@ -69,16 +69,16 @@ public partial class ButtonCard : ContentView
     }
 
     public static readonly BindableProperty StateColorProperty =
-        BindableProperty.Create(nameof(StateColor), typeof(Color), typeof(ButtonCard), Color.FromHex("#636366"));
+        BindableProperty.Create(nameof(StateColor), typeof(Color), typeof(ButtonCard), Color.FromArgb("#636366"));
 
     private void UpdateStateColor()
     {
         Color color = State?.ToLower() switch
         {
-            "on" => Color.FromHex("#34C759"),
-            "open" => Color.FromHex("#34C759"),
-            "locked" => Color.FromHex("#34C759"),
-            _ => Color.FromHex("#636366")
+            "on" => Color.FromArgb("#34C759"),
+            "open" => Color.FromArgb("#34C759"),
+            "locked" => Color.FromArgb("#34C759"),
+            _ => Color.FromArgb("#636366")
         };
         StateColor = color;
     }

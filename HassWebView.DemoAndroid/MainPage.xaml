@@ -1,79 +1,137 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:hass="clr-namespace:HassWebView.Component;assembly=HassWebView.Component"
              x:Class="HassWebView.DemoAndroid.MainPage"
              BackgroundColor="{AppThemeBinding Light='#F5F5F7', Dark='#1C1C1E'}">
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="12">
 
-            <!-- ===== ButtonGrid: 快捷操作磁贴 ===== -->
-            <hass:ButtonGrid Title="快捷操作" Columns="3">
-                <hass:ButtonCard IconText="💡" Title="客厅灯" State="开启" IsActive="True" ShowBadge="True" />
-                <hass:ButtonCard IconText="🔒" Title="门锁" State="已锁定" />
-                <hass:ButtonCard IconText="🌡️" Title="空调" State="关闭" />
-                <hass:ButtonCard IconText="📷" Title="摄像头" State="在线" IsActive="True" />
-                <hass:ButtonCard IconText="🚗" Title="车库门" State="关闭" />
-                <hass:ButtonCard IconText="🔔" Title="门铃" State="正常" />
-            </hass:ButtonGrid>
+            <!-- ===== 快捷操作磁贴 ===== -->
+            <Label Text="快捷操作" FontSize="16" FontAttributes="Bold" Margin="0,0,0,8" />
+            <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+                <Button Grid.Row="0" Grid.Column="0" Text="💡 客厅灯" BackgroundColor="#4CAF50" TextColor="White" CornerRadius="12" />
+                <Button Grid.Row="0" Grid.Column="1" Text="🔒 门锁" BackgroundColor="#2196F3" TextColor="White" CornerRadius="12" />
+                <Button Grid.Row="0" Grid.Column="2" Text="🌡️ 空调" BackgroundColor="#FF9800" TextColor="White" CornerRadius="12" />
+                <Button Grid.Row="1" Grid.Column="0" Text="📷 摄像头" BackgroundColor="#9C27B0" TextColor="White" CornerRadius="12" />
+                <Button Grid.Row="1" Grid.Column="1" Text="🚗 车库门" BackgroundColor="#00BCD4" TextColor="White" CornerRadius="12" />
+                <Button Grid.Row="1" Grid.Column="2" Text="🔔 门铃" BackgroundColor="#E91E63" TextColor="White" CornerRadius="12" />
+            </Grid>
 
-            <!-- ===== EntityListGroup: 设备列表 ===== -->
-            <hass:EntityListGroup Title="我的设备" Action="查看全部"
-                                  ActionTapped="OnViewAllTapped">
-                <hass:EntityRow IconText="💡" Title="客厅灯" Description="飞利浦 Hue" State="on" IsActive="True" />
-                <hass:EntityRow IconText="🌡️" Title="温度传感器" Description="客厅" State="23°C" />
-                <hass:EntityRow IconText="💧" Title="湿度传感器" Description="卧室" State="65%" />
-                <hass:EntityRow IconText="📡" Title="路由器" Description="TP-Link" State="unavailable" />
-            </hass:EntityListGroup>
+            <!-- ===== 设备列表 ===== -->
+            <Label Text="我的设备" FontSize="16" FontAttributes="Bold" Margin="0,16,0,8" />
+            <VerticalStackLayout Spacing="4">
+                <Border StrokeThickness="0" BackgroundColor="White" Padding="12">
+                    <HorizontalStackLayout>
+                        <Label Text="💡" FontSize="18" Margin="0,0,12,0" />
+                        <VerticalStackLayout>
+                            <Label Text="客厅灯" FontAttributes="Bold" />
+                            <Label Text="飞利浦 Hue - 开启" FontSize="12" TextColor="Gray" />
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                </Border>
+                <Border StrokeThickness="0" BackgroundColor="White" Padding="12">
+                    <HorizontalStackLayout>
+                        <Label Text="🌡️" FontSize="18" Margin="0,0,12,0" />
+                        <VerticalStackLayout>
+                            <Label Text="温度传感器" FontAttributes="Bold" />
+                            <Label Text="客厅 - 23°C" FontSize="12" TextColor="Gray" />
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                </Border>
+                <Border StrokeThickness="0" BackgroundColor="White" Padding="12">
+                    <HorizontalStackLayout>
+                        <Label Text="💧" FontSize="18" Margin="0,0,12,0" />
+                        <VerticalStackLayout>
+                            <Label Text="湿度传感器" FontAttributes="Bold" />
+                            <Label Text="卧室 - 65%" FontSize="12" TextColor="Gray" />
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                </Border>
+            </VerticalStackLayout>
 
-            <!-- ===== SliderCard: 亮度 / 音量调节 ===== -->
-            <hass:SectionHeader Title="调节" />
+            <!-- ===== 调节 ===== -->
+            <Label Text="调节" FontSize="16" FontAttributes="Bold" Margin="0,16,0,8" />
 
-            <hass:SliderCard Title="客厅亮度"
-                             Value="75"
-                             Unit="%"
-                             Step="5"
-                             ValueChanged="OnBrightnessChanged" />
+            <Border StrokeThickness="0" BackgroundColor="White" Padding="12">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="客厅亮度" FontAttributes="Bold" />
+                    <Slider Value="75" Minimum="0" Maximum="100" />
+                    <Label Text="75%" HorizontalOptions="End" FontSize="12" TextColor="Gray" />
+                </VerticalStackLayout>
+            </Border>
 
-            <hass:SliderCard Title="音量"
-                             Value="40"
-                             Min="0"
-                             Max="100"
-                             Unit="%"
-                             Step="1" />
+            <Border StrokeThickness="0" BackgroundColor="White" Padding="12">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="音量" FontAttributes="Bold" />
+                    <Slider Value="40" Minimum="0" Maximum="100" />
+                    <Label Text="40%" HorizontalOptions="End" FontSize="12" TextColor="Gray" />
+                </VerticalStackLayout>
+            </Border>
 
-            <!-- ===== DetailCard: 设备详情 ===== -->
-            <hass:SectionHeader Title="详情" />
+            <!-- ===== 设备详情 ===== -->
+            <Label Text="设备详情" FontSize="16" FontAttributes="Bold" Margin="0,16,0,8" />
 
-            <hass:DetailCard Title="空调" Subtitle="格力 KFR-35" State="on">
-                <hass:DetailCard.ActionContent>
-                    <hass:SliderCard Title="目标温度"
-                                     Value="26"
-                                     Min="16"
-                                     Max="30"
-                                     Step="0.5"
-                                     Unit="°C" />
-                </hass:DetailCard.ActionContent>
-                <hass:InfoRow Title="当前温度" Value="28°C" />
-                <hass:InfoRow Title="模式" Value="制冷" />
-                <hass:InfoRow Title="风速" Value="自动" />
-                <hass:InfoRow Title="上次触发" Value="10 分钟前" />
-            </hass:DetailCard>
+            <Border StrokeThickness="0" BackgroundColor="White" Padding="12">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="空调" FontSize="18" FontAttributes="Bold" />
+                    <Label Text="格力 KFR-35 - 开启" FontSize="12" TextColor="Gray" />
+                    <Border StrokeThickness="0" BackgroundColor="#F5F5F5" Padding="8">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="目标温度" FontSize="12" />
+                            <Slider Value="26" Minimum="16" Maximum="30" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <HorizontalStackLayout>
+                        <Label Text="当前温度:" FontSize="12" TextColor="Gray" />
+                        <Label Text="28°C" FontSize="12" Margin="8,0,0,0" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout>
+                        <Label Text="模式:" FontSize="12" TextColor="Gray" />
+                        <Label Text="制冷" FontSize="12" Margin="8,0,0,0" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
 
-            <!-- ===== SettingsGroup: 应用设置 ===== -->
-            <hass:SettingsGroup Title="通知设置" Footer="修改后即时生效">
-                <hass:ControlSwitch Title="启用推送通知" IsToggled="True" />
-                <hass:InfoRow Title="通知渠道" Value="Home Assistant" />
-                <hass:ControlSwitch Title="震动反馈" />
-            </hass:SettingsGroup>
+            <!-- ===== 应用设置 ===== -->
+            <Label Text="通知设置" FontSize="16" FontAttributes="Bold" Margin="0,16,0,8" />
 
-            <hass:SettingsGroup Title="系统信息">
-                <hass:InfoRow Title="应用版本" Value="1.0.0" />
-                <hass:InfoRow Title="HA 服务器" Value="homeassistant.local" />
-                <hass:InfoRow Title="连接状态" Value="已连接" />
-                <hass:InfoRow Title="最后同步" Value="刚刚" />
-            </hass:SettingsGroup>
+            <Border StrokeThickness="0" BackgroundColor="White" Padding="12">
+                <VerticalStackLayout Spacing="8">
+                    <HorizontalStackLayout>
+                        <Label Text="启用推送通知" FlexLayout.Grow="1" />
+                        <Switch IsToggled="True" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout>
+                        <Label Text="通知渠道" FlexLayout.Grow="1" />
+                        <Label Text="Home Assistant" TextColor="Gray" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout>
+                        <Label Text="震动反馈" FlexLayout.Grow="1" />
+                        <Switch />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ===== 系统信息 ===== -->
+            <Label Text="系统信息" FontSize="16" FontAttributes="Bold" Margin="0,16,0,8" />
+
+            <Border StrokeThickness="0" BackgroundColor="White" Padding="12">
+                <VerticalStackLayout Spacing="4">
+                    <HorizontalStackLayout>
+                        <Label Text="应用版本" FlexLayout.Grow="1" TextColor="Gray" />
+                        <Label Text="1.0.0" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout>
+                        <Label Text="HA 服务器" FlexLayout.Grow="1" TextColor="Gray" />
+                        <Label Text="homeassistant.local" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout>
+                        <Label Text="连接状态" FlexLayout.Grow="1" TextColor="Gray" />
+                        <Label Text="已连接" TextColor="#4CAF50" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
 
         </VerticalStackLayout>
     </ScrollView>

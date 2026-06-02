@@ -20,7 +20,7 @@ namespace HassWebView.Core.Services
         /// <param name="downloadUrl">X5 内核离线包下载地址 (tbs.apk)</param>
         /// <param name="onProgress">用于接收下载进度的回调函数 (0-100)</param>
         /// <returns>返回 true 表示内核安装成功，返回 false 表示失败。</returns>
-        public static async Task<bool> InitializeX5CoreAsync(string downloadUrl, Action<int> onProgress = null)
+        public static async Task<bool> InitializeX5CoreAsync(string downloadUrl, Action<int>? onProgress = null)
         {
 #if ANDROID
             try
@@ -57,7 +57,7 @@ namespace HassWebView.Core.Services
             return false; // 非 Android 平台直接返回失败
         }
 
-        private static async Task EnsureDownloadAsync(string url, string path, Action<int> onProgress)
+        private static async Task EnsureDownloadAsync(string url, string path, Action<int>? onProgress)
         {
             if (_downloadTasks.TryGetValue(path, out var existingTask))
             {
@@ -84,7 +84,7 @@ namespace HassWebView.Core.Services
             }
         }
 
-        private static async Task DoDownloadInternalAsync(string url, string path, Action<int> onProgress)
+        private static async Task DoDownloadInternalAsync(string url, string path, Action<int>? onProgress)
         {
             try
             {

@@ -7,12 +7,12 @@ public partial class DialogExamplePage : ContentPage
 		InitializeComponent();
 	}
 
-    private void OnShowDialogClicked(object sender, EventArgs e)
+    private void OnShowDialogClicked(object? sender, EventArgs e)
     {
         ExampleDialog.Show();
     }
 
-    private void OnDialogConfirmClicked(object sender, EventArgs e)
+    private void OnDialogConfirmClicked(object? sender, EventArgs e)
     {
         ExampleDialog.Hide();
     }

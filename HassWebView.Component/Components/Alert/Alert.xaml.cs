@@ -97,28 +97,28 @@ public partial class Alert : ContentView
             switch (Type)
             {
                 case AlertType.Warning:
-                    AlertBorder.BackgroundColor = Color.FromHex("#FFF8E6");
+                    AlertBorder.BackgroundColor = Color.FromArgb("#FFF8E6");
                     IconLabel.Text = "⚠️";
-                    TitleLabel.TextColor = Color.FromHex("#1D1D1F");
-                    MessageLabel.TextColor = Color.FromHex("#3C3C3C");
+                    TitleLabel.TextColor = Color.FromArgb("#1D1D1F");
+                    MessageLabel.TextColor = Color.FromArgb("#3C3C3C");
                     break;
                 case AlertType.Error:
-                    AlertBorder.BackgroundColor = Color.FromHex("#FFEBEB");
+                    AlertBorder.BackgroundColor = Color.FromArgb("#FFEBEB");
                     IconLabel.Text = "❌";
-                    TitleLabel.TextColor = Color.FromHex("#FF3B30");
-                    MessageLabel.TextColor = Color.FromHex("#CC1A00");
+                    TitleLabel.TextColor = Color.FromArgb("#FF3B30");
+                    MessageLabel.TextColor = Color.FromArgb("#CC1A00");
                     break;
                 case AlertType.Success:
-                    AlertBorder.BackgroundColor = Color.FromHex("#E8F8E8");
+                    AlertBorder.BackgroundColor = Color.FromArgb("#E8F8E8");
                     IconLabel.Text = "✅";
-                    TitleLabel.TextColor = Color.FromHex("#30D158");
-                    MessageLabel.TextColor = Color.FromHex("#00C853");
+                    TitleLabel.TextColor = Color.FromArgb("#30D158");
+                    MessageLabel.TextColor = Color.FromArgb("#00C853");
                     break;
                 case AlertType.Info:
-                    AlertBorder.BackgroundColor = Color.FromHex("#E8F4FD");
+                    AlertBorder.BackgroundColor = Color.FromArgb("#E8F4FD");
                     IconLabel.Text = "ℹ️";
-                    TitleLabel.TextColor = Color.FromHex("#007AFF");
-                    MessageLabel.TextColor = Color.FromHex("#0066CC");
+                    TitleLabel.TextColor = Color.FromArgb("#007AFF");
+                    MessageLabel.TextColor = Color.FromArgb("#0066CC");
                     break;
             }
         }
@@ -132,7 +132,7 @@ public partial class Alert : ContentView
     {
         if (bindable is Alert alert)
         {
-            // 只在组件初始化完成后才更新样式
+            // 只在组件初始化完成后才更新样�?
             if (alert._isInitialized)
             {
                 alert.UpdateAlertStyle();

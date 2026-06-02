@@ -72,7 +72,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\HassWebView.AndroidService\HassWebView.AndroidService.csproj" />
-	  <ProjectReference Include="..\HassWebView.Component\HassWebView.Component.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -34,7 +34,7 @@ public static class ResourceHelper
         }
     }
 
-    public static async Task ExecuteScriptAsync(HassWebView webView, string scriptPath, string functionCall = null)
+    public static async Task ExecuteScriptAsync(HassWebView webView, string scriptPath, string? functionCall = null)
     {
         if (webView == null) return;
 

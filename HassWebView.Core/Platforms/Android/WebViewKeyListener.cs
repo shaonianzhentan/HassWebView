@@ -1,4 +1,4 @@
-﻿using Android.Runtime;
+using Android.Runtime;
 using Android.Views;
 using HassWebView.Core.Services;
 
@@ -10,10 +10,14 @@ namespace HassWebView.Core.Platforms.Android
         {
         }
 
-        public bool OnKey(global::Android.Views.View v, [GeneratedEnum] Keycode keyCode, KeyEvent e)
+        public bool OnKey(global::Android.Views.View? v, [GeneratedEnum] Keycode keyCode, KeyEvent? e)
         {
-            var _keyService = IPlatformApplication.Current.Services.GetRequiredService<KeyService>();
-            if (e == null || _keyService == null)
+            var current = IPlatformApplication.Current;
+            if (current == null || e == null)
+                return false;
+                
+            var _keyService = current.Services.GetService<KeyService>();
+            if (_keyService == null)
                 return false;
 
             string keyName = KeyHelper.GetKeyName(e.KeyCode);

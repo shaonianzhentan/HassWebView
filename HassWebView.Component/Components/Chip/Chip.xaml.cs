@@ -87,27 +87,27 @@ public partial class Chip : ContentView
         switch (Type)
         {
             case ChipType.Default:
-                ChipBorder.BackgroundColor = Color.FromHex("#EFEFF4");
-                TextLabel.TextColor = Color.FromHex("#1D1D1F");
+                ChipBorder.BackgroundColor = Color.FromArgb("#EFEFF4");
+                TextLabel.TextColor = Color.FromArgb("#1D1D1F");
                 break;
             case ChipType.Primary:
-                ChipBorder.BackgroundColor = Color.FromHex("#007AFF");
+                ChipBorder.BackgroundColor = Color.FromArgb("#007AFF");
                 TextLabel.TextColor = Colors.White;
                 break;
             case ChipType.Secondary:
-                ChipBorder.BackgroundColor = Color.FromHex("#3C3C3C");
+                ChipBorder.BackgroundColor = Color.FromArgb("#3C3C3C");
                 TextLabel.TextColor = Colors.White;
                 break;
             case ChipType.Success:
-                ChipBorder.BackgroundColor = Color.FromHex("#30D158");
+                ChipBorder.BackgroundColor = Color.FromArgb("#30D158");
                 TextLabel.TextColor = Colors.White;
                 break;
             case ChipType.Warning:
-                ChipBorder.BackgroundColor = Color.FromHex("#FF9F0A");
+                ChipBorder.BackgroundColor = Color.FromArgb("#FF9F0A");
                 TextLabel.TextColor = Colors.White;
                 break;
             case ChipType.Error:
-                ChipBorder.BackgroundColor = Color.FromHex("#FF3B30");
+                ChipBorder.BackgroundColor = Color.FromArgb("#FF3B30");
                 TextLabel.TextColor = Colors.White;
                 break;
         }

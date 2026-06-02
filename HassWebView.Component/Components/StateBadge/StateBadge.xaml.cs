@@ -30,17 +30,17 @@ public partial class StateBadge : ContentView
     {
         Color color = State?.ToLower() switch
         {
-            "on" => Color.FromHex("#34C759"),
-            "open" => Color.FromHex("#34C759"),
-            "active" => Color.FromHex("#34C759"),
-            "locked" => Color.FromHex("#34C759"),
-            "off" => Color.FromHex("#8E8E93"),
-            "closed" => Color.FromHex("#8E8E93"),
-            "inactive" => Color.FromHex("#8E8E93"),
-            "unlocked" => Color.FromHex("#8E8E93"),
-            "unavailable" => Color.FromHex("#FF3B30"),
-            "unknown" => Color.FromHex("#FF9500"),
-            _ => Color.FromHex("#8E8E93")
+            "on" => Color.FromArgb("#34C759"),
+            "open" => Color.FromArgb("#34C759"),
+            "active" => Color.FromArgb("#34C759"),
+            "locked" => Color.FromArgb("#34C759"),
+            "off" => Color.FromArgb("#8E8E93"),
+            "closed" => Color.FromArgb("#8E8E93"),
+            "inactive" => Color.FromArgb("#8E8E93"),
+            "unlocked" => Color.FromArgb("#8E8E93"),
+            "unavailable" => Color.FromArgb("#FF3B30"),
+            "unknown" => Color.FromArgb("#FF9500"),
+            _ => Color.FromArgb("#8E8E93")
         };
         BadgeBorder.BackgroundColor = color;
     }

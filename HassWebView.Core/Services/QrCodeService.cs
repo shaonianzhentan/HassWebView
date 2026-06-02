@@ -97,7 +97,7 @@ namespace HassWebView.Core.Services
         /// <summary>
         /// 生成二维码矩阵
         /// </summary>
-        private static bool[,] GenerateMatrix(string text, ErrorCorrectionLevel level)
+        private static bool[,]? GenerateMatrix(string text, ErrorCorrectionLevel level)
         {
             if (string.IsNullOrEmpty(text)) return null;
 
