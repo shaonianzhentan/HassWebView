@@ -8,22 +8,24 @@
         <Label x:Name="LabelLabel"
                Text="{Binding Source={x:Reference this}, Path=Label}"
                FontSize="13"
-               TextColor="#86868B"
+               TextColor="{DynamicResource PrimaryTextColor}"
                IsVisible="{Binding Source={x:Reference this}, Path=ShowLabel}" />
         
         <Border x:Name="InputBorder"
-                Padding="12"
-                BackgroundColor="#FFFFFF"
-                Stroke="#E5E5EA">
+                BackgroundColor="{DynamicResource InputBackgroundColor}"
+                Padding="12">
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="8" />
             </Border.StrokeShape>
+            <Border.Stroke>
+                <SolidColorBrush Color="{DynamicResource BorderColor}" />
+            </Border.Stroke>
             <Entry x:Name="InputEntry"
                    Text="{Binding Source={x:Reference this}, Path=Text, Mode=TwoWay}"
                    Placeholder="{Binding Source={x:Reference this}, Path=Placeholder}"
                    FontSize="16"
-                   TextColor="#1D1D1F"
-                   PlaceholderColor="#86868B"
+                   TextColor="{DynamicResource PrimaryTextColor}"
+                   PlaceholderColor="{DynamicResource TertiaryTextColor}"
                    BackgroundColor="Transparent"
                    IsPassword="{Binding Source={x:Reference this}, Path=IsPassword}"
                    Keyboard="{Binding Source={x:Reference this}, Path=KeyboardType}" />

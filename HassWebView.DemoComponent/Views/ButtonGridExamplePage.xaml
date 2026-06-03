@@ -4,12 +4,12 @@
              xmlns:component="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.DemoComponent.Views.ButtonGridExamplePage"
              Title="ButtonGrid 组件示例"
-             BackgroundColor="#F2F2F7">
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="ButtonGrid 按钮网格组件" FontSize="24" FontAttributes="Bold" TextColor="#1D1D1F" />
-            <Label Text="用于显示设备控制网格" FontSize="14" TextColor="#86868B" />
+            <Label Text="ButtonGrid 按钮网格组件" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+            <Label Text="用于显示设备控制网格" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
             
             <!-- 只使用 ButtonGrid 组件 -->
             <component:ButtonGrid>

@@ -13,8 +13,22 @@ public partial class DetailCard : ContentView
         {
             UpdateStateColor();
             UpdateSize();
-            SizeManager.SizeChanged += (s, e) => UpdateSize();
+            SizeManager.SizeChanged += OnSizeChanged;
         });
+    }
+
+    private void OnSizeChanged(object? sender, EventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() => UpdateSize());
+    }
+
+    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
+    {
+        base.OnHandlerChanging(args);
+        if (args.OldHandler != null)
+        {
+            SizeManager.SizeChanged -= OnSizeChanged;
+        }
     }
 
     public static readonly BindableProperty TitleProperty =
@@ -83,30 +97,29 @@ public partial class DetailCard : ContentView
     {
         try
         {
-            switch (SizeManager.CurrentSize)
+            var resources = Application.Current?.Resources;
+            if (resources == null) return;
+            
+            // 从资源字典读取尺寸值
+            if (resources.TryGetValue("ComponentPaddingLarge", out var padLg) && padLg is Thickness padLgVal)
+                CardFrame.Padding = padLgVal;
+            
+            if (resources.TryGetValue("ComponentTitleSizeLarge", out var titleLg) && titleLg is double titleLgVal)
+                TitleLabel.FontSize = titleLgVal;
+            
+            if (resources.TryGetValue("ComponentBodySizeLarge", out var bodyLg) && bodyLg is double bodyLgVal)
+                SubtitleLabel.FontSize = bodyLgVal;
+            
+            if (resources.TryGetValue("ComponentBodySizeMedium", out var bodyMed) && bodyMed is double bodyMedVal)
+                StateLabel.FontSize = bodyMedVal;
+            
+            // StateFrame padding 使用特定值
+            StateFrame.Padding = SizeManager.CurrentSize switch
             {
-                case ComponentSize.Phone:
-                    CardFrame.Padding = new Thickness(20);
-                    TitleLabel.FontSize = 16;
-                    SubtitleLabel.FontSize = 14;
-                    StateFrame.Padding = new Thickness(12, 6);
-                    StateLabel.FontSize = 14;
-                    break;
-                case ComponentSize.Tablet:
-                    CardFrame.Padding = new Thickness(28);
-                    TitleLabel.FontSize = 24;
-                    SubtitleLabel.FontSize = 18;
-                    StateFrame.Padding = new Thickness(20, 10);
-                    StateLabel.FontSize = 20;
-                    break;
-                case ComponentSize.TV:
-                    CardFrame.Padding = new Thickness(36);
-                    TitleLabel.FontSize = 32;
-                    SubtitleLabel.FontSize = 24;
-                    StateFrame.Padding = new Thickness(28, 14);
-                    StateLabel.FontSize = 28;
-                    break;
-            }
+                Models.ComponentSize.Tablet => new Thickness(20, 10),
+                Models.ComponentSize.TV => new Thickness(28, 14),
+                _ => new Thickness(12, 6)
+            };
         }
         catch (Exception ex)
         {

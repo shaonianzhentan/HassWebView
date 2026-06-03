@@ -4,11 +4,15 @@
              x:Class="HassWebView.Component.Components.ThemeSelector"
              x:Name="this">
 
-    <Border Padding="8"
-            BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#2C2C2E}">
+    <Border x:Name="MainBorder"
+            BackgroundColor="{DynamicResource CardBackgroundColor}"
+            Padding="8">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="12" />
         </Border.StrokeShape>
+        <Border.Stroke>
+            <SolidColorBrush Color="{DynamicResource BorderColor}" />
+        </Border.Stroke>
         <HorizontalStackLayout Spacing="4">
             <Button x:Name="LightBtn"
                     Text="☀️"

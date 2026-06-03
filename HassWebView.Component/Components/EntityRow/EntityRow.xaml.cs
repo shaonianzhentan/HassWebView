@@ -17,8 +17,8 @@ public partial class EntityRow : ContentView
             {
                 UpdateColors();
                 UpdateSize();
-                SizeManager.SizeChanged += (s, e) => UpdateSize();
-                ThemeManager.ThemeChanged += (s, e) => UpdateColors();
+                SizeManager.SizeChanged += OnSizeChanged;
+                ThemeManager.ThemeChanged += OnThemeChanged;
                 _isInitialized = true;
             }
             catch (Exception ex)
@@ -26,6 +26,26 @@ public partial class EntityRow : ContentView
                 System.Diagnostics.Debug.WriteLine($"EntityRow initialization failed: {ex}");
             }
         });
+    }
+
+    private void OnSizeChanged(object? sender, EventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() => UpdateSize());
+    }
+
+    private void OnThemeChanged(object? sender, EventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() => UpdateColors());
+    }
+
+    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
+    {
+        base.OnHandlerChanging(args);
+        if (args.OldHandler != null)
+        {
+            SizeManager.SizeChanged -= OnSizeChanged;
+            ThemeManager.ThemeChanged -= OnThemeChanged;
+        }
     }
 
     public static readonly BindableProperty IconTextProperty =
@@ -127,30 +147,25 @@ public partial class EntityRow : ContentView
     {
         try
         {
-            switch (SizeManager.CurrentSize)
-            {
-                case ComponentSize.Phone:
-                    IconBorder.Padding = new Thickness(10);
-                    IconLabel.FontSize = 20;
-                    TitleLabel.FontSize = 15;
-                    StateLabel.FontSize = 13;
-                    ArrowLabel.FontSize = 24;
-                    break;
-                case ComponentSize.Tablet:
-                    IconBorder.Padding = new Thickness(16);
-                    IconLabel.FontSize = 32;
-                    TitleLabel.FontSize = 22;
-                    StateLabel.FontSize = 18;
-                    ArrowLabel.FontSize = 36;
-                    break;
-                case ComponentSize.TV:
-                    IconBorder.Padding = new Thickness(24);
-                    IconLabel.FontSize = 44;
-                    TitleLabel.FontSize = 28;
-                    StateLabel.FontSize = 22;
-                    ArrowLabel.FontSize = 48;
-                    break;
-            }
+            var resources = Application.Current?.Resources;
+            if (resources == null) return;
+            
+            // 从资源字典读取尺寸值
+            if (resources.TryGetValue("ComponentIconSizePhoneSmall", out var iconSmall) && iconSmall is double iconSmallVal)
+                IconLabel.FontSize = iconSmallVal;
+            
+            if (resources.TryGetValue("ComponentTitleSizePhoneLarge", out var titleLg) && titleLg is double titleLgVal)
+                TitleLabel.FontSize = titleLgVal;
+            
+            if (resources.TryGetValue("ComponentBodySizePhoneMedium", out var bodyMed) && bodyMed is double bodyMedVal)
+                StateLabel.FontSize = bodyMedVal;
+            
+            if (resources.TryGetValue("ComponentIconSizePhoneLarge", out var iconLg) && iconLg is double iconLgVal)
+                ArrowLabel.FontSize = iconLgVal;
+            
+            // IconBorder padding
+            if (resources.TryGetValue("ComponentPaddingSmall", out var padSmall) && padSmall is Thickness padSmallVal)
+                IconBorder.Padding = padSmallVal;
         }
         catch (Exception ex)
         {

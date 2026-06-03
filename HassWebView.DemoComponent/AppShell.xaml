@@ -4,7 +4,17 @@
        xmlns:local="clr-namespace:HassWebView.DemoComponent"
        xmlns:views="clr-namespace:HassWebView.DemoComponent.Views"
        x:Class="HassWebView.DemoComponent.AppShell"
-       Title="Home Assistant Components">
+       Title="Home Assistant Components"
+       FlyoutBehavior="Locked">
+    
+    <Shell.FlyoutHeader>
+        <ContentView Padding="16" BackgroundColor="{DynamicResource PageBackgroundColor}">
+            <Label Text="HA Components"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="{DynamicResource PrimaryTextColor}" />
+        </ContentView>
+    </Shell.FlyoutHeader>
 
     <FlyoutItem Title="首页" Icon="🏠">
         <ShellContent Route="MainPage" ContentTemplate="{DataTemplate local:MainPage}" />

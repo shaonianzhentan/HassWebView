@@ -11,15 +11,15 @@
                Grid.Column="0"
                Text="{Binding Source={x:Reference this}, Path=Title}"
                FontSize="12"
+               TextColor="{DynamicResource TertiaryTextColor}"
                FontAttributes="Bold"
-               TextColor="{AppThemeBinding Light=#86868B, Dark=#8E8E93}"
                VerticalOptions="Center" />
 
         <Label x:Name="ActionLabel"
                Grid.Column="1"
                Text="{Binding Source={x:Reference this}, Path=Action}"
                FontSize="14"
-               TextColor="{AppThemeBinding Light=#007AFF, Dark=#0A84FF}"
+               TextColor="{DynamicResource AccentColor}"
                VerticalOptions="Center"
                IsVisible="False">
             <Label.GestureRecognizers>

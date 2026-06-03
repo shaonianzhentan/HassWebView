@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="HassWebView.Component.Resources.Themes.DarkTheme">
+
+    <!-- Home Assistant 暗色主题颜色 -->
+    
+    <!-- Shell 和页面颜色 -->
+    <Color x:Key="PageBackgroundColor">#1C1C1E</Color>
+    <Color x:Key="FlyoutBackgroundColor">#1C1C1E</Color>
+    <Color x:Key="NavigationBarColor">#2C2C2E</Color>
+    
+    <!-- 背景色 -->
+    <Color x:Key="CardBackgroundColor">#2C2C2E</Color>
+    <Color x:Key="InputBackgroundColor">#3A3A3C</Color>
+    <Color x:Key="ButtonBackgroundColor">#0A84FF</Color>
+    <Color x:Key="ButtonDisabledBackgroundColor">#3A3A3C</Color>
+    
+    <!-- 文字颜色 -->
+    <Color x:Key="PrimaryTextColor">#FFFFFF</Color>
+    <Color x:Key="SecondaryTextColor">#8E8E93</Color>
+    <Color x:Key="TertiaryTextColor">#8E8E93</Color>
+    <Color x:Key="ButtonTextColor">#FFFFFF</Color>
+    <Color x:Key="ButtonDisabledTextColor">#8E8E93</Color>
+    
+    <!-- 边框颜色 -->
+    <Color x:Key="BorderColor">#3A3A3C</Color>
+    
+    <!-- 强调色 -->
+    <Color x:Key="AccentColor">#0A84FF</Color>
+    
+    <!-- 状态颜色 -->
+    <Color x:Key="SuccessColor">#30D158</Color>
+    <Color x:Key="WarningColor">#FF9F0A</Color>
+    <Color x:Key="ErrorColor">#FF453A</Color>
+    <Color x:Key="InfoColor">#64D2FF</Color>
+
+    <!-- ========== 组件尺寸相关样式 ========== -->
+    
+    <!-- Phone (默认) -->
+    <x:Double x:Key="ComponentIconSizePhoneSmall">20</x:Double>
+    <x:Double x:Key="ComponentIconSizePhoneMedium">36</x:Double>
+    <x:Double x:Key="ComponentIconSizePhoneLarge">48</x:Double>
+    <x:Double x:Key="ComponentIconSizePhoneExtraLarge">64</x:Double>
+    
+    <x:Double x:Key="ComponentTitleSizePhoneSmall">12</x:Double>
+    <x:Double x:Key="ComponentTitleSizePhoneMedium">14</x:Double>
+    <x:Double x:Key="ComponentTitleSizePhoneLarge">16</x:Double>
+    <x:Double x:Key="ComponentTitleSizePhoneExtraLarge">22</x:Double>
+    
+    <x:Double x:Key="ComponentBodySizePhoneSmall">11</x:Double>
+    <x:Double x:Key="ComponentBodySizePhoneMedium">13</x:Double>
+    <x:Double x:Key="ComponentBodySizePhoneLarge">14</x:Double>
+    <x:Double x:Key="ComponentBodySizePhoneExtraLarge">18</x:Double>
+    
+    <Thickness x:Key="ComponentPaddingPhoneSmall">10,6</Thickness>
+    <Thickness x:Key="ComponentPaddingPhoneMedium">16</Thickness>
+    <Thickness x:Key="ComponentPaddingPhoneLarge">20</Thickness>
+    <Thickness x:Key="ComponentPaddingPhoneExtraLarge">28</Thickness>
+    
+    <!-- Tablet -->
+    <x:Double x:Key="ComponentIconSizeTabletSmall">28</x:Double>
+    <x:Double x:Key="ComponentIconSizeTabletMedium">48</x:Double>
+    <x:Double x:Key="ComponentIconSizeTabletLarge">64</x:Double>
+    <x:Double x:Key="ComponentIconSizeTabletExtraLarge">86</x:Double>
+    
+    <x:Double x:Key="ComponentTitleSizeTabletSmall">18</x:Double>
+    <x:Double x:Key="ComponentTitleSizeTabletMedium">20</x:Double>
+    <x:Double x:Key="ComponentTitleSizeTabletLarge">24</x:Double>
+    <x:Double x:Key="ComponentTitleSizeTabletExtraLarge">32</x:Double>
+    
+    <x:Double x:Key="ComponentBodySizeTabletSmall">16</x:Double>
+    <x:Double x:Key="ComponentBodySizeTabletMedium">18</x:Double>
+    <x:Double x:Key="ComponentBodySizeTabletLarge">20</x:Double>
+    <x:Double x:Key="ComponentBodySizeTabletExtraLarge">24</x:Double>
+    
+    <Thickness x:Key="ComponentPaddingTabletSmall">14,10</Thickness>
+    <Thickness x:Key="ComponentPaddingTabletMedium">24</Thickness>
+    <Thickness x:Key="ComponentPaddingTabletLarge">28</Thickness>
+    <Thickness x:Key="ComponentPaddingTabletExtraLarge">36</Thickness>
+    
+    <!-- TV -->
+    <x:Double x:Key="ComponentIconSizeTVSmall">36</x:Double>
+    <x:Double x:Key="ComponentIconSizeTVMedium">64</x:Double>
+    <x:Double x:Key="ComponentIconSizeTVLarge">86</x:Double>
+    <x:Double x:Key="ComponentIconSizeTVExtraLarge">114</x:Double>
+    
+    <x:Double x:Key="ComponentTitleSizeTVSmall">24</x:Double>
+    <x:Double x:Key="ComponentTitleSizeTVMedium">28</x:Double>
+    <x:Double x:Key="ComponentTitleSizeTVLarge">32</x:Double>
+    <x:Double x:Key="ComponentTitleSizeTVExtraLarge">44</x:Double>
+    
+    <x:Double x:Key="ComponentBodySizeTVSmall">20</x:Double>
+    <x:Double x:Key="ComponentBodySizeTVMedium">24</x:Double>
+    <x:Double x:Key="ComponentBodySizeTVLarge">28</x:Double>
+    <x:Double x:Key="ComponentBodySizeTVExtraLarge">36</x:Double>
+    
+    <Thickness x:Key="ComponentPaddingTVSmall">18,14</Thickness>
+    <Thickness x:Key="ComponentPaddingTVMedium">32</Thickness>
+    <Thickness x:Key="ComponentPaddingTVLarge">36</Thickness>
+    <Thickness x:Key="ComponentPaddingTVExtraLarge">48</Thickness>
+    
+    <!-- 当前尺寸的别名（通过代码动态设置）-->
+    <x:Double x:Key="ComponentIconSizeSmall">20</x:Double>
+    <x:Double x:Key="ComponentIconSizeMedium">36</x:Double>
+    <x:Double x:Key="ComponentIconSizeLarge">48</x:Double>
+    <x:Double x:Key="ComponentIconSizeExtraLarge">64</x:Double>
+    
+    <x:Double x:Key="ComponentTitleSizeSmall">12</x:Double>
+    <x:Double x:Key="ComponentTitleSizeMedium">14</x:Double>
+    <x:Double x:Key="ComponentTitleSizeLarge">16</x:Double>
+    <x:Double x:Key="ComponentTitleSizeExtraLarge">22</x:Double>
+    
+    <x:Double x:Key="ComponentBodySizeSmall">11</x:Double>
+    <x:Double x:Key="ComponentBodySizeMedium">13</x:Double>
+    <x:Double x:Key="ComponentBodySizeLarge">14</x:Double>
+    <x:Double x:Key="ComponentBodySizeExtraLarge">18</x:Double>
+    
+    <Thickness x:Key="ComponentPaddingSmall">10,6</Thickness>
+    <Thickness x:Key="ComponentPaddingMedium">16</Thickness>
+    <Thickness x:Key="ComponentPaddingLarge">20</Thickness>
+    <Thickness x:Key="ComponentPaddingExtraLarge">28</Thickness>
+
+</ResourceDictionary>

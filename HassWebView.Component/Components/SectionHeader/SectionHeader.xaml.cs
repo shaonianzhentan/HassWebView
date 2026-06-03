@@ -8,7 +8,21 @@ public partial class SectionHeader : ContentView
     {
         InitializeComponent();
         UpdateSize();
-        SizeManager.SizeChanged += (s, e) => UpdateSize();
+        SizeManager.SizeChanged += OnSizeChanged;
+    }
+
+    private void OnSizeChanged(object? sender, EventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() => UpdateSize());
+    }
+
+    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
+    {
+        base.OnHandlerChanging(args);
+        if (args.OldHandler != null)
+        {
+            SizeManager.SizeChanged -= OnSizeChanged;
+        }
     }
 
     public event EventHandler? ActionTapped;
@@ -38,20 +52,21 @@ public partial class SectionHeader : ContentView
 
     private void UpdateSize()
     {
-        switch (SizeManager.CurrentSize)
+        try
         {
-            case ComponentSize.Phone:
-                TitleLabel.FontSize = 12;
-                ActionLabel.FontSize = 12;
-                break;
-            case ComponentSize.Tablet:
-                TitleLabel.FontSize = 18;
-                ActionLabel.FontSize = 18;
-                break;
-            case ComponentSize.TV:
-                TitleLabel.FontSize = 24;
-                ActionLabel.FontSize = 24;
-                break;
+            var resources = Application.Current?.Resources;
+            if (resources == null) return;
+            
+            // 从资源字典读取字体大小
+            if (resources.TryGetValue("ComponentTitleSizeSmall", out var titleSmall) && titleSmall is double titleSmallVal)
+            {
+                TitleLabel.FontSize = titleSmallVal;
+                ActionLabel.FontSize = titleSmallVal;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"SectionHeader.UpdateSize failed: {ex}");
         }
     }
 

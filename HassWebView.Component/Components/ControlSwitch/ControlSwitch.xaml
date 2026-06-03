@@ -4,8 +4,7 @@
              x:Class="HassWebView.Component.Components.ControlSwitch"
              x:Name="this">
     
-    <Border x:Name="SwitchBorder"
-            BackgroundColor="#EFEFF4">
+    <Border x:Name="SwitchBorder">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="15" />
         </Border.StrokeShape>

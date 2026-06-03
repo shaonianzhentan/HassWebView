@@ -4,17 +4,22 @@
              x:Class="HassWebView.Component.Components.SettingsGroup"
              x:Name="this">
 
-    <Border BackgroundColor="#FFFFFF" Padding="0">
+    <Border x:Name="MainBorder"
+            BackgroundColor="{DynamicResource CardBackgroundColor}"
+            Padding="0">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="12" />
         </Border.StrokeShape>
+        <Border.Stroke>
+            <SolidColorBrush Color="{DynamicResource BorderColor}" />
+        </Border.Stroke>
         <VerticalStackLayout>
             <Label Text="{Binding Source={x:Reference this}, Path=Title}"
                    FontSize="13"
-                   TextColor="#86868B"
+                   TextColor="{DynamicResource PrimaryTextColor}"
                    FontAttributes="Bold"
                    Padding="16,12,16,8" />
-            <ContentPresenter Content="{Binding Source={x:Reference this}, Path=Content}" />
+            <ContentPresenter />
         </VerticalStackLayout>
     </Border>
 

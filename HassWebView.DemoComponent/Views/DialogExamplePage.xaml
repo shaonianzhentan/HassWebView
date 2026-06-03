@@ -4,12 +4,12 @@
              xmlns:component="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.DemoComponent.Views.DialogExamplePage"
              Title="Dialog 组件示例"
-             BackgroundColor="{AppThemeBinding Light=#F2F2F7, Dark=#1C1C1E}">
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="Dialog 对话框组件" FontSize="24" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#FFFFFF}" />
-            <Label Text="用于显示弹窗对话框" FontSize="14" TextColor="{AppThemeBinding Light=#86868B, Dark=#8E8E93}" />
+            <Label Text="Dialog 对话框组件" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+            <Label Text="用于显示弹窗对话框" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
             
             <!-- 只使用 Dialog 组件 -->
             <Button Text="显示对话框" Clicked="OnShowDialogClicked" />

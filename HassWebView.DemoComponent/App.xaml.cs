@@ -1,10 +1,26 @@
 namespace HassWebView.DemoComponent;
 
+using HassWebView.Component.Models;
+
 public partial class App : Application
 {
     public App()
     {
         InitializeComponent();
+        
+        System.Diagnostics.Debug.WriteLine("[App] Constructor called");
+        
+        // 直接初始化主题系统
+        try
+        {
+            System.Diagnostics.Debug.WriteLine("[App] Calling ThemeManager.Initialize() directly");
+            ThemeManager.Initialize();
+            System.Diagnostics.Debug.WriteLine("[App] ThemeManager initialized");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[App] Failed to initialize ThemeManager: {ex.Message}");
+        }
         
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;

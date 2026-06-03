@@ -3,50 +3,50 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="HassWebView.DemoComponent.MainPage"
              Title="HassWebView Demo Component"
-             BackgroundColor="#F2F2F7">
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="24">
             <Label Text="HassWebView Component Demo"
                    FontAttributes="Bold"
                    FontSize="28"
-                   TextColor="#1D1D1F" />
+                   TextColor="{DynamicResource PrimaryTextColor}" />
 
             <Label Text="这是一组来自 HassWebView.Component 的控件示例应用"
                    FontSize="16"
-                   TextColor="#636366" />
+                   TextColor="{DynamicResource SecondaryTextColor}" />
 
             <Label Text="使用侧边栏导航到各个组件示例页面"
                    FontSize="14"
-                   TextColor="#86868B" />
+                   TextColor="{DynamicResource TertiaryTextColor}" />
 
             <Label Text="应用会每4秒自动跳转到下一个页面进行测试"
                    FontSize="14"
-                   TextColor="#86868B" />
+                   TextColor="{DynamicResource TertiaryTextColor}" />
 
             <BoxView HeightRequest="20" />
             
-            <Label Text="组件列表：" FontAttributes="Bold" TextColor="#1D1D1F" />
-            <Label Text="• Alert - 警告提示组件" FontSize="14" TextColor="#636366" />
-            <Label Text="• Chip - 芯片标签组件" FontSize="14" TextColor="#636366" />
-            <Label Text="• ControlSwitch - 开关组件" FontSize="14" TextColor="#636366" />
-            <Label Text="• Input - 输入框组件" FontSize="14" TextColor="#636366" />
-            <Label Text="• Spinner - 加载指示器组件" FontSize="14" TextColor="#636366" />
-            <Label Text="• Gauge - 仪表盘组件" FontSize="14" TextColor="#636366" />
-            <Label Text="• ButtonCard - 按钮卡片组件" FontSize="14" TextColor="#636366" />
-            <Label Text="• ButtonGrid - 按钮网格组件" FontSize="14" TextColor="#636366" />
-            <Label Text="• DetailCard - 详情卡片组件" FontSize="14" TextColor="#636366" />
-            <Label Text="• Dialog - 对话框组件" FontSize="14" TextColor="#636366" />
-            <Label Text="• EntityRow - 实体行组件" FontSize="14" TextColor="#636366" />
-            <Label Text="• EntityListGroup - 实体列表分组组件" FontSize="14" TextColor="#636366" />
-            <Label Text="• SliderCard - 滑块卡片组件" FontSize="14" TextColor="#636366" />
-            <Label Text="• StateBadge - 状态徽章组件" FontSize="14" TextColor="#636366" />
-            <Label Text="• SettingsGroup - 设置分组组件" FontSize="14" TextColor="#636366" />
+            <Label Text="组件列表：" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+            <Label Text="• Alert - 警告提示组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• Chip - 芯片标签组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• ControlSwitch - 开关组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• Input - 输入框组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• Spinner - 加载指示器组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• Gauge - 仪表盘组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• ButtonCard - 按钮卡片组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• ButtonGrid - 按钮网格组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• DetailCard - 详情卡片组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• Dialog - 对话框组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• EntityRow - 实体行组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• EntityListGroup - 实体列表分组组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• SliderCard - 滑块卡片组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• StateBadge - 状态徽章组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• SettingsGroup - 设置分组组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
 
             <BoxView HeightRequest="20" />
             
-            <Label Text="设置：" FontAttributes="Bold" TextColor="#1D1D1F" />
-            <Label Text="• 设置页面 - 主题和尺寸切换" FontSize="14" TextColor="#636366" />
-            <Label Text="• 关于页面 - 应用信息" FontSize="14" TextColor="#636366" />
+            <Label Text="设置：" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+            <Label Text="• 设置页面 - 主题和尺寸切换" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• 关于页面 - 应用信息" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
         </VerticalStackLayout>
     </ScrollView>
 

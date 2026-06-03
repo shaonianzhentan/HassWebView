@@ -24,7 +24,6 @@ public partial class Chip : ContentView
         InitializeComponent();
         UpdateChipStyle();
         UpdateChipSize();
-        SizeManager.SizeChanged += (s, e) => UpdateChipSize();
     }
 
     public string Text
@@ -59,26 +58,28 @@ public partial class Chip : ContentView
 
     private void UpdateChipSize()
     {
-        switch (SizeManager.CurrentSize)
+        try
         {
-            case ComponentSize.Phone:
-                IconLabel.FontSize = 14;
-                TextLabel.FontSize = 14;
-                CloseBtn.FontSize = 12;
-                ChipBorder.Padding = new Thickness(10, 6);
-                break;
-            case ComponentSize.Tablet:
-                IconLabel.FontSize = 18;
-                TextLabel.FontSize = 18;
-                CloseBtn.FontSize = 16;
-                ChipBorder.Padding = new Thickness(14, 10);
-                break;
-            case ComponentSize.TV:
-                IconLabel.FontSize = 24;
-                TextLabel.FontSize = 24;
-                CloseBtn.FontSize = 20;
-                ChipBorder.Padding = new Thickness(18, 14);
-                break;
+            var resources = Application.Current?.Resources;
+            if (resources == null) return;
+            
+            // 从资源字典读取字体大小
+            if (resources.TryGetValue("ComponentBodySizeMedium", out var bodyMed) && bodyMed is double bodyMedVal)
+            {
+                IconLabel.FontSize = bodyMedVal;
+                TextLabel.FontSize = bodyMedVal;
+            }
+            
+            if (resources.TryGetValue("ComponentBodySizeSmall", out var bodySmall) && bodySmall is double bodySmallVal)
+                CloseBtn.FontSize = bodySmallVal;
+            
+            // Padding
+            if (resources.TryGetValue("ComponentPaddingSmall", out var padSmall) && padSmall is Thickness padSmallVal)
+                ChipBorder.Padding = padSmallVal;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Chip.UpdateChipSize failed: {ex}");
         }
     }
 
@@ -99,11 +100,11 @@ public partial class Chip : ContentView
                 TextLabel.TextColor = Colors.White;
                 break;
             case ChipType.Success:
-                ChipBorder.BackgroundColor = Color.FromArgb("#30D158");
+                ChipBorder.BackgroundColor = Color.FromArgb("#34C759");
                 TextLabel.TextColor = Colors.White;
                 break;
             case ChipType.Warning:
-                ChipBorder.BackgroundColor = Color.FromArgb("#FF9F0A");
+                ChipBorder.BackgroundColor = Color.FromArgb("#FF9500");
                 TextLabel.TextColor = Colors.White;
                 break;
             case ChipType.Error:

@@ -27,7 +27,6 @@ public partial class Alert : ContentView
             {
                 UpdateAlertStyle();
                 UpdateAlertSize();
-                SizeManager.SizeChanged += (s, e) => UpdateAlertSize();
                 _isInitialized = true;
             }
             catch (Exception ex)
@@ -59,30 +58,25 @@ public partial class Alert : ContentView
     {
         try
         {
-            switch (SizeManager.CurrentSize)
-            {
-                case ComponentSize.Phone:
-                    IconLabel.FontSize = 20;
-                    TitleLabel.FontSize = 14;
-                    MessageLabel.FontSize = 13;
-                    CloseBtn.FontSize = 14;
-                    AlertBorder.Padding = new Thickness(16);
-                    break;
-                case ComponentSize.Tablet:
-                    IconLabel.FontSize = 28;
-                    TitleLabel.FontSize = 18;
-                    MessageLabel.FontSize = 16;
-                    CloseBtn.FontSize = 18;
-                    AlertBorder.Padding = new Thickness(20);
-                    break;
-                case ComponentSize.TV:
-                    IconLabel.FontSize = 36;
-                    TitleLabel.FontSize = 24;
-                    MessageLabel.FontSize = 20;
-                    CloseBtn.FontSize = 24;
-                    AlertBorder.Padding = new Thickness(24);
-                    break;
-            }
+            var resources = Application.Current?.Resources;
+            if (resources == null) return;
+            
+            // 从资源字典读取字体大小
+            if (resources.TryGetValue("ComponentIconSizePhoneSmall", out var iconSmall) && iconSmall is double iconSmallVal)
+                IconLabel.FontSize = iconSmallVal;
+            
+            if (resources.TryGetValue("ComponentTitleSizeMedium", out var titleMed) && titleMed is double titleMedVal)
+                TitleLabel.FontSize = titleMedVal;
+            
+            if (resources.TryGetValue("ComponentBodySizeMedium", out var bodyMed) && bodyMed is double bodyMedVal)
+                MessageLabel.FontSize = bodyMedVal;
+            
+            if (resources.TryGetValue("ComponentTitleSizeLarge", out var titleLg) && titleLg is double titleLgVal)
+                CloseBtn.FontSize = titleLgVal;
+            
+            // Padding
+            if (resources.TryGetValue("ComponentPaddingMedium", out var padMed) && padMed is Thickness padMedVal)
+                AlertBorder.Padding = padMedVal;
         }
         catch (Exception ex)
         {

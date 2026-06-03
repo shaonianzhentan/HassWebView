@@ -34,7 +34,23 @@ public partial class Input : ContentView
         InputEntry.Focused += OnFocused;
         InputEntry.Unfocused += OnUnfocused;
         UpdateInputSize();
-        SizeManager.SizeChanged += (s, e) => UpdateInputSize();
+        SizeManager.SizeChanged += OnSizeChanged;
+    }
+
+    private void OnSizeChanged(object? sender, EventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() => UpdateInputSize());
+    }
+
+    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
+    {
+        base.OnHandlerChanging(args);
+        if (args.OldHandler != null)
+        {
+            InputEntry.Focused -= OnFocused;
+            InputEntry.Unfocused -= OnUnfocused;
+            SizeManager.SizeChanged -= OnSizeChanged;
+        }
     }
 
     public string Text
@@ -87,38 +103,40 @@ public partial class Input : ContentView
 
     private void UpdateInputSize()
     {
-        switch (SizeManager.CurrentSize)
+        try
         {
-            case ComponentSize.Phone:
-                LabelLabel.FontSize = 13;
-                InputEntry.FontSize = 16;
-                ErrorLabel.FontSize = 12;
-                InputBorder.Padding = new Thickness(12);
-                break;
-            case ComponentSize.Tablet:
-                LabelLabel.FontSize = 16;
-                InputEntry.FontSize = 20;
-                ErrorLabel.FontSize = 14;
-                InputBorder.Padding = new Thickness(16);
-                break;
-            case ComponentSize.TV:
-                LabelLabel.FontSize = 20;
-                InputEntry.FontSize = 26;
-                ErrorLabel.FontSize = 18;
-                InputBorder.Padding = new Thickness(20);
-                break;
+            var resources = Application.Current?.Resources;
+            if (resources == null) return;
+            
+            // 从资源字典读取字体大小
+            if (resources.TryGetValue("ComponentBodySizeMedium", out var bodyMed) && bodyMed is double bodyMedVal)
+                LabelLabel.FontSize = bodyMedVal;
+            
+            if (resources.TryGetValue("ComponentTitleSizeLarge", out var titleLg) && titleLg is double titleLgVal)
+                InputEntry.FontSize = titleLgVal;
+            
+            if (resources.TryGetValue("ComponentBodySizeSmall", out var bodySmall) && bodySmall is double bodySmallVal)
+                ErrorLabel.FontSize = bodySmallVal;
+            
+            // Padding
+            if (resources.TryGetValue("ComponentPaddingMedium", out var padMed) && padMed is Thickness padMedVal)
+                InputBorder.Padding = padMedVal;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Input.UpdateInputSize failed: {ex}");
         }
     }
 
     private void OnFocused(object? sender, FocusEventArgs e)
     {
-        InputBorder.Stroke = Color.FromArgb("#007AFF");
-        InputBorder.BackgroundColor = Color.FromArgb("#F0F7FF");
+        // 使用主题颜色表示聚焦状态
+        InputBorder.Stroke = new SolidColorBrush(Color.FromArgb("#007AFF"));
     }
 
     private void OnUnfocused(object? sender, FocusEventArgs e)
     {
-        InputBorder.Stroke = Color.FromArgb("#E5E5EA");
-        InputBorder.BackgroundColor = Colors.White;
+        // 恢复默认边框颜色
+        InputBorder.Stroke = new SolidColorBrush(Color.FromArgb("#E5E5EA"));
     }
 }

@@ -22,8 +22,22 @@ public partial class Spinner : ContentView
         Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
         {
             UpdateSpinnerSize();
-            SizeManager.SizeChanged += (s, e) => UpdateSpinnerSize();
+            SizeManager.SizeChanged += OnSizeManagerChanged;
         });
+    }
+
+    private void OnSizeManagerChanged(object? sender, EventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() => UpdateSpinnerSize());
+    }
+
+    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
+    {
+        base.OnHandlerChanging(args);
+        if (args.OldHandler != null)
+        {
+            SizeManager.SizeChanged -= OnSizeManagerChanged;
+        }
     }
 
     public bool IsRunning
@@ -61,18 +75,15 @@ public partial class Spinner : ContentView
             double baseSize = (double)GetValue(SizeProperty);
             double scale = baseSize / 48;
             
-            switch (SizeManager.CurrentSize)
+            // Scale factor 根据尺寸设置
+            double scaleFactor = SizeManager.CurrentSize switch
             {
-                case ComponentSize.Phone:
-                    SpinnerIndicator.Scale = scale * 1.0;
-                    break;
-                case ComponentSize.Tablet:
-                    SpinnerIndicator.Scale = scale * 1.4;
-                    break;
-                case ComponentSize.TV:
-                    SpinnerIndicator.Scale = scale * 1.8;
-                    break;
-            }
+                Models.ComponentSize.Tablet => 1.4,
+                Models.ComponentSize.TV => 1.8,
+                _ => 1.0
+            };
+            
+            SpinnerIndicator.Scale = scale * scaleFactor;
         }
         catch (Exception ex)
         {

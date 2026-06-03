@@ -9,7 +9,6 @@ public partial class ButtonCard : ContentView
         InitializeComponent();
         UpdateStateColor();
         UpdateSize();
-        SizeManager.SizeChanged += (s, e) => UpdateSize();
     }
 
     public static readonly BindableProperty IconProperty =
@@ -81,33 +80,45 @@ public partial class ButtonCard : ContentView
             _ => Color.FromArgb("#636366")
         };
         StateColor = color;
+        
+        // 如果已经初始化，更新主题
+        if (StateLabel != null)
+        {
+            StateLabel.TextColor = color;
+        }
     }
 
     private void UpdateSize()
     {
-        switch (SizeManager.CurrentSize)
+        try
         {
-            case ComponentSize.Phone:
-                CardBorder.Padding = new Thickness(16);
-                IconLabel.FontSize = 36;
-                TitleLabel.FontSize = 14;
-                StateLabel.FontSize = 12;
+            var resources = Application.Current?.Resources;
+            if (resources == null) return;
+            
+            // 从资源字典读取尺寸值
+            if (resources.TryGetValue("ComponentPaddingMedium", out var padMed) && padMed is Thickness padMedVal)
+                CardBorder.Padding = padMedVal;
+            
+            if (resources.TryGetValue("ComponentIconSizeMedium", out var iconMed) && iconMed is double iconMedVal)
+                IconLabel.FontSize = iconMedVal;
+            
+            if (resources.TryGetValue("ComponentTitleSizeMedium", out var titleMed) && titleMed is double titleMedVal)
+                TitleLabel.FontSize = titleMedVal;
+            
+            if (resources.TryGetValue("ComponentBodySizeMedium", out var bodyMed) && bodyMed is double bodyMedVal)
+                StateLabel.FontSize = bodyMedVal;
+            
+            // Badge padding 使用特定值
+            if (SizeManager.CurrentSize == ComponentSize.Phone)
                 BadgeBorder.Padding = new Thickness(6, 3);
-                break;
-            case ComponentSize.Tablet:
-                CardBorder.Padding = new Thickness(20);
-                IconLabel.FontSize = 48;
-                TitleLabel.FontSize = 16;
-                StateLabel.FontSize = 14;
+            else if (SizeManager.CurrentSize == ComponentSize.Tablet)
                 BadgeBorder.Padding = new Thickness(8, 4);
-                break;
-            case ComponentSize.TV:
-                CardBorder.Padding = new Thickness(28);
-                IconLabel.FontSize = 64;
-                TitleLabel.FontSize = 22;
-                StateLabel.FontSize = 18;
+            else
                 BadgeBorder.Padding = new Thickness(12, 6);
-                break;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ButtonCard] UpdateSize failed: {ex.Message}");
         }
     }
 }

@@ -4,12 +4,12 @@
              xmlns:component="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.DemoComponent.Views.SliderCardExamplePage"
              Title="SliderCard 组件示例"
-             BackgroundColor="{AppThemeBinding Light=#F2F2F7, Dark=#1C1C1E}">
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="SliderCard 滑块卡片组件" FontSize="24" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#FFFFFF}" />
-            <Label Text="带标签的滑块组件，用于调节数值" FontSize="14" TextColor="{AppThemeBinding Light=#86868B, Dark=#8E8E93}" />
+            <Label Text="SliderCard 滑块卡片组件" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+            <Label Text="带标签的滑块组件，用于调节数值" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
             
             <!-- 只使用 SliderCard 组件 -->
             <component:SliderCard Title="亮度调节" Value="75" Min="0" Max="100" Unit="%" />

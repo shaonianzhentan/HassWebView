@@ -16,7 +16,6 @@ public partial class ControlSwitch : ContentView
         InitializeComponent();
         UpdateSwitchVisual();
         UpdateSwitchSize();
-        SizeManager.SizeChanged += (s, e) => UpdateSwitchSize();
     }
 
     public bool IsToggled
@@ -44,28 +43,36 @@ public partial class ControlSwitch : ContentView
 
     private void UpdateSwitchSize()
     {
-        switch (SizeManager.CurrentSize)
+        try
         {
-            case ComponentSize.Phone:
-                SwitchGrid.WidthRequest = 51;
-                SwitchGrid.HeightRequest = 31;
-                Thumb.WidthRequest = 27;
-                Thumb.HeightRequest = 27;
-                break;
-            case ComponentSize.Tablet:
-                SwitchGrid.WidthRequest = 76;
-                SwitchGrid.HeightRequest = 46;
-                Thumb.WidthRequest = 40;
-                Thumb.HeightRequest = 40;
-                break;
-            case ComponentSize.TV:
-                SwitchGrid.WidthRequest = 102;
-                SwitchGrid.HeightRequest = 62;
-                Thumb.WidthRequest = 54;
-                Thumb.HeightRequest = 54;
-                break;
+            // WidthRequest 和 HeightRequest 根据尺寸设置
+            switch (SizeManager.CurrentSize)
+            {
+                case Models.ComponentSize.Tablet:
+                    SwitchGrid.WidthRequest = 76;
+                    SwitchGrid.HeightRequest = 46;
+                    Thumb.WidthRequest = 40;
+                    Thumb.HeightRequest = 40;
+                    break;
+                case Models.ComponentSize.TV:
+                    SwitchGrid.WidthRequest = 102;
+                    SwitchGrid.HeightRequest = 62;
+                    Thumb.WidthRequest = 54;
+                    Thumb.HeightRequest = 54;
+                    break;
+                default: // Phone
+                    SwitchGrid.WidthRequest = 51;
+                    SwitchGrid.HeightRequest = 31;
+                    Thumb.WidthRequest = 27;
+                    Thumb.HeightRequest = 27;
+                    break;
+            }
+            UpdateSwitchVisual();
         }
-        UpdateSwitchVisual();
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"ControlSwitch.UpdateSwitchSize failed: {ex}");
+        }
     }
 
     private void UpdateSwitchVisual()
@@ -74,8 +81,8 @@ public partial class ControlSwitch : ContentView
         {
             SwitchBorder.BackgroundColor = IsToggled 
                 ? Color.FromArgb("#B3B3B3") 
-                : Color.FromArgb("#D1D1D6");
-            Thumb.Fill = Color.FromArgb("#EFEFF4");
+                : Color.FromArgb("#EFEFF4");
+            Thumb.Fill = Colors.White;
             Thumb.Opacity = 0.6;
         }
         else

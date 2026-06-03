@@ -5,11 +5,14 @@
              x:Name="this">
 
     <Border x:Name="CardBorder"
-            BackgroundColor="#FFFFFF"
+            BackgroundColor="{DynamicResource CardBackgroundColor}"
             Padding="16">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="12" />
         </Border.StrokeShape>
+        <Border.Stroke>
+            <SolidColorBrush Color="{DynamicResource BorderColor}" />
+        </Border.Stroke>
         <ContentPresenter Content="{Binding Source={x:Reference this}, Path=Content}" />
     </Border>
 

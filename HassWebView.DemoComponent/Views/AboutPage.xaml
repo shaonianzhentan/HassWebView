@@ -3,73 +3,73 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="HassWebView.DemoComponent.Views.AboutPage"
              Title="关于"
-             BackgroundColor="#F2F2F7">
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
     
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
             
             <!-- Logo 和应用名称 -->
             <VerticalStackLayout Spacing="12" HorizontalOptions="Center" Margin="0,20,0,0">
-                <Border WidthRequest="100" HeightRequest="100" BackgroundColor="#007AFF" Padding="0" HorizontalOptions="Center">
+                <Border WidthRequest="100" HeightRequest="100" BackgroundColor="{DynamicResource AccentColor}" Padding="0" HorizontalOptions="Center">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="50" />
                     </Border.StrokeShape>
                     <Label Text="🏠" FontSize="50" HorizontalOptions="Center" VerticalOptions="Center" />
                 </Border>
-                <Label x:Name="AppNameLabel" FontSize="28" FontAttributes="Bold" TextColor="#1D1D1F" />
-                <Label Text="Home Assistant 设计系统组件库" FontSize="14" TextColor="#86868B" />
+                <Label x:Name="AppNameLabel" FontSize="28" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                <Label Text="Home Assistant 设计系统组件库" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
             </VerticalStackLayout>
             
             <!-- 应用信息 -->
-            <Label Text="应用信息" FontSize="18" FontAttributes="Bold" TextColor="#1D1D1F" />
+            <Label Text="应用信息" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
             
-            <Border Padding="16" BackgroundColor="#FFFFFF">
+            <Border Padding="16" BackgroundColor="{DynamicResource CardBackgroundColor}">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="12" />
                 </Border.StrokeShape>
                 <VerticalStackLayout Spacing="12">
                     <HorizontalStackLayout Spacing="12">
                         <Label Text="📱" FontSize="18" />
-                        <Label Text="应用名称:" FontSize="14" TextColor="#636366" />
-                        <Label x:Name="AppNameValue" FontSize="14" TextColor="#1D1D1F" />
+                        <Label Text="应用名称:" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+                        <Label x:Name="AppNameValue" FontSize="14" TextColor="{DynamicResource PrimaryTextColor}" />
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="12">
                         <Label Text="🔢" FontSize="18" />
-                        <Label Text="版本号:" FontSize="14" TextColor="#636366" />
-                        <Label x:Name="VersionValue" FontSize="14" TextColor="#1D1D1F" />
+                        <Label Text="版本号:" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+                        <Label x:Name="VersionValue" FontSize="14" TextColor="{DynamicResource PrimaryTextColor}" />
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="12">
                         <Label Text="🛠️" FontSize="18" />
-                        <Label Text="框架:" FontSize="14" TextColor="#636366" />
-                        <Label x:Name="FrameworkValue" FontSize="14" TextColor="#1D1D1F" />
+                        <Label Text="框架:" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+                        <Label x:Name="FrameworkValue" FontSize="14" TextColor="{DynamicResource PrimaryTextColor}" />
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="12">
                         <Label Text="🎨" FontSize="18" />
-                        <Label Text="设计规范:" FontSize="14" TextColor="#636366" />
-                        <Label x:Name="DesignSystemValue" FontSize="14" TextColor="#1D1D1F" />
+                        <Label Text="设计规范:" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+                        <Label x:Name="DesignSystemValue" FontSize="14" TextColor="{DynamicResource PrimaryTextColor}" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
             </Border>
             
             <!-- 功能特性 -->
-            <Label Text="功能特性" FontSize="18" FontAttributes="Bold" TextColor="#1D1D1F" />
+            <Label Text="功能特性" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
             
-            <Border Padding="16" BackgroundColor="#FFFFFF">
+            <Border Padding="16" BackgroundColor="{DynamicResource CardBackgroundColor}">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="12" />
                 </Border.StrokeShape>
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="• 支持亮色/暗色/系统主题切换" FontSize="14" TextColor="#636366" />
-                    <Label Text="• 支持手机/平板/电视尺寸适配" FontSize="14" TextColor="#636366" />
-                    <Label Text="• 遵循 Home Assistant 设计规范" FontSize="14" TextColor="#636366" />
-                    <Label Text="• 跨平台兼容（iOS/macOS/Android/Windows）" FontSize="14" TextColor="#636366" />
+                    <Label Text="• 支持亮色/暗色/系统主题切换" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+                    <Label Text="• 支持手机/平板/电视尺寸适配" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+                    <Label Text="• 遵循 Home Assistant 设计规范" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+                    <Label Text="• 跨平台兼容（iOS/macOS/Android/Windows）" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
                 </VerticalStackLayout>
             </Border>
             
             <!-- 页脚 -->
             <VerticalStackLayout Spacing="8" Margin="0,20,0,40" HorizontalOptions="Center">
-                <Label Text="Made with ❤️ for Home Assistant" FontSize="12" TextColor="#86868B" />
-                <Label Text="© 2024 HassWebView Team" FontSize="12" TextColor="#86868B" />
+                <Label Text="Made with ❤️ for Home Assistant" FontSize="12" TextColor="{DynamicResource TertiaryTextColor}" />
+                <Label Text="© 2024 HassWebView Team" FontSize="12" TextColor="{DynamicResource TertiaryTextColor}" />
             </VerticalStackLayout>
             
         </VerticalStackLayout>

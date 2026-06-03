@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Hosting;
+using HassWebView.Component.Models;
 
 namespace HassWebView.Component;
 
@@ -8,34 +9,40 @@ public class HassComponentInitializer : IMauiInitializeService
 {
     public void Initialize(IServiceProvider serviceProvider)
     {
+        System.Diagnostics.Debug.WriteLine("[HassComponentInitializer] Initialize called");
+        
         try
         {
             var application = serviceProvider.GetService<Application>() ?? Application.Current;
             if (application?.Resources?.MergedDictionaries == null)
             {
-                System.Diagnostics.Debug.WriteLine("Application or Resources is null");
+                System.Diagnostics.Debug.WriteLine("[HassComponentInitializer] ERROR: Application or Resources is null");
                 return;
             }
 
-            // 延迟加载资源字典，避免在应用初始化期间访问资源
+            System.Diagnostics.Debug.WriteLine($"[HassComponentInitializer] Application found. MergedDictionaries count: {application.Resources.MergedDictionaries.Count}");
+
+            // 延迟初始化主题系统
             application.Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
             {
                 try
                 {
-                    var colorsRes = new ResourceDictionary();
-                    colorsRes.Source = new Uri("Resources/Styles/Colors.xaml", UriKind.Relative);
-                    application.Resources.MergedDictionaries.Add(colorsRes);
-                    System.Diagnostics.Debug.WriteLine("Colors.xaml loaded successfully");
+                    System.Diagnostics.Debug.WriteLine("[HassComponentInitializer] Calling ThemeManager.Initialize()");
+                    // 初始化主题系统（会自动加载深色主题）
+                    ThemeManager.Initialize();
+                    System.Diagnostics.Debug.WriteLine("[HassComponentInitializer] Theme system initialized successfully");
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Failed to load Colors.xaml: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"[HassComponentInitializer] Failed to initialize theme system: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"[HassComponentInitializer] Stack trace: {ex.StackTrace}");
                 }
             });
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"HassComponentInitializer.Initialize failed: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[HassComponentInitializer] Initialize failed: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[HassComponentInitializer] Stack trace: {ex.StackTrace}");
         }
     }
 }

@@ -4,20 +4,22 @@
              x:Class="HassWebView.Component.Components.InfoRow"
              x:Name="this">
 
-    <Grid ColumnDefinitions="40,*,Auto" Padding="16,8" ColumnSpacing="8">
+    <Grid ColumnDefinitions="40,*,Auto" Padding="{DynamicResource ComponentPaddingSmall}" ColumnSpacing="8">
         <Label x:Name="IconLabel"
                Grid.Column="0"
                Text="{Binding Source={x:Reference this}, Path=Icon}"
-               FontSize="20"
+               FontSize="{DynamicResource ComponentIconSizePhoneSmall}"
                HorizontalOptions="Center" />
         <Label x:Name="LabelLabel"
                Grid.Column="1"
                Text="{Binding Source={x:Reference this}, Path=Label}"
-               Style="{StaticResource InfoRowTitleStyle}" />
+               FontSize="{DynamicResource ComponentTitleSizeMedium}"
+               TextColor="{DynamicResource PrimaryTextColor}" />
         <Label x:Name="ValueLabel"
                Grid.Column="2"
                Text="{Binding Source={x:Reference this}, Path=Value}"
-               Style="{StaticResource InfoRowValueStyle}" />
+               FontSize="{DynamicResource ComponentBodySizeMedium}"
+               TextColor="{DynamicResource SecondaryTextColor}" />
     </Grid>
 
 </ContentView>

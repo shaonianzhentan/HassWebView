@@ -7,8 +7,6 @@ public partial class InfoRow : ContentView
     public InfoRow()
     {
         InitializeComponent();
-        UpdateSize();
-        SizeManager.SizeChanged += (s, e) => UpdateSize();
     }
 
     public static readonly BindableProperty IconProperty =
@@ -36,27 +34,5 @@ public partial class InfoRow : ContentView
     {
         get => (string)GetValue(ValueProperty);
         set => SetValue(ValueProperty, value);
-    }
-
-    private void UpdateSize()
-    {
-        switch (SizeManager.CurrentSize)
-        {
-            case ComponentSize.Phone:
-                IconLabel.FontSize = 20;
-                LabelLabel.FontSize = 14;
-                ValueLabel.FontSize = 14;
-                break;
-            case ComponentSize.Tablet:
-                IconLabel.FontSize = 28;
-                LabelLabel.FontSize = 18;
-                ValueLabel.FontSize = 18;
-                break;
-            case ComponentSize.TV:
-                IconLabel.FontSize = 36;
-                LabelLabel.FontSize = 24;
-                ValueLabel.FontSize = 24;
-                break;
-        }
     }
 }

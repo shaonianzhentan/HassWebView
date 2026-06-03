@@ -5,8 +5,7 @@
              x:Name="this">
 
     <Border x:Name="BadgeBorder"
-            Padding="10,6"
-            BackgroundColor="{Binding Source={x:Reference this}, Path=BadgeColor}">
+            Padding="10,6">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="16" />
         </Border.StrokeShape>

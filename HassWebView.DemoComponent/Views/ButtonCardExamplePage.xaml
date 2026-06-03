@@ -4,12 +4,12 @@
              xmlns:component="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.DemoComponent.Views.ButtonCardExamplePage"
              Title="ButtonCard 组件示例"
-             BackgroundColor="#F2F2F7">
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="12">
-            <Label Text="ButtonCard 按钮卡片组件" FontSize="24" FontAttributes="Bold" TextColor="#1D1D1F" />
-            <Label Text="用于显示设备控制卡片" FontSize="14" TextColor="#86868B" />
+            <Label Text="ButtonCard 按钮卡片组件" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+            <Label Text="用于显示设备控制卡片" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
             
             <!-- 只使用 ButtonCard 组件 -->
             <component:ButtonCard Icon="💡" Title="客厅灯" State="开启" StateColor="#34C759" />

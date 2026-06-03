@@ -9,13 +9,10 @@ public enum ComponentSize
 
 public static class SizeManager
 {
-    public static ComponentSize CurrentSize { get; set; } = ComponentSize.Phone;
-    
-    public static event EventHandler? SizeChanged;
+    public static ComponentSize CurrentSize { get; private set; } = ComponentSize.Phone;
     
     public static void SetSize(ComponentSize size)
     {
         CurrentSize = size;
-        SizeChanged?.Invoke(null, EventArgs.Empty);
     }
 }

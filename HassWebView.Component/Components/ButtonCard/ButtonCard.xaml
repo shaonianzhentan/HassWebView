@@ -5,16 +5,20 @@
              x:Name="this">
 
     <Border x:Name="CardBorder"
-            Padding="16"
-            BackgroundColor="#FFFFFF">
+            BackgroundColor="{DynamicResource CardBackgroundColor}"
+            Padding="16">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="12" />
         </Border.StrokeShape>
+        <Border.Stroke>
+            <SolidColorBrush Color="{DynamicResource BorderColor}" />
+        </Border.Stroke>
         <VerticalStackLayout Spacing="8">
             <Grid ColumnDefinitions="*,Auto">
                 <Label x:Name="IconLabel"
                        Text="{Binding Source={x:Reference this}, Path=Icon}"
                        FontSize="36"
+                       TextColor="{DynamicResource PrimaryTextColor}"
                        VerticalOptions="Center" />
                 <Border x:Name="BadgeBorder"
                         Grid.Column="1"
@@ -30,8 +34,8 @@
             <Label x:Name="TitleLabel"
                    Text="{Binding Source={x:Reference this}, Path=Title}"
                    FontSize="16"
-                   FontAttributes="Bold"
-                   TextColor="#1D1D1F" />
+                   TextColor="{DynamicResource PrimaryTextColor}"
+                   FontAttributes="Bold" />
             <Label x:Name="StateLabel"
                    Text="{Binding Source={x:Reference this}, Path=State}"
                    FontSize="12"

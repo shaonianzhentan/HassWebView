@@ -8,7 +8,21 @@ public partial class SliderCard : ContentView
     {
         InitializeComponent();
         UpdateSize();
-        SizeManager.SizeChanged += (s, e) => UpdateSize();
+        SizeManager.SizeChanged += OnSizeChanged;
+    }
+
+    private void OnSizeChanged(object? sender, EventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() => UpdateSize());
+    }
+
+    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
+    {
+        base.OnHandlerChanging(args);
+        if (args.OldHandler != null)
+        {
+            SizeManager.SizeChanged -= OnSizeChanged;
+        }
     }
 
     public static readonly BindableProperty TitleProperty =
@@ -58,26 +72,32 @@ public partial class SliderCard : ContentView
 
     private void UpdateSize()
     {
-        switch (SizeManager.CurrentSize)
+        try
         {
-            case ComponentSize.Phone:
-                CardBorder.Padding = new Thickness(16);
-                TitleLabel.FontSize = 14;
-                ValueLabel.FontSize = 14;
-                ValueSlider.HeightRequest = 40;
-                break;
-            case ComponentSize.Tablet:
-                CardBorder.Padding = new Thickness(24);
-                TitleLabel.FontSize = 20;
-                ValueLabel.FontSize = 20;
-                ValueSlider.HeightRequest = 56;
-                break;
-            case ComponentSize.TV:
-                CardBorder.Padding = new Thickness(32);
-                TitleLabel.FontSize = 28;
-                ValueLabel.FontSize = 28;
-                ValueSlider.HeightRequest = 72;
-                break;
+            var resources = Application.Current?.Resources;
+            if (resources == null) return;
+            
+            // 从资源字典读取尺寸值
+            if (resources.TryGetValue("ComponentPaddingMedium", out var padMed) && padMed is Thickness padMedVal)
+                CardBorder.Padding = padMedVal;
+            
+            if (resources.TryGetValue("ComponentTitleSizeMedium", out var titleMed) && titleMed is double titleMedVal)
+            {
+                TitleLabel.FontSize = titleMedVal;
+                ValueLabel.FontSize = titleMedVal;
+            }
+            
+            // HeightRequest 根据尺寸设置
+            ValueSlider.HeightRequest = SizeManager.CurrentSize switch
+            {
+                Models.ComponentSize.Tablet => 56,
+                Models.ComponentSize.TV => 72,
+                _ => 40
+            };
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"SliderCard.UpdateSize failed: {ex}");
         }
     }
 }

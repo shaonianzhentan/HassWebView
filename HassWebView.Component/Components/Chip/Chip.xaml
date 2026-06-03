@@ -5,8 +5,7 @@
              x:Name="this">
 
     <Border x:Name="ChipBorder"
-            Padding="10,6"
-            BackgroundColor="#EFEFF4">
+            Padding="10,6">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="16" />
         </Border.StrokeShape>
@@ -17,12 +16,10 @@
                    IsVisible="{Binding Source={x:Reference this}, Path=ShowIcon}" />
             <Label x:Name="TextLabel"
                    Text="{Binding Source={x:Reference this}, Path=Text}"
-                   FontSize="14"
-                   TextColor="#1D1D1F" />
+                   FontSize="14" />
             <Button x:Name="CloseBtn"
                     Text="✕"
                     FontSize="12"
-                    TextColor="#86868B"
                     BackgroundColor="Transparent"
                     WidthRequest="20"
                     HeightRequest="20"

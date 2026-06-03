@@ -4,12 +4,12 @@
              xmlns:component="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.DemoComponent.Views.ControlSwitchExamplePage"
              Title="ControlSwitch 组件示例"
-             BackgroundColor="#F2F2F7">
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="ControlSwitch 开关组件" FontSize="24" FontAttributes="Bold" TextColor="#1D1D1F" />
-            <Label Text="用于切换布尔状态的开关控件" FontSize="14" TextColor="#86868B" />
+            <Label Text="ControlSwitch 开关组件" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+            <Label Text="用于切换布尔状态的开关控件" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
             
             <!-- 只使用 ControlSwitch 组件 -->
             <component:ControlSwitch IsToggled="False" />

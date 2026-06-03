@@ -9,7 +9,21 @@ public partial class StateBadge : ContentView
         InitializeComponent();
         UpdateStateColor();
         UpdateSize();
-        SizeManager.SizeChanged += (s, e) => UpdateSize();
+        SizeManager.SizeChanged += OnSizeChanged;
+    }
+
+    private void OnSizeChanged(object? sender, EventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() => UpdateSize());
+    }
+
+    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
+    {
+        base.OnHandlerChanging(args);
+        if (args.OldHandler != null)
+        {
+            SizeManager.SizeChanged -= OnSizeChanged;
+        }
     }
 
     public static readonly BindableProperty StateProperty =
@@ -34,33 +48,35 @@ public partial class StateBadge : ContentView
             "open" => Color.FromArgb("#34C759"),
             "active" => Color.FromArgb("#34C759"),
             "locked" => Color.FromArgb("#34C759"),
-            "off" => Color.FromArgb("#8E8E93"),
-            "closed" => Color.FromArgb("#8E8E93"),
-            "inactive" => Color.FromArgb("#8E8E93"),
-            "unlocked" => Color.FromArgb("#8E8E93"),
+            "off" => Color.FromArgb("#636366"),
+            "closed" => Color.FromArgb("#636366"),
+            "inactive" => Color.FromArgb("#636366"),
+            "unlocked" => Color.FromArgb("#636366"),
             "unavailable" => Color.FromArgb("#FF3B30"),
             "unknown" => Color.FromArgb("#FF9500"),
-            _ => Color.FromArgb("#8E8E93")
+            _ => Color.FromArgb("#636366")
         };
         BadgeBorder.BackgroundColor = color;
     }
 
     private void UpdateSize()
     {
-        switch (SizeManager.CurrentSize)
+        try
         {
-            case ComponentSize.Phone:
-                BadgeBorder.Padding = new Thickness(10, 6);
-                StateLabel.FontSize = 11;
-                break;
-            case ComponentSize.Tablet:
-                BadgeBorder.Padding = new Thickness(16, 10);
-                StateLabel.FontSize = 16;
-                break;
-            case ComponentSize.TV:
-                BadgeBorder.Padding = new Thickness(24, 14);
-                StateLabel.FontSize = 24;
-                break;
+            var resources = Application.Current?.Resources;
+            if (resources == null) return;
+            
+            // 从资源字典读取字体大小
+            if (resources.TryGetValue("ComponentBodySizeSmall", out var bodySmall) && bodySmall is double bodySmallVal)
+                StateLabel.FontSize = bodySmallVal;
+            
+            // Padding
+            if (resources.TryGetValue("ComponentPaddingSmall", out var padSmall) && padSmall is Thickness padSmallVal)
+                BadgeBorder.Padding = padSmallVal;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"StateBadge.UpdateSize failed: {ex}");
         }
     }
 }

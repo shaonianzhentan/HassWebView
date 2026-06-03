@@ -12,8 +12,22 @@ public partial class SizeSelector : ContentView
         Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
         {
             UpdateButtonStates();
-            SizeManager.SizeChanged += (s, e) => UpdateButtonStates();
+            SizeManager.SizeChanged += OnSizeChanged;
         });
+    }
+
+    private void OnSizeChanged(object? sender, EventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() => UpdateButtonStates());
+    }
+
+    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
+    {
+        base.OnHandlerChanging(args);
+        if (args.OldHandler != null)
+        {
+            SizeManager.SizeChanged -= OnSizeChanged;
+        }
     }
 
     private void OnSizeClicked(object sender, EventArgs e)
