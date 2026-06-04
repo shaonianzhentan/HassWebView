@@ -34,12 +34,6 @@ public partial class Input : ContentView
         InputEntry.Focused += OnFocused;
         InputEntry.Unfocused += OnUnfocused;
         UpdateInputSize();
-        SizeManager.SizeChanged += OnSizeChanged;
-    }
-
-    private void OnSizeChanged(object? sender, EventArgs e)
-    {
-        MainThread.BeginInvokeOnMainThread(() => UpdateInputSize());
     }
 
     protected override void OnHandlerChanging(HandlerChangingEventArgs args)
@@ -49,7 +43,6 @@ public partial class Input : ContentView
         {
             InputEntry.Focused -= OnFocused;
             InputEntry.Unfocused -= OnUnfocused;
-            SizeManager.SizeChanged -= OnSizeChanged;
         }
     }
 

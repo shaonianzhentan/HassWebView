@@ -3,24 +3,32 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="HassWebView.Component.Components.Dialog"
              x:Name="this"
-             IsVisible="False">
+             IsVisible="False"
+             BackgroundColor="Transparent"
+             HorizontalOptions="FillAndExpand"
+             VerticalOptions="FillAndExpand">
 
-    <!-- 背景遮罩 -->
-    <Grid x:Name="OverlayGrid"
-          BackgroundColor="#000000"
-          Opacity="0.5">
-        <Grid.GestureRecognizers>
-            <TapGestureRecognizer Tapped="OnOverlayTapped" />
-        </Grid.GestureRecognizers>
+    <!-- 使用 AbsoluteLayout 确保全屏覆盖 -->
+    <AbsoluteLayout HorizontalOptions="FillAndExpand"
+                    VerticalOptions="FillAndExpand">
+        <!-- 背景遮罩 - 铺满全屏 -->
+        <Grid AbsoluteLayout.LayoutFlags="All"
+              AbsoluteLayout.LayoutBounds="0,0,1,1"
+              BackgroundColor="#000000"
+              Opacity="0.5">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnOverlayTapped" />
+            </Grid.GestureRecognizers>
+        </Grid>
         
-        <!-- 对话框内容 -->
+        <!-- 对话框内容 - 居中显示 -->
         <Border x:Name="DialogBorder"
+                AbsoluteLayout.LayoutFlags="PositionProportional"
+                AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
                 Padding="24"
-                BackgroundColor="#FFFFFF"
+                BackgroundColor="{DynamicResource CardBackgroundColor}"
                 WidthRequest="320"
-                HeightRequest="240"
-                HorizontalOptions="Center"
-                VerticalOptions="Center">
+                Opacity="1">
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="16" />
             </Border.StrokeShape>
@@ -29,35 +37,36 @@
                 <!-- 标题 -->
                 <Label x:Name="TitleLabel"
                        Text="{Binding Source={x:Reference this}, Path=Title}"
-                       FontSize="18"
+                       FontSize="{DynamicResource ComponentTitleSizePhoneLarge}"
                        FontAttributes="Bold"
-                       TextColor="#1D1D1F" />
+                       TextColor="{DynamicResource PrimaryTextColor}" />
                 
                 <!-- 内容 -->
                 <Label x:Name="ContentLabel"
                        Text="{Binding Source={x:Reference this}, Path=Message}"
-                       FontSize="14"
-                       TextColor="#636366"
+                       FontSize="{DynamicResource ComponentBodySizePhoneMedium}"
+                       TextColor="{DynamicResource SecondaryTextColor}"
                        LineBreakMode="WordWrap" />
                 
                 <!-- 按钮区域 -->
                 <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
                     <Button x:Name="CancelBtn"
                             Text="{Binding Source={x:Reference this}, Path=CancelText}"
-                            FontSize="14"
-                            TextColor="#007AFF"
+                            FontSize="{DynamicResource ComponentBodySizePhoneMedium}"
+                            TextColor="{DynamicResource AccentColor}"
                             BackgroundColor="Transparent"
+                            CornerRadius="8"
                             Clicked="OnCancelClicked" />
                     <Button x:Name="ConfirmBtn"
                             Text="{Binding Source={x:Reference this}, Path=ConfirmText}"
-                            FontSize="14"
-                            TextColor="White"
-                            BackgroundColor="#007AFF"
+                            FontSize="{DynamicResource ComponentBodySizePhoneMedium}"
+                            TextColor="{DynamicResource ButtonTextColor}"
+                            BackgroundColor="{DynamicResource ButtonBackgroundColor}"
                             CornerRadius="8"
                             Clicked="OnConfirmClicked" />
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </Border>
-    </Grid>
+    </AbsoluteLayout>
 
 </ContentView>

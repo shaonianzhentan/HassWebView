@@ -5,16 +5,15 @@
              x:Name="this">
 
     <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
-        <!-- 最简单的实现，只使用 Label -->
         <Label x:Name="ValueLabel"
                Text="0%"
-               FontSize="28"
+               FontSize="{DynamicResource ComponentTitleSizeExtraLarge}"
                FontAttributes="Bold"
-               TextColor="#1D1D1F" />
+               TextColor="{DynamicResource PrimaryTextColor}" />
         <Label x:Name="LabelLabel"
                Text="{Binding Source={x:Reference this}, Path=Label}"
-               FontSize="12"
-               TextColor="#86868B"
+               FontSize="{DynamicResource ComponentBodySizeSmall}"
+               TextColor="{DynamicResource SecondaryTextColor}"
                HorizontalOptions="Center" />
     </VerticalStackLayout>
 

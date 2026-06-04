@@ -10,15 +10,11 @@ public partial class EntityRow : ContentView
     {
         InitializeComponent();
         
-        // 延迟初始化以避免应用未完全启动时访问 Application.Current
         Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
         {
             try
             {
                 UpdateColors();
-                UpdateSize();
-                SizeManager.SizeChanged += OnSizeChanged;
-                ThemeManager.ThemeChanged += OnThemeChanged;
                 _isInitialized = true;
             }
             catch (Exception ex)
@@ -26,26 +22,6 @@ public partial class EntityRow : ContentView
                 System.Diagnostics.Debug.WriteLine($"EntityRow initialization failed: {ex}");
             }
         });
-    }
-
-    private void OnSizeChanged(object? sender, EventArgs e)
-    {
-        MainThread.BeginInvokeOnMainThread(() => UpdateSize());
-    }
-
-    private void OnThemeChanged(object? sender, EventArgs e)
-    {
-        MainThread.BeginInvokeOnMainThread(() => UpdateColors());
-    }
-
-    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
-    {
-        base.OnHandlerChanging(args);
-        if (args.OldHandler != null)
-        {
-            SizeManager.SizeChanged -= OnSizeChanged;
-            ThemeManager.ThemeChanged -= OnThemeChanged;
-        }
     }
 
     public static readonly BindableProperty IconTextProperty =
@@ -101,7 +77,16 @@ public partial class EntityRow : ContentView
     }
 
     public static readonly BindableProperty IconBackgroundColorProperty =
-        BindableProperty.Create(nameof(IconBackgroundColor), typeof(Color), typeof(EntityRow), Color.FromArgb("#EFEFF4"));
+        BindableProperty.Create(nameof(IconBackgroundColor), typeof(Color), typeof(EntityRow), Colors.Transparent);
+
+    public Color IconTextColor
+    {
+        get => (Color)GetValue(IconTextColorProperty);
+        set => SetValue(IconTextColorProperty, value);
+    }
+
+    public static readonly BindableProperty IconTextColorProperty =
+        BindableProperty.Create(nameof(IconTextColor), typeof(Color), typeof(EntityRow), Colors.Black);
 
     public Color StateColor
     {
@@ -110,7 +95,7 @@ public partial class EntityRow : ContentView
     }
 
     public static readonly BindableProperty StateColorProperty =
-        BindableProperty.Create(nameof(StateColor), typeof(Color), typeof(EntityRow), Color.FromArgb("#636366"));
+        BindableProperty.Create(nameof(StateColor), typeof(Color), typeof(EntityRow), Colors.Gray);
 
     private void SafeUpdateColors()
     {
@@ -124,52 +109,28 @@ public partial class EntityRow : ContentView
     {
         try
         {
-            var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
-            
-            if (IsActive || State?.ToLower() == "on")
+            var resources = Application.Current?.Resources;
+            if (resources == null) return;
+
+            var isDark = Application.Current.RequestedTheme == AppTheme.Dark;
+            var isActive = IsActive || (State?.ToLower() == "on" || State?.ToLower() == "open");
+
+            if (isActive)
             {
-                IconBackgroundColor = Color.FromArgb("#34C759");
-                StateColor = Color.FromArgb("#34C759");
+                IconBackgroundColor = (Color)resources["SuccessColor"];
+                IconTextColor = Colors.White;
+                StateColor = (Color)resources["SuccessColor"];
             }
             else
             {
                 IconBackgroundColor = isDark ? Color.FromArgb("#3A3A3C") : Color.FromArgb("#EFEFF4");
+                IconTextColor = isDark ? Color.FromArgb("#FFFFFF") : Color.FromArgb("#1D1D1F");
                 StateColor = isDark ? Color.FromArgb("#8E8E93") : Color.FromArgb("#636366");
             }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"EntityRow.UpdateColors failed: {ex}");
-        }
-    }
-
-    private void UpdateSize()
-    {
-        try
-        {
-            var resources = Application.Current?.Resources;
-            if (resources == null) return;
-            
-            // 从资源字典读取尺寸值
-            if (resources.TryGetValue("ComponentIconSizePhoneSmall", out var iconSmall) && iconSmall is double iconSmallVal)
-                IconLabel.FontSize = iconSmallVal;
-            
-            if (resources.TryGetValue("ComponentTitleSizePhoneLarge", out var titleLg) && titleLg is double titleLgVal)
-                TitleLabel.FontSize = titleLgVal;
-            
-            if (resources.TryGetValue("ComponentBodySizePhoneMedium", out var bodyMed) && bodyMed is double bodyMedVal)
-                StateLabel.FontSize = bodyMedVal;
-            
-            if (resources.TryGetValue("ComponentIconSizePhoneLarge", out var iconLg) && iconLg is double iconLgVal)
-                ArrowLabel.FontSize = iconLgVal;
-            
-            // IconBorder padding
-            if (resources.TryGetValue("ComponentPaddingSmall", out var padSmall) && padSmall is Thickness padSmallVal)
-                IconBorder.Padding = padSmallVal;
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"EntityRow.UpdateSize failed: {ex}");
         }
     }
 }

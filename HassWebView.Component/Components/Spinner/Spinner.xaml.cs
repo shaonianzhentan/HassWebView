@@ -22,22 +22,7 @@ public partial class Spinner : ContentView
         Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
         {
             UpdateSpinnerSize();
-            SizeManager.SizeChanged += OnSizeManagerChanged;
         });
-    }
-
-    private void OnSizeManagerChanged(object? sender, EventArgs e)
-    {
-        MainThread.BeginInvokeOnMainThread(() => UpdateSpinnerSize());
-    }
-
-    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
-    {
-        base.OnHandlerChanging(args);
-        if (args.OldHandler != null)
-        {
-            SizeManager.SizeChanged -= OnSizeManagerChanged;
-        }
     }
 
     public bool IsRunning

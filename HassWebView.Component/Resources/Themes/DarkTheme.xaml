@@ -35,6 +35,66 @@
     <Color x:Key="WarningColor">#FF9F0A</Color>
     <Color x:Key="ErrorColor">#FF453A</Color>
     <Color x:Key="InfoColor">#64D2FF</Color>
+    <Color x:Key="AlertBackgroundColor">#3A3526</Color>
+
+    <!-- Chip 组件颜色 -->
+    <Color x:Key="ChipDefaultBackgroundColor">#3A3A3C</Color>
+    <Color x:Key="ChipDefaultTextColor">#FFFFFF</Color>
+    <Color x:Key="ChipPrimaryBackgroundColor">#0A84FF</Color>
+    <Color x:Key="ChipPrimaryTextColor">#FFFFFF</Color>
+    <Color x:Key="ChipSecondaryBackgroundColor">#636366</Color>
+    <Color x:Key="ChipSecondaryTextColor">#FFFFFF</Color>
+    <Color x:Key="ChipSuccessBackgroundColor">#30D158</Color>
+    <Color x:Key="ChipSuccessTextColor">#FFFFFF</Color>
+    <Color x:Key="ChipWarningBackgroundColor">#FF9F0A</Color>
+    <Color x:Key="ChipWarningTextColor">#FFFFFF</Color>
+    <Color x:Key="ChipErrorBackgroundColor">#FF453A</Color>
+    <Color x:Key="ChipErrorTextColor">#FFFFFF</Color>
+    <Color x:Key="ChipCloseButtonBackgroundColor">#4A4A4C</Color>
+    <Color x:Key="ChipCloseButtonTextColor">#8E8E93</Color>
+
+    <!-- Switch 组件颜色 -->
+    <Color x:Key="SwitchOffBackgroundColor">#3A3A3C</Color>
+    <Color x:Key="SwitchOnBackgroundColor">#0A84FF</Color>
+    <Color x:Key="SwitchDisabledBackgroundColor">#636366</Color>
+    <Color x:Key="SwitchThumbColor">#FFFFFF</Color>
+
+    <!-- Alert 组件颜色 -->
+    <Color x:Key="AlertWarningBackgroundColor">#3D2D00</Color>
+    <Color x:Key="AlertWarningTitleColor">#FFD60A</Color>
+    <Color x:Key="AlertWarningMessageColor">#FFE680</Color>
+    <Color x:Key="AlertErrorBackgroundColor">#4A0E0E</Color>
+    <Color x:Key="AlertErrorTitleColor">#FF6B6B</Color>
+    <Color x:Key="AlertErrorMessageColor">#FF8A8A</Color>
+    <Color x:Key="AlertSuccessBackgroundColor">#0E4A20</Color>
+    <Color x:Key="AlertSuccessTitleColor">#4CD964</Color>
+    <Color x:Key="AlertSuccessMessageColor">#6EE7A0</Color>
+    <Color x:Key="AlertInfoBackgroundColor">#0A1E3C</Color>
+    <Color x:Key="AlertInfoTitleColor">#5AC8FA</Color>
+    <Color x:Key="AlertInfoMessageColor">#87CEEB</Color>
+    <Color x:Key="AlertCloseButtonBackgroundColor">#4A4A4C</Color>
+    <Color x:Key="AlertCloseButtonTextColor">#8E8E93</Color>
+
+    <!-- StateBadge 组件颜色 -->
+    <Color x:Key="StateBadgeSuccessColor">#34C759</Color>
+    <Color x:Key="StateBadgeWarningColor">#FF9500</Color>
+    <Color x:Key="StateBadgeErrorColor">#FF3B30</Color>
+    <Color x:Key="StateBadgeDefaultColor">#5A5A5C</Color>
+    <Color x:Key="StateBadgeSuccessTextColor">#FFFFFF</Color>
+    <Color x:Key="StateBadgeWarningTextColor">#FFFFFF</Color>
+    <Color x:Key="StateBadgeErrorTextColor">#FFFFFF</Color>
+    <Color x:Key="StateBadgeDefaultTextColor">#FFFFFF</Color>
+    <Color x:Key="StateBadgeBorderColor">#6B6B6D</Color>
+
+    <!-- ButtonCard 组件颜色 -->
+    <Color x:Key="ButtonCardBadgeBackgroundColor">#FF9500</Color>
+    <Color x:Key="ButtonCardBadgeTextColor">#FFFFFF</Color>
+
+    <!-- SizeSelector 组件颜色 -->
+    <Color x:Key="SizeSelectorButtonBackgroundColor">#3A3A3C</Color>
+    <Color x:Key="SizeSelectorButtonTextColor">#8E8E93</Color>
+    <Color x:Key="SizeSelectorButtonSelectedBackgroundColor">#0A84FF</Color>
+    <Color x:Key="SizeSelectorButtonSelectedTextColor">#FFFFFF</Color>
 
     <!-- ========== 组件尺寸相关样式 ========== -->
     

@@ -1,30 +1,109 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.Component.Components.Chip"
-             x:Name="this">
+             x:Name="this"
+             HorizontalOptions="Start">
 
     <Border x:Name="ChipBorder"
-            Padding="10,6">
+            Padding="{DynamicResource ComponentPaddingSmall}">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="16" />
         </Border.StrokeShape>
-        <HorizontalStackLayout Spacing="6">
+        <Border.Triggers>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding Source={x:Reference this}, Path=Type}"
+                         Value="{x:Static local:ChipType.Default}">
+                <Setter Property="BackgroundColor" Value="{DynamicResource ChipDefaultBackgroundColor}" />
+            </DataTrigger>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding Source={x:Reference this}, Path=Type}"
+                         Value="{x:Static local:ChipType.Primary}">
+                <Setter Property="BackgroundColor" Value="{DynamicResource ChipPrimaryBackgroundColor}" />
+            </DataTrigger>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding Source={x:Reference this}, Path=Type}"
+                         Value="{x:Static local:ChipType.Secondary}">
+                <Setter Property="BackgroundColor" Value="{DynamicResource ChipSecondaryBackgroundColor}" />
+            </DataTrigger>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding Source={x:Reference this}, Path=Type}"
+                         Value="{x:Static local:ChipType.Success}">
+                <Setter Property="BackgroundColor" Value="{DynamicResource ChipSuccessBackgroundColor}" />
+            </DataTrigger>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding Source={x:Reference this}, Path=Type}"
+                         Value="{x:Static local:ChipType.Warning}">
+                <Setter Property="BackgroundColor" Value="{DynamicResource ChipWarningBackgroundColor}" />
+            </DataTrigger>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding Source={x:Reference this}, Path=Type}"
+                         Value="{x:Static local:ChipType.Error}">
+                <Setter Property="BackgroundColor" Value="{DynamicResource ChipErrorBackgroundColor}" />
+            </DataTrigger>
+        </Border.Triggers>
+        
+        <HorizontalStackLayout Spacing="6" HorizontalOptions="Start">
             <Label x:Name="IconLabel"
                    Text="{Binding Source={x:Reference this}, Path=IconText}"
-                   FontSize="14"
+                   FontSize="{DynamicResource ComponentBodySizeMedium}"
                    IsVisible="{Binding Source={x:Reference this}, Path=ShowIcon}" />
             <Label x:Name="TextLabel"
                    Text="{Binding Source={x:Reference this}, Path=Text}"
-                   FontSize="14" />
-            <Button x:Name="CloseBtn"
-                    Text="✕"
-                    FontSize="12"
-                    BackgroundColor="Transparent"
-                    WidthRequest="20"
-                    HeightRequest="20"
+                   FontSize="{DynamicResource ComponentBodySizeMedium}"
+                   LineBreakMode="NoWrap">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                 Value="{x:Static local:ChipType.Default}">
+                        <Setter Property="TextColor" Value="{DynamicResource ChipDefaultTextColor}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                 Value="{x:Static local:ChipType.Primary}">
+                        <Setter Property="TextColor" Value="{DynamicResource ChipPrimaryTextColor}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                 Value="{x:Static local:ChipType.Secondary}">
+                        <Setter Property="TextColor" Value="{DynamicResource ChipSecondaryTextColor}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                 Value="{x:Static local:ChipType.Success}">
+                        <Setter Property="TextColor" Value="{DynamicResource ChipSuccessTextColor}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                 Value="{x:Static local:ChipType.Warning}">
+                        <Setter Property="TextColor" Value="{DynamicResource ChipWarningTextColor}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                 Value="{x:Static local:ChipType.Error}">
+                        <Setter Property="TextColor" Value="{DynamicResource ChipErrorTextColor}" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+            <Border x:Name="CloseButtonBorder"
+                    WidthRequest="22"
+                    HeightRequest="22"
                     IsVisible="{Binding Source={x:Reference this}, Path=Dismissible}"
-                    Clicked="OnCloseClicked" />
+                    BackgroundColor="{DynamicResource ChipCloseButtonBackgroundColor}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="11" />
+                </Border.StrokeShape>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnCloseClicked" />
+                </Border.GestureRecognizers>
+                <Label Text="✕"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="{DynamicResource ChipCloseButtonTextColor}"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+            </Border>
         </HorizontalStackLayout>
     </Border>
 

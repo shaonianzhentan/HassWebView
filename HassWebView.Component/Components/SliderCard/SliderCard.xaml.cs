@@ -8,21 +8,6 @@ public partial class SliderCard : ContentView
     {
         InitializeComponent();
         UpdateSize();
-        SizeManager.SizeChanged += OnSizeChanged;
-    }
-
-    private void OnSizeChanged(object? sender, EventArgs e)
-    {
-        MainThread.BeginInvokeOnMainThread(() => UpdateSize());
-    }
-
-    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
-    {
-        base.OnHandlerChanging(args);
-        if (args.OldHandler != null)
-        {
-            SizeManager.SizeChanged -= OnSizeChanged;
-        }
     }
 
     public static readonly BindableProperty TitleProperty =
@@ -35,7 +20,8 @@ public partial class SliderCard : ContentView
     }
 
     public static readonly BindableProperty ValueProperty =
-        BindableProperty.Create(nameof(Value), typeof(double), typeof(SliderCard), 0.0);
+        BindableProperty.Create(nameof(Value), typeof(double), typeof(SliderCard), 0.0,
+            propertyChanged: OnValueChanged);
 
     public static readonly BindableProperty MinProperty =
         BindableProperty.Create(nameof(Min), typeof(double), typeof(SliderCard), 0.0);
@@ -70,6 +56,35 @@ public partial class SliderCard : ContentView
         set => SetValue(UnitProperty, value);
     }
 
+    public static readonly BindableProperty ValuePrecisionProperty =
+        BindableProperty.Create(nameof(ValuePrecision), typeof(int), typeof(SliderCard), 0,
+            propertyChanged: OnValueChanged);
+
+    public int ValuePrecision
+    {
+        get => (int)GetValue(ValuePrecisionProperty);
+        set => SetValue(ValuePrecisionProperty, value);
+    }
+
+    public string DisplayValue => FormatValue(Value, ValuePrecision);
+
+    private static void OnValueChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        if (bindable is SliderCard card)
+        {
+            card.OnPropertyChanged(nameof(DisplayValue));
+        }
+    }
+
+    private string FormatValue(double value, int precision)
+    {
+        if (precision <= 0)
+        {
+            return Math.Round(value).ToString();
+        }
+        return value.ToString($"F{precision}");
+    }
+
     private void UpdateSize()
     {
         try
@@ -77,7 +92,6 @@ public partial class SliderCard : ContentView
             var resources = Application.Current?.Resources;
             if (resources == null) return;
             
-            // 从资源字典读取尺寸值
             if (resources.TryGetValue("ComponentPaddingMedium", out var padMed) && padMed is Thickness padMedVal)
                 CardBorder.Padding = padMedVal;
             
@@ -87,7 +101,6 @@ public partial class SliderCard : ContentView
                 ValueLabel.FontSize = titleMedVal;
             }
             
-            // HeightRequest 根据尺寸设置
             ValueSlider.HeightRequest = SizeManager.CurrentSize switch
             {
                 Models.ComponentSize.Tablet => 56,

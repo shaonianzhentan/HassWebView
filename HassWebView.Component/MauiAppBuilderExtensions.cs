@@ -28,8 +28,34 @@ public static class MauiAppBuilderExtensions
         var options = new HassComponentOptions();
         configure?.Invoke(options);
 
-        // 设置默认尺寸
-        if (options.DefaultSize.HasValue)
+        // 设置默认尺寸或启用自适应
+        if (options.AutoDetectSize)
+        {
+            // 延迟检测屏幕尺寸
+            Application.Current?.Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(100), () =>
+            {
+                try
+                {
+                    var window = Application.Current?.Windows[0];
+                    if (window != null)
+                    {
+                        var width = window.Width;
+                        var size = width switch
+                        {
+                            > 1200 => ComponentSize.TV,
+                            > 768 => ComponentSize.Tablet,
+                            _ => ComponentSize.Phone
+                        };
+                        SizeManager.SetSize(size);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[UseHassComponents] Auto-detect size failed: {ex.Message}");
+                }
+            });
+        }
+        else if (options.DefaultSize.HasValue)
         {
             SizeManager.SetSize(options.DefaultSize.Value);
         }
@@ -46,6 +72,13 @@ public class HassComponentOptions
 {
     /// <summary>
     /// Gets or sets the default component size. If null, defaults to ComponentSize.Phone.
+    /// Ignored if AutoDetectSize is true.
     /// </summary>
     public ComponentSize? DefaultSize { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to automatically detect screen size and set component size accordingly.
+    /// Default is false.
+    /// </summary>
+    public bool AutoDetectSize { get; set; }
 }

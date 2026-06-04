@@ -1,5 +1,6 @@
 using Microsoft.Maui;
 using Microsoft.UI.Xaml;
+using HassWebView.Component.Models;
 
 namespace HassWebView.DemoComponent.WinUI;
 

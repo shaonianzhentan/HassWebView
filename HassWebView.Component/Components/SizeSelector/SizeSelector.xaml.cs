@@ -4,30 +4,41 @@ using HassWebView.Component.Models;
 
 public partial class SizeSelector : ContentView
 {
+    public static readonly BindableProperty IsPhoneSelectedProperty = BindableProperty.Create(
+        nameof(IsPhoneSelected), typeof(bool), typeof(SizeSelector), false);
+
+    public static readonly BindableProperty IsTabletSelectedProperty = BindableProperty.Create(
+        nameof(IsTabletSelected), typeof(bool), typeof(SizeSelector), false);
+
+    public static readonly BindableProperty IsTVSelectedProperty = BindableProperty.Create(
+        nameof(IsTVSelected), typeof(bool), typeof(SizeSelector), false);
+
+    public bool IsPhoneSelected
+    {
+        get => (bool)GetValue(IsPhoneSelectedProperty);
+        set => SetValue(IsPhoneSelectedProperty, value);
+    }
+
+    public bool IsTabletSelected
+    {
+        get => (bool)GetValue(IsTabletSelectedProperty);
+        set => SetValue(IsTabletSelectedProperty, value);
+    }
+
+    public bool IsTVSelected
+    {
+        get => (bool)GetValue(IsTVSelectedProperty);
+        set => SetValue(IsTVSelectedProperty, value);
+    }
+
     public SizeSelector()
     {
         InitializeComponent();
         
-        // 延迟初始化以避免应用未完全启动时访问 Application.Current
         Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
         {
             UpdateButtonStates();
-            SizeManager.SizeChanged += OnSizeChanged;
         });
-    }
-
-    private void OnSizeChanged(object? sender, EventArgs e)
-    {
-        MainThread.BeginInvokeOnMainThread(() => UpdateButtonStates());
-    }
-
-    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
-    {
-        base.OnHandlerChanging(args);
-        if (args.OldHandler != null)
-        {
-            SizeManager.SizeChanged -= OnSizeChanged;
-        }
     }
 
     private void OnSizeClicked(object sender, EventArgs e)
@@ -52,29 +63,13 @@ public partial class SizeSelector : ContentView
     {
         try
         {
-            UpdateButtonStyle(MediumBtn, SizeManager.CurrentSize == ComponentSize.Phone);
-            UpdateButtonStyle(LargeBtn, SizeManager.CurrentSize == ComponentSize.Tablet);
-            UpdateButtonStyle(ExtraLargeBtn, SizeManager.CurrentSize == ComponentSize.TV);
+            IsPhoneSelected = SizeManager.CurrentSize == ComponentSize.Phone;
+            IsTabletSelected = SizeManager.CurrentSize == ComponentSize.Tablet;
+            IsTVSelected = SizeManager.CurrentSize == ComponentSize.TV;
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"SizeSelector.UpdateButtonStates failed: {ex}");
-        }
-    }
-
-    private void UpdateButtonStyle(Button button, bool isSelected)
-    {
-        if (button == null) return;
-        
-        if (isSelected)
-        {
-            button.BackgroundColor = Color.FromArgb("#007AFF");
-            button.TextColor = Colors.White;
-        }
-        else
-        {
-            button.BackgroundColor = Color.FromArgb("#F2F2F7");
-            button.TextColor = Color.FromArgb("#636366");
         }
     }
 }

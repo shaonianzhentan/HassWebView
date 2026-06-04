@@ -6,7 +6,7 @@
 
     <Border x:Name="CardFrame"
             Padding="20"
-            BackgroundColor="#FFFFFF">
+            BackgroundColor="{DynamicResource CardBackgroundColor}">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="16" />
         </Border.StrokeShape>
@@ -15,11 +15,11 @@
                    Text="{Binding Source={x:Reference this}, Path=Title}"
                    FontSize="16"
                    FontAttributes="Bold"
-                   TextColor="#1D1D1F" />
+                   TextColor="{DynamicResource PrimaryTextColor}" />
             <Label x:Name="SubtitleLabel"
                    Text="{Binding Source={x:Reference this}, Path=Subtitle}"
                    FontSize="14"
-                   TextColor="#636366" />
+                   TextColor="{DynamicResource SecondaryTextColor}" />
             <Border x:Name="StateFrame"
                     Padding="12,6"
                     Margin="0,12,0,0"

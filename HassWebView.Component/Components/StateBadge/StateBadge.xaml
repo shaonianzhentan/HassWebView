@@ -5,15 +5,62 @@
              x:Name="this">
 
     <Border x:Name="BadgeBorder"
-            Padding="10,6">
+            Padding="{DynamicResource ComponentPaddingSmall}"
+            Stroke="{DynamicResource StateBadgeBorderColor}"
+            StrokeThickness="1">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="16" />
         </Border.StrokeShape>
+        <Border.Triggers>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding Source={x:Reference this}, Path=StateColor}"
+                         Value="{x:Static local:StateColorType.Success}">
+                <Setter Property="BackgroundColor" Value="{DynamicResource StateBadgeSuccessColor}" />
+            </DataTrigger>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding Source={x:Reference this}, Path=StateColor}"
+                         Value="{x:Static local:StateColorType.Warning}">
+                <Setter Property="BackgroundColor" Value="{DynamicResource StateBadgeWarningColor}" />
+            </DataTrigger>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding Source={x:Reference this}, Path=StateColor}"
+                         Value="{x:Static local:StateColorType.Error}">
+                <Setter Property="BackgroundColor" Value="{DynamicResource StateBadgeErrorColor}" />
+            </DataTrigger>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding Source={x:Reference this}, Path=StateColor}"
+                         Value="{x:Static local:StateColorType.Default}">
+                <Setter Property="BackgroundColor" Value="{DynamicResource StateBadgeDefaultColor}" />
+            </DataTrigger>
+        </Border.Triggers>
         <Label x:Name="StateLabel"
                Text="{Binding Source={x:Reference this}, Path=State}"
-               FontSize="11"
+               FontSize="{DynamicResource ComponentBodySizeSmall}"
                FontAttributes="Bold"
-               TextColor="White" />
+               TextColor="{DynamicResource StateBadgeDefaultTextColor}">
+            <Label.Triggers>
+                <DataTrigger TargetType="Label"
+                             Binding="{Binding Source={x:Reference this}, Path=StateColor}"
+                             Value="{x:Static local:StateColorType.Success}">
+                    <Setter Property="TextColor" Value="{DynamicResource StateBadgeSuccessTextColor}" />
+                </DataTrigger>
+                <DataTrigger TargetType="Label"
+                             Binding="{Binding Source={x:Reference this}, Path=StateColor}"
+                             Value="{x:Static local:StateColorType.Warning}">
+                    <Setter Property="TextColor" Value="{DynamicResource StateBadgeWarningTextColor}" />
+                </DataTrigger>
+                <DataTrigger TargetType="Label"
+                             Binding="{Binding Source={x:Reference this}, Path=StateColor}"
+                             Value="{x:Static local:StateColorType.Error}">
+                    <Setter Property="TextColor" Value="{DynamicResource StateBadgeErrorTextColor}" />
+                </DataTrigger>
+                <DataTrigger TargetType="Label"
+                             Binding="{Binding Source={x:Reference this}, Path=StateColor}"
+                             Value="{x:Static local:StateColorType.Default}">
+                    <Setter Property="TextColor" Value="{DynamicResource StateBadgeDefaultTextColor}" />
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
     </Border>
 
 </ContentView>

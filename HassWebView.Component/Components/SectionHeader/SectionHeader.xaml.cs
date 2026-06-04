@@ -8,21 +8,6 @@ public partial class SectionHeader : ContentView
     {
         InitializeComponent();
         UpdateSize();
-        SizeManager.SizeChanged += OnSizeChanged;
-    }
-
-    private void OnSizeChanged(object? sender, EventArgs e)
-    {
-        MainThread.BeginInvokeOnMainThread(() => UpdateSize());
-    }
-
-    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
-    {
-        base.OnHandlerChanging(args);
-        if (args.OldHandler != null)
-        {
-            SizeManager.SizeChanged -= OnSizeChanged;
-        }
     }
 
     public event EventHandler? ActionTapped;

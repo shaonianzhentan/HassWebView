@@ -6,7 +6,7 @@
 
     <Border x:Name="CardBorder"
             Padding="16"
-            BackgroundColor="#FFFFFF">
+            BackgroundColor="{DynamicResource CardBackgroundColor}">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="12" />
         </Border.StrokeShape>
@@ -16,15 +16,15 @@
                        Grid.Column="0"
                        Text="{Binding Source={x:Reference this}, Path=Title}"
                        FontSize="14"
-                       TextColor="#1D1D1F" />
+                       TextColor="{DynamicResource PrimaryTextColor}" />
                 <Label x:Name="ValueLabel"
                        Grid.Column="1"
                        FontSize="16"
                        FontAttributes="Bold"
-                       TextColor="#1D1D1F">
+                       TextColor="{DynamicResource PrimaryTextColor}">
                     <Label.FormattedText>
                         <FormattedString>
-                            <Span Text="{Binding Source={x:Reference this}, Path=Value}" />
+                            <Span Text="{Binding Source={x:Reference this}, Path=DisplayValue}" />
                             <Span Text="{Binding Source={x:Reference this}, Path=Unit}" />
                         </FormattedString>
                     </Label.FormattedText>
@@ -34,9 +34,9 @@
                     Minimum="{Binding Source={x:Reference this}, Path=Min}"
                     Maximum="{Binding Source={x:Reference this}, Path=Max}"
                     Value="{Binding Source={x:Reference this}, Path=Value}"
-                    ThumbColor="#007AFF"
-                    MinimumTrackColor="#007AFF"
-                    MaximumTrackColor="#86868B" />
+                    ThumbColor="{DynamicResource AccentColor}"
+                    MinimumTrackColor="{DynamicResource AccentColor}"
+                    MaximumTrackColor="{DynamicResource TertiaryTextColor}" />
         </VerticalStackLayout>
     </Border>
 

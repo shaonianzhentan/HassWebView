@@ -13,22 +13,7 @@ public partial class DetailCard : ContentView
         {
             UpdateStateColor();
             UpdateSize();
-            SizeManager.SizeChanged += OnSizeChanged;
         });
-    }
-
-    private void OnSizeChanged(object? sender, EventArgs e)
-    {
-        MainThread.BeginInvokeOnMainThread(() => UpdateSize());
-    }
-
-    protected override void OnHandlerChanging(HandlerChangingEventArgs args)
-    {
-        base.OnHandlerChanging(args);
-        if (args.OldHandler != null)
-        {
-            SizeManager.SizeChanged -= OnSizeChanged;
-        }
     }
 
     public static readonly BindableProperty TitleProperty =

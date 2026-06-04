@@ -5,31 +5,44 @@
              x:Name="this">
 
     <Grid ColumnDefinitions="Auto,*,Auto" Padding="16" ColumnSpacing="12">
+        <!-- 图标区域 -->
         <Border x:Name="IconBorder"
-                Padding="10"
-                BackgroundColor="{Binding Source={x:Reference this}, Path=IconBackgroundColor}">
+                WidthRequest="48"
+                HeightRequest="48"
+                BackgroundColor="{Binding Source={x:Reference this}, Path=IconBackgroundColor}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
             <Border.StrokeShape>
-                <RoundRectangle CornerRadius="12" />
+                <RoundRectangle CornerRadius="14" />
             </Border.StrokeShape>
             <Label x:Name="IconLabel"
                    Text="{Binding Source={x:Reference this}, Path=IconText}"
-                   FontSize="20" />
+                   FontSize="24"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   TextColor="{Binding Source={x:Reference this}, Path=IconTextColor}"
+                   LineBreakMode="NoWrap" />
         </Border>
-        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+        
+        <!-- 内容区域 -->
+        <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
             <Label x:Name="TitleLabel"
                    Text="{Binding Source={x:Reference this}, Path=Title}"
-                   FontSize="16"
-                   TextColor="#1D1D1F" />
+                   FontSize="{DynamicResource ComponentTitleSizePhoneLarge}"
+                   TextColor="{DynamicResource PrimaryTextColor}"
+                   FontAttributes="Bold" />
             <Label x:Name="StateLabel"
                    Text="{Binding Source={x:Reference this}, Path=State}"
-                   FontSize="13"
+                   FontSize="{DynamicResource ComponentBodySizePhoneMedium}"
                    TextColor="{Binding Source={x:Reference this}, Path=StateColor}" />
         </VerticalStackLayout>
+        
+        <!-- 箭头 -->
         <Label x:Name="ArrowLabel"
                Grid.Column="2"
                Text="›"
-               FontSize="24"
-               TextColor="#C7C7CC"
+               FontSize="32"
+               TextColor="{DynamicResource TertiaryTextColor}"
                VerticalOptions="Center" />
     </Grid>
 

@@ -5,11 +5,11 @@
              x:Name="this">
 
     <HorizontalStackLayout Spacing="12">
-        <Label Text="✅" FontSize="18" />
+        <Label Text="✅" FontSize="{DynamicResource ComponentIconSizeSmall}" />
         <Label x:Name="FeatureText"
                Text="{Binding Source={x:Reference this}, Path=Text}"
-               FontSize="14"
-               TextColor="{StaticResource TextColor}" />
+               FontSize="{DynamicResource ComponentBodySizeMedium}"
+               TextColor="{DynamicResource PrimaryTextColor}" />
     </HorizontalStackLayout>
 
 </ContentView>

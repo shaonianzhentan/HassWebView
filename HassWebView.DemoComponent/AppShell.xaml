@@ -5,90 +5,103 @@
        xmlns:views="clr-namespace:HassWebView.DemoComponent.Views"
        x:Class="HassWebView.DemoComponent.AppShell"
        Title="Home Assistant Components"
-       FlyoutBehavior="Locked">
-    
-    <Shell.FlyoutHeader>
-        <ContentView Padding="16" BackgroundColor="{DynamicResource PageBackgroundColor}">
-            <Label Text="HA Components"
-                   FontSize="20"
-                   FontAttributes="Bold"
-                   TextColor="{DynamicResource PrimaryTextColor}" />
-        </ContentView>
-    </Shell.FlyoutHeader>
+       FlyoutBehavior="Locked"
+       FlyoutBackgroundColor="{DynamicResource FlyoutBackgroundColor}"
+       BackgroundColor="{DynamicResource NavigationBarColor}"
+       TitleColor="{DynamicResource PrimaryTextColor}">
 
-    <FlyoutItem Title="首页" Icon="🏠">
+    <Shell.Resources>
+        <ResourceDictionary>
+            <DataTemplate x:Key="FlyoutItemTemplate">
+                <Grid Padding="12,8" ColumnDefinitions="40,*" BackgroundColor="Transparent">
+                    <Label Grid.Column="0" 
+                           Text="{Binding FlyoutIcon}" 
+                           FontSize="20"
+                           VerticalOptions="Center"
+                           HorizontalOptions="Center" />
+                    <Label Grid.Column="1" 
+                           Text="{Binding Title}" 
+                           FontSize="{DynamicResource ComponentTitleSizeSmall}"
+                           TextColor="{DynamicResource PrimaryTextColor}"
+                           VerticalOptions="Center" />
+                </Grid>
+            </DataTemplate>
+        </ResourceDictionary>
+    </Shell.Resources>
+
+    <FlyoutItem Title="首页" Icon="🏠" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="MainPage" ContentTemplate="{DataTemplate local:MainPage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Alert" Icon="⚠️">
+    <FlyoutItem Title="Alert" Icon="⚠️" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="AlertExamplePage" ContentTemplate="{DataTemplate views:AlertExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Chip" Icon="📌">
+    <FlyoutItem Title="Chip" Icon="📌" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="ChipExamplePage" ContentTemplate="{DataTemplate views:ChipExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="ControlSwitch" Icon="🔘">
+    <FlyoutItem Title="ControlSwitch" Icon="🔘" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="ControlSwitchExamplePage" ContentTemplate="{DataTemplate views:ControlSwitchExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Input" Icon="✏️">
+    <FlyoutItem Title="Input" Icon="✏️" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="InputExamplePage" ContentTemplate="{DataTemplate views:InputExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Spinner" Icon="🔄">
+    <FlyoutItem Title="Spinner" Icon="🔄" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="SpinnerExamplePage" ContentTemplate="{DataTemplate views:SpinnerExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="ButtonCard" Icon="🔘">
+    <FlyoutItem Title="ButtonCard" Icon="🔘" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="ButtonCardExamplePage" ContentTemplate="{DataTemplate views:ButtonCardExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="ButtonGrid" Icon="🔲">
+    <FlyoutItem Title="ButtonGrid" Icon="🔲" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="ButtonGridExamplePage" ContentTemplate="{DataTemplate views:ButtonGridExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="DetailCard" Icon="📋">
+    <FlyoutItem Title="DetailCard" Icon="📋" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="DetailCardExamplePage" ContentTemplate="{DataTemplate views:DetailCardExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Dialog" Icon="💬">
+    <FlyoutItem Title="Dialog" Icon="💬" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="DialogExamplePage" ContentTemplate="{DataTemplate views:DialogExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="EntityRow" Icon="📝">
+    <FlyoutItem Title="EntityRow" Icon="📝" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="EntityRowExamplePage" ContentTemplate="{DataTemplate views:EntityRowExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="EntityListGroup" Icon="📋">
+    <FlyoutItem Title="EntityListGroup" Icon="📋" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="EntityListGroupExamplePage" ContentTemplate="{DataTemplate views:EntityListGroupExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="SliderCard" Icon="🎚️">
+    <FlyoutItem Title="SliderCard" Icon="🎚️" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="SliderCardExamplePage" ContentTemplate="{DataTemplate views:SliderCardExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="StateBadge" Icon="🏷️">
+    <FlyoutItem Title="StateBadge" Icon="🏷️" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="StateBadgeExamplePage" ContentTemplate="{DataTemplate views:StateBadgeExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="ThemeSelector" Icon="🎨">
+    <FlyoutItem Title="ThemeSelector" Icon="🎨" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="ThemeSelectorExamplePage" ContentTemplate="{DataTemplate views:ThemeSelectorExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="SizeSelector" Icon="📐">
+    <FlyoutItem Title="SizeSelector" Icon="📐" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="SizeSelectorExamplePage" ContentTemplate="{DataTemplate views:SizeSelectorExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="SettingsGroup" Icon="⚙️">
+    <FlyoutItem Title="SettingsGroup" Icon="⚙️" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="SettingsGroupExamplePage" ContentTemplate="{DataTemplate views:SettingsGroupExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="设置" Icon="🔧">
+    <FlyoutItem Title="设置" Icon="🔧" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="SettingsPage" ContentTemplate="{DataTemplate views:SettingsPage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="关于" Icon="ℹ️">
+    <FlyoutItem Title="关于" Icon="ℹ️" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="AboutPage" ContentTemplate="{DataTemplate views:AboutPage}" />
     </FlyoutItem>
 

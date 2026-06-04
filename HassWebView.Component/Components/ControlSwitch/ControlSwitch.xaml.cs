@@ -14,8 +14,8 @@ public partial class ControlSwitch : ContentView
     public ControlSwitch()
     {
         InitializeComponent();
-        UpdateSwitchVisual();
         UpdateSwitchSize();
+        UpdateThumbPosition(false);
     }
 
     public bool IsToggled
@@ -36,7 +36,7 @@ public partial class ControlSwitch : ContentView
     {
         if (bindable is ControlSwitch switchControl)
         {
-            switchControl.UpdateSwitchVisual();
+            switchControl.UpdateThumbPosition(true);
             switchControl.Toggled?.Invoke(switchControl, new ToggledEventArgs((bool)newValue));
         }
     }
@@ -45,29 +45,24 @@ public partial class ControlSwitch : ContentView
     {
         try
         {
-            // WidthRequest 和 HeightRequest 根据尺寸设置
             switch (SizeManager.CurrentSize)
             {
                 case Models.ComponentSize.Tablet:
-                    SwitchGrid.WidthRequest = 76;
-                    SwitchGrid.HeightRequest = 46;
-                    Thumb.WidthRequest = 40;
-                    Thumb.HeightRequest = 40;
+                    SwitchBorder.WidthRequest = SwitchGrid.WidthRequest = 76;
+                    SwitchBorder.HeightRequest = SwitchGrid.HeightRequest = 46;
+                    Thumb.WidthRequest = Thumb.HeightRequest = 40;
                     break;
                 case Models.ComponentSize.TV:
-                    SwitchGrid.WidthRequest = 102;
-                    SwitchGrid.HeightRequest = 62;
-                    Thumb.WidthRequest = 54;
-                    Thumb.HeightRequest = 54;
+                    SwitchBorder.WidthRequest = SwitchGrid.WidthRequest = 102;
+                    SwitchBorder.HeightRequest = SwitchGrid.HeightRequest = 62;
+                    Thumb.WidthRequest = Thumb.HeightRequest = 54;
                     break;
                 default: // Phone
-                    SwitchGrid.WidthRequest = 51;
-                    SwitchGrid.HeightRequest = 31;
-                    Thumb.WidthRequest = 27;
-                    Thumb.HeightRequest = 27;
+                    SwitchBorder.WidthRequest = SwitchGrid.WidthRequest = 51;
+                    SwitchBorder.HeightRequest = SwitchGrid.HeightRequest = 31;
+                    Thumb.WidthRequest = Thumb.HeightRequest = 27;
                     break;
             }
-            UpdateSwitchVisual();
         }
         catch (Exception ex)
         {
@@ -75,26 +70,26 @@ public partial class ControlSwitch : ContentView
         }
     }
 
-    private void UpdateSwitchVisual()
+    private void UpdateThumbPosition(bool animated = true)
     {
-        if (Disabled)
+        try
         {
-            SwitchBorder.BackgroundColor = IsToggled 
-                ? Color.FromArgb("#B3B3B3") 
-                : Color.FromArgb("#EFEFF4");
-            Thumb.Fill = Colors.White;
-            Thumb.Opacity = 0.6;
-        }
-        else
-        {
-            SwitchBorder.BackgroundColor = IsToggled 
-                ? Color.FromArgb("#007AFF") 
-                : Color.FromArgb("#EFEFF4");
-            Thumb.Fill = Colors.White;
-            Thumb.Opacity = 1;
-        }
+            double maxTranslation = SwitchGrid.WidthRequest - Thumb.WidthRequest - 4;
+            double targetX = IsToggled ? maxTranslation : 0;
 
-        Thumb.TranslationX = IsToggled ? (SwitchGrid.WidthRequest - Thumb.WidthRequest - 4) : 0;
+            if (animated)
+            {
+                _ = Thumb.TranslateToAsync(targetX, 0, 150, Easing.CubicInOut);
+            }
+            else
+            {
+                Thumb.TranslationX = targetX;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"ControlSwitch.UpdateThumbPosition failed: {ex}");
+        }
     }
 
     private void OnTapped(object sender, EventArgs e)

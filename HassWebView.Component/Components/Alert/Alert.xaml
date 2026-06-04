@@ -1,41 +1,155 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.Component.Components.Alert"
              x:Name="this">
 
     <Border x:Name="AlertBorder"
-            Padding="16"
-            BackgroundColor="#FFF8E6">
+            Padding="{DynamicResource ComponentPaddingMedium}">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="12" />
         </Border.StrokeShape>
-        <HorizontalStackLayout Spacing="12">
+        <Border.Triggers>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding Source={x:Reference this}, Path=Type}"
+                         Value="{x:Static local:AlertType.Warning}">
+                <Setter Property="BackgroundColor" Value="{DynamicResource AlertWarningBackgroundColor}" />
+            </DataTrigger>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding Source={x:Reference this}, Path=Type}"
+                         Value="{x:Static local:AlertType.Error}">
+                <Setter Property="BackgroundColor" Value="{DynamicResource AlertErrorBackgroundColor}" />
+            </DataTrigger>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding Source={x:Reference this}, Path=Type}"
+                         Value="{x:Static local:AlertType.Success}">
+                <Setter Property="BackgroundColor" Value="{DynamicResource AlertSuccessBackgroundColor}" />
+            </DataTrigger>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding Source={x:Reference this}, Path=Type}"
+                         Value="{x:Static local:AlertType.Info}">
+                <Setter Property="BackgroundColor" Value="{DynamicResource AlertInfoBackgroundColor}" />
+            </DataTrigger>
+        </Border.Triggers>
+        
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+            <!-- 图标 -->
             <Label x:Name="IconLabel"
-                   Text="⚠️"
-                   FontSize="20"
-                   VerticalOptions="Center" />
-            <VerticalStackLayout Spacing="4">
+                   Grid.Column="0"
+                   FontSize="{DynamicResource ComponentIconSizeMedium}"
+                   VerticalOptions="Start"
+                   Margin="0,4,0,0">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                 Value="{x:Static local:AlertType.Warning}">
+                        <Setter Property="Text" Value="⚠️" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                 Value="{x:Static local:AlertType.Error}">
+                        <Setter Property="Text" Value="❌" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                 Value="{x:Static local:AlertType.Success}">
+                        <Setter Property="Text" Value="✅" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                 Value="{x:Static local:AlertType.Info}">
+                        <Setter Property="Text" Value="ℹ️" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+            
+            <!-- 内容区域 -->
+            <VerticalStackLayout Grid.Column="1" Spacing="4" Margin="12,0,0,0">
                 <Label x:Name="TitleLabel"
                        Text="{Binding Source={x:Reference this}, Path=Title}"
-                       FontSize="14"
-                       FontAttributes="Bold"
-                       TextColor="#1D1D1F" />
+                       FontSize="{DynamicResource ComponentTitleSizeMedium}"
+                       FontAttributes="Bold">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                     Value="{x:Static local:AlertType.Warning}">
+                            <Setter Property="TextColor" Value="{DynamicResource AlertWarningTitleColor}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                     Value="{x:Static local:AlertType.Error}">
+                            <Setter Property="TextColor" Value="{DynamicResource AlertErrorTitleColor}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                     Value="{x:Static local:AlertType.Success}">
+                            <Setter Property="TextColor" Value="{DynamicResource AlertSuccessTitleColor}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                     Value="{x:Static local:AlertType.Info}">
+                            <Setter Property="TextColor" Value="{DynamicResource AlertInfoTitleColor}" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+                
                 <Label x:Name="MessageLabel"
                        Text="{Binding Source={x:Reference this}, Path=Message}"
-                       FontSize="13"
-                       TextColor="#636366"
-                       LineBreakMode="WordWrap" />
+                       FontSize="{DynamicResource ComponentBodySizeMedium}"
+                       LineBreakMode="WordWrap">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                     Value="{x:Static local:AlertType.Warning}">
+                            <Setter Property="TextColor" Value="{DynamicResource AlertWarningMessageColor}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                     Value="{x:Static local:AlertType.Error}">
+                            <Setter Property="TextColor" Value="{DynamicResource AlertErrorMessageColor}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                     Value="{x:Static local:AlertType.Success}">
+                            <Setter Property="TextColor" Value="{DynamicResource AlertSuccessMessageColor}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding Source={x:Reference this}, Path=Type}"
+                                     Value="{x:Static local:AlertType.Info}">
+                            <Setter Property="TextColor" Value="{DynamicResource AlertInfoMessageColor}" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
             </VerticalStackLayout>
-            <Button x:Name="CloseBtn"
-                    Text="✕"
-                    FontSize="14"
-                    TextColor="#86868B"
-                    BackgroundColor="Transparent"
-                    WidthRequest="24"
-                    HeightRequest="24"
-                    Clicked="OnCloseClicked" />
-        </HorizontalStackLayout>
+            
+            <!-- 关闭按钮 - 位于右上角 -->
+            <Border x:Name="CloseButtonBorder"
+                    Grid.Column="2"
+                    WidthRequest="22"
+                    HeightRequest="22"
+                    Margin="8,0,0,0"
+                    BackgroundColor="{DynamicResource AlertCloseButtonBackgroundColor}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="11" />
+                </Border.StrokeShape>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnCloseClicked" />
+                </Border.GestureRecognizers>
+                <Label Text="✕"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="{DynamicResource AlertCloseButtonTextColor}"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+            </Border>
+        </Grid>
     </Border>
 
 </ContentView>

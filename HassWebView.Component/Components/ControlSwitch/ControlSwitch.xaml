@@ -4,10 +4,35 @@
              x:Class="HassWebView.Component.Components.ControlSwitch"
              x:Name="this">
     
-    <Border x:Name="SwitchBorder">
+    <Border x:Name="SwitchBorder"
+            WidthRequest="51"
+            HeightRequest="31">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="15" />
         </Border.StrokeShape>
+        <Border.Triggers>
+            <MultiTrigger TargetType="Border">
+                <MultiTrigger.Conditions>
+                    <BindingCondition Binding="{Binding Source={x:Reference this}, Path=Disabled}" Value="true" />
+                </MultiTrigger.Conditions>
+                <Setter Property="BackgroundColor" Value="{DynamicResource SwitchDisabledBackgroundColor}" />
+            </MultiTrigger>
+            <MultiTrigger TargetType="Border">
+                <MultiTrigger.Conditions>
+                    <BindingCondition Binding="{Binding Source={x:Reference this}, Path=Disabled}" Value="false" />
+                    <BindingCondition Binding="{Binding Source={x:Reference this}, Path=IsToggled}" Value="true" />
+                </MultiTrigger.Conditions>
+                <Setter Property="BackgroundColor" Value="{DynamicResource SwitchOnBackgroundColor}" />
+            </MultiTrigger>
+            <MultiTrigger TargetType="Border">
+                <MultiTrigger.Conditions>
+                    <BindingCondition Binding="{Binding Source={x:Reference this}, Path=Disabled}" Value="false" />
+                    <BindingCondition Binding="{Binding Source={x:Reference this}, Path=IsToggled}" Value="false" />
+                </MultiTrigger.Conditions>
+                <Setter Property="BackgroundColor" Value="{DynamicResource SwitchOffBackgroundColor}" />
+            </MultiTrigger>
+        </Border.Triggers>
+        
         <Grid x:Name="SwitchGrid"
               WidthRequest="51"
               HeightRequest="31">
@@ -18,9 +43,22 @@
             <Ellipse x:Name="Thumb"
                      WidthRequest="27"
                      HeightRequest="27"
-                     Fill="White"
+                     Fill="{DynamicResource SwitchThumbColor}"
                      Margin="2"
-                     HorizontalOptions="Start" />
+                     HorizontalOptions="Start">
+                <Ellipse.Triggers>
+                    <DataTrigger TargetType="Ellipse"
+                                 Binding="{Binding Source={x:Reference this}, Path=Disabled}"
+                                 Value="true">
+                        <Setter Property="Opacity" Value="0.6" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Ellipse"
+                                 Binding="{Binding Source={x:Reference this}, Path=Disabled}"
+                                 Value="false">
+                        <Setter Property="Opacity" Value="1" />
+                    </DataTrigger>
+                </Ellipse.Triggers>
+            </Ellipse>
         </Grid>
     </Border>
 
