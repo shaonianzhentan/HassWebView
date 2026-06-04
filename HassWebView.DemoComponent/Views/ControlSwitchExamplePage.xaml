@@ -8,10 +8,7 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="ControlSwitch 开关组件" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
             <Label Text="用于切换布尔状态的开关控件" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
-            
-            <!-- 只使用 ControlSwitch 组件 -->
             <component:ControlSwitch IsToggled="False" />
             <component:ControlSwitch IsToggled="True" />
             

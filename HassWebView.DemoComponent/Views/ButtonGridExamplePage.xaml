@@ -8,10 +8,7 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="ButtonGrid 按钮网格组件" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
             <Label Text="用于显示设备控制网格" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
-            
-            <!-- 只使用 ButtonGrid 组件 -->
             <component:ButtonGrid>
                 <component:ButtonCard Icon="💡" Title="客厅灯" State="开启" StateColor="#34C759" />
                 <component:ButtonCard Icon="❄️" Title="空调" State="制冷" StateColor="#3B82F6" />

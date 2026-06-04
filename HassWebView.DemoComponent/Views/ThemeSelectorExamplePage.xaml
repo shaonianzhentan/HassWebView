@@ -8,10 +8,7 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="ThemeSelector 主题选择组件" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
             <Label Text="用于选择亮色/暗色/系统主题" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
-            
-            <!-- 使用真正的 ThemeSelector 组件 -->
             <component:ThemeSelector />
             
             <BoxView HeightRequest="40" />

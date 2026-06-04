@@ -8,10 +8,7 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="EntityListGroup 实体列表组组件" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
             <Label Text="用于分组显示实体列表" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
-            
-            <!-- 只使用 EntityListGroup 组件 -->
             <component:EntityListGroup Title="客厅设备">
                 <component:EntityRow Title="客厅灯" IconText="💡" State="on" StateColor="#FCD34D" />
                 <component:EntityRow Title="空调" IconText="❄️" State="制冷" StateColor="#3B82F6" />

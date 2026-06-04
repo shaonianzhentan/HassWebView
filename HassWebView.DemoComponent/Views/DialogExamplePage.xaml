@@ -8,10 +8,7 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="Dialog 对话框组件" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
             <Label Text="用于显示弹窗对话框" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
-            
-            <!-- 只使用 Dialog 组件 -->
             <Button Text="显示对话框" Clicked="OnShowDialogClicked" />
             <component:Dialog x:Name="ExampleDialog"
                               Title="提示"

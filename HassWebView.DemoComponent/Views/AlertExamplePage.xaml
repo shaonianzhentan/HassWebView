@@ -8,10 +8,7 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="Alert 警告提示组件" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
             <Label Text="支持四种类型：Warning、Error、Success、Info" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
-            
-            <!-- 只使用 Alert 组件 -->
             <component:Alert Type="Warning" Title="警告" Message="这是一个警告提示信息" />
             <component:Alert Type="Error" Title="错误" Message="这是一个错误提示信息" />
             <component:Alert Type="Success" Title="成功" Message="操作成功完成" />

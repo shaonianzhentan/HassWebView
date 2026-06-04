@@ -8,10 +8,7 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="Input 输入框组件" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
             <Label Text="用于用户输入文本" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
-            
-            <!-- 只使用 Input 组件 -->
             <component:Input Label="用户名" Placeholder="请输入用户名" />
             <component:Input Label="密码" Placeholder="请输入密码" IsPassword="True" />
             <component:Input Label="邮箱" Placeholder="请输入邮箱地址" />

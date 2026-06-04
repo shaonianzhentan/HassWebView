@@ -8,10 +8,7 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="SliderCard 滑块卡片组件" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
             <Label Text="带标签的滑块组件，用于调节数值" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
-            
-            <!-- 只使用 SliderCard 组件 -->
             <component:SliderCard Title="亮度调节" Value="75" Min="0" Max="100" Unit="%" />
             <component:SliderCard Title="温度调节" Value="24" Min="16" Max="30" Unit="°C" />
             <component:SliderCard Title="音量调节" Value="60" Min="0" Max="100" Unit="%" />

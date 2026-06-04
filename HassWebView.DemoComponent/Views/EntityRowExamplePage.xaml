@@ -8,10 +8,7 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="12">
-            <Label Text="EntityRow 实体行组件" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
             <Label Text="用于显示 Home Assistant 实体信息的行组件" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
-            
-            <!-- 只使用 EntityRow 组件 -->
             <component:EntityRow Title="客厅灯" IconText="💡" State="on" StateColor="#FCD34D" />
             <component:EntityRow Title="卧室灯" IconText="💡" State="off" StateColor="#9CA3AF" />
             <component:EntityRow Title="室内温度" IconText="🌡️" State="23.5°C" StateColor="#3B82F6" />

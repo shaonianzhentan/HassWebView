@@ -8,10 +8,7 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
-            <Label Text="Chip 芯片标签组件" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
             <Label Text="用于显示可选择或可关闭的标签" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
-            
-            <!-- 只使用 Chip 组件 -->
             <component:Chip Text="标签示例" ShowIcon="True" IconText="🏷️" />
             <component:Chip Text="可关闭标签" Dismissible="True" />
             <component:Chip Text="简单标签" />
