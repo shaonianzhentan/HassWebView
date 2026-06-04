@@ -1,31 +1,43 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:component="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.DemoComponent.Views.SettingsPage"
              Title="设置"
              BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="24">
-            <Label Text="设置"
-                   FontAttributes="Bold"
-                   FontSize="28" />
+        <VerticalStackLayout Padding="16" Spacing="24">
+            <!-- 主题设置 -->
+            <component:SettingsGroup Title="外观设置">
+                <component:InfoRow Icon="🎨" Label="主题模式" Value="{Binding CurrentThemeText}" />
+            </component:SettingsGroup>
+            
+            <component:SettingsGroup Title="主题选择">
+                <component:ThemeSelector />
+            </component:SettingsGroup>
 
-            <Label Text="主题切换：" FontAttributes="Bold" />
-            <Label Text="使用侧边栏导航到 ThemeSelector 页面进行主题切换" FontSize="14" />
+            <!-- 尺寸设置 -->
+            <component:SettingsGroup Title="界面尺寸">
+                <component:InfoRow Icon="📐" Label="当前尺寸" Value="{Binding CurrentSizeText}" />
+            </component:SettingsGroup>
+            
+            <component:SettingsGroup Title="尺寸选择">
+                <component:SizeSelector />
+            </component:SettingsGroup>
 
-            <BoxView HeightRequest="20" />
-
-            <Label Text="尺寸切换：" FontAttributes="Bold" />
-            <Label Text="使用侧边栏导航到 SizeSelector 页面进行尺寸切换" FontSize="14" />
+            <!-- 关于信息 -->
+            <component:SettingsGroup Title="关于">
+                <component:InfoRow Icon="ℹ️" Label="版本" Value="1.0.0" />
+                <component:InfoRow Icon="🏠" Label="项目" Value="HassWebView" />
+                <Button Text="查看关于" 
+                        Clicked="OnAboutClicked" 
+                        BackgroundColor="Transparent"
+                        TextColor="{DynamicResource PrimaryTextColor}"
+                        HorizontalOptions="Start" />
+            </component:SettingsGroup>
 
             <BoxView HeightRequest="40" />
-
-            <Label Text="当前主题：" FontSize="14" />
-            <Label x:Name="CurrentThemeLabel" FontSize="16" />
-
-            <Label Text="当前尺寸：" FontSize="14" />
-            <Label x:Name="CurrentSizeLabel" FontSize="16" />
         </VerticalStackLayout>
     </ScrollView>
 
