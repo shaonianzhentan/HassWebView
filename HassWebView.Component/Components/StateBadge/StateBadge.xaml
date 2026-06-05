@@ -3,6 +3,7 @@
                         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                         xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
                         xmlns:local="clr-namespace:HassWebView.Component.Components"
+                        xmlns:models="clr-namespace:HassWebView.Component.Models"
                         x:Class="HassWebView.Component.Components.StateBadge"
                         x:Name="this">
 
@@ -13,10 +14,10 @@
             <Style TargetType="Border">
                 <Setter Property="Padding" Value="{StaticResource ComponentPaddingPhoneSmall}" />
                 <Style.Triggers>
-                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                         <Setter Property="Padding" Value="{StaticResource ComponentPaddingTabletSmall}" />
                     </DataTrigger>
-                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
                         <Setter Property="Padding" Value="{StaticResource ComponentPaddingTVSmall}" />
                     </DataTrigger>
                     <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=StateColor}" Value="{x:Static local:StateColorType.Success}">
@@ -45,10 +46,10 @@
                     <Setter Property="FontSize" Value="{StaticResource ComponentBodySizePhoneSmall}" />
                     <Setter Property="TextColor" Value="{DynamicResource StateBadgeDefaultTextColor}" />
                     <Style.Triggers>
-                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                             <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTabletSmall}" />
                         </DataTrigger>
-                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
                             <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTVSmall}" />
                         </DataTrigger>
                         <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=StateColor}" Value="{x:Static local:StateColorType.Success}">

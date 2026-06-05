@@ -81,9 +81,23 @@ public partial class SizeSelector : SizeableComponent
     {
         try
         {
-            IsPhoneSelected = SizeManager.CurrentSize == ComponentSize.Phone;
-            IsTabletSelected = SizeManager.CurrentSize == ComponentSize.Tablet;
-            IsTVSelected = SizeManager.CurrentSize == ComponentSize.TV;
+            var phoneSelected = SizeManager.CurrentSize == ComponentSize.Phone;
+            var tabletSelected = SizeManager.CurrentSize == ComponentSize.Tablet;
+            var tvSelected = SizeManager.CurrentSize == ComponentSize.TV;
+            
+            // 手动触发属性变更通知
+            if (IsPhoneSelected != phoneSelected)
+            {
+                IsPhoneSelected = phoneSelected;
+            }
+            if (IsTabletSelected != tabletSelected)
+            {
+                IsTabletSelected = tabletSelected;
+            }
+            if (IsTVSelected != tvSelected)
+            {
+                IsTVSelected = tvSelected;
+            }
         }
         catch (Exception ex)
         {

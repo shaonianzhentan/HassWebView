@@ -2,6 +2,7 @@
 <base:SizeableComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                         xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
+                        xmlns:models="clr-namespace:HassWebView.Component.Models"
                         x:Class="HassWebView.Component.Components.Spinner"
                         x:Name="this">
 
@@ -12,10 +13,10 @@
             <Style TargetType="ActivityIndicator">
                 <Setter Property="Scale" Value="1" />
                 <Style.Triggers>
-                    <DataTrigger TargetType="ActivityIndicator" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                    <DataTrigger TargetType="ActivityIndicator" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                         <Setter Property="Scale" Value="1.4" />
                     </DataTrigger>
-                    <DataTrigger TargetType="ActivityIndicator" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                    <DataTrigger TargetType="ActivityIndicator" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
                         <Setter Property="Scale" Value="1.8" />
                     </DataTrigger>
                 </Style.Triggers>

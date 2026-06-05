@@ -2,6 +2,7 @@
 <base:SizeableComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                         xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
+                        xmlns:models="clr-namespace:HassWebView.Component.Models"
                         x:Class="HassWebView.Component.Components.ControlSwitch"
                         x:Name="this">
     
@@ -12,11 +13,11 @@
                 <Setter Property="HeightRequest" Value="31" />
                 <Setter Property="BackgroundColor" Value="{StaticResource SwitchOffBackgroundColor}" />
                 <Style.Triggers>
-                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                         <Setter Property="WidthRequest" Value="76" />
                         <Setter Property="HeightRequest" Value="46" />
                     </DataTrigger>
-                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
                         <Setter Property="WidthRequest" Value="102" />
                         <Setter Property="HeightRequest" Value="62" />
                     </DataTrigger>
@@ -43,11 +44,11 @@
                     <Setter Property="WidthRequest" Value="51" />
                     <Setter Property="HeightRequest" Value="31" />
                     <Style.Triggers>
-                        <DataTrigger TargetType="Grid" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                        <DataTrigger TargetType="Grid" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                             <Setter Property="WidthRequest" Value="76" />
                             <Setter Property="HeightRequest" Value="46" />
                         </DataTrigger>
-                        <DataTrigger TargetType="Grid" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                        <DataTrigger TargetType="Grid" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
                             <Setter Property="WidthRequest" Value="102" />
                             <Setter Property="HeightRequest" Value="62" />
                         </DataTrigger>
@@ -68,11 +69,11 @@
                         <Setter Property="HorizontalOptions" Value="Start" />
                         <Setter Property="Opacity" Value="1" />
                         <Style.Triggers>
-                            <DataTrigger TargetType="Ellipse" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                            <DataTrigger TargetType="Ellipse" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                                 <Setter Property="WidthRequest" Value="40" />
                                 <Setter Property="HeightRequest" Value="40" />
                             </DataTrigger>
-                            <DataTrigger TargetType="Ellipse" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                            <DataTrigger TargetType="Ellipse" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
                                 <Setter Property="WidthRequest" Value="54" />
                                 <Setter Property="HeightRequest" Value="54" />
                             </DataTrigger>

@@ -14,10 +14,10 @@
             <Style TargetType="Border">
                 <Setter Property="Padding" Value="{StaticResource ComponentPaddingPhoneMedium}" />
                 <Style.Triggers>
-                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                         <Setter Property="Padding" Value="{StaticResource ComponentPaddingTabletMedium}" />
                     </DataTrigger>
-                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
                         <Setter Property="Padding" Value="{StaticResource ComponentPaddingTVMedium}" />
                     </DataTrigger>
                 </Style.Triggers>
@@ -39,10 +39,10 @@
                         <Style TargetType="Label">
                             <Setter Property="FontSize" Value="{StaticResource ComponentIconSizePhoneMedium}" />
                             <Style.Triggers>
-                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                                     <Setter Property="FontSize" Value="{StaticResource ComponentIconSizeTabletMedium}" />
                                 </DataTrigger>
-                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
                                     <Setter Property="FontSize" Value="{StaticResource ComponentIconSizeTVMedium}" />
                                 </DataTrigger>
                             </Style.Triggers>
@@ -83,10 +83,10 @@
                     <Style TargetType="Label">
                         <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizePhoneMedium}" />
                         <Style.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                                 <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTabletMedium}" />
                             </DataTrigger>
-                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
                                 <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTVMedium}" />
                             </DataTrigger>
                         </Style.Triggers>
@@ -100,10 +100,10 @@
                         <Setter Property="FontSize" Value="{StaticResource ComponentBodySizePhoneMedium}" />
                         <Setter Property="TextColor" Value="{StaticResource SecondaryTextColor}" />
                         <Style.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                                 <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTabletMedium}" />
                             </DataTrigger>
-                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
                                 <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTVMedium}" />
                             </DataTrigger>
                             <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=StateColorType}" Value="{x:Static local:StateColorType.Success}">
