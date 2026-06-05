@@ -2,7 +2,7 @@ namespace HassWebView.Component.Components;
 
 using HassWebView.Component.Components.Base;
 
-public partial class SectionHeader : SizeableComponent
+public partial class SectionHeader : AdaptiveComponent
 {
     public SectionHeader()
     {

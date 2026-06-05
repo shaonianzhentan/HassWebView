@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<base:SizeableComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<base:AdaptiveComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                         xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
                         x:Class="HassWebView.Component.Components.ButtonGrid">
@@ -11,4 +11,4 @@
         <ContentPresenter Grid.Row="1" Grid.Column="1" />
     </Grid>
 
-</base:SizeableComponent>
+</base:AdaptiveComponent>

@@ -2,7 +2,7 @@ namespace HassWebView.Component.Components;
 
 using HassWebView.Component.Components.Base;
 
-public partial class DetailCard : SizeableComponent
+public partial class DetailCard : AdaptiveComponent
 {
     public DetailCard()
     {

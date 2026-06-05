@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<base:SizeableComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<base:AdaptiveComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                         xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
                         xmlns:models="clr-namespace:HassWebView.Component.Models"
@@ -30,13 +30,13 @@
                     Text="📱"
                     CornerRadius="8"
                     Clicked="OnSizeClicked"
-                    CommandParameter="Phone"
-                    BackgroundColor="{DynamicResource SizeSelectorButtonBackgroundColor}"
-                    TextColor="{DynamicResource SizeSelectorButtonTextColor}">
+                    CommandParameter="Phone">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="FontSize" Value="{StaticResource ComponentIconSizePhoneSmall}" />
                         <Setter Property="Padding" Value="12,6" />
+                        <Setter Property="BackgroundColor" Value="{DynamicResource SizeSelectorButtonBackgroundColor}" />
+                        <Setter Property="TextColor" Value="{DynamicResource SizeSelectorButtonTextColor}" />
                         <Style.Triggers>
                             <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                                 <Setter Property="FontSize" Value="{StaticResource ComponentIconSizeTabletSmall}" />
@@ -58,13 +58,13 @@
                     Text="📲"
                     CornerRadius="8"
                     Clicked="OnSizeClicked"
-                    CommandParameter="Tablet"
-                    BackgroundColor="{DynamicResource SizeSelectorButtonBackgroundColor}"
-                    TextColor="{DynamicResource SizeSelectorButtonTextColor}">
+                    CommandParameter="Tablet">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="FontSize" Value="{StaticResource ComponentIconSizePhoneSmall}" />
                         <Setter Property="Padding" Value="12,6" />
+                        <Setter Property="BackgroundColor" Value="{DynamicResource SizeSelectorButtonBackgroundColor}" />
+                        <Setter Property="TextColor" Value="{DynamicResource SizeSelectorButtonTextColor}" />
                         <Style.Triggers>
                             <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                                 <Setter Property="FontSize" Value="{StaticResource ComponentIconSizeTabletSmall}" />
@@ -86,13 +86,13 @@
                     Text="📺"
                     CornerRadius="8"
                     Clicked="OnSizeClicked"
-                    CommandParameter="TV"
-                    BackgroundColor="{DynamicResource SizeSelectorButtonBackgroundColor}"
-                    TextColor="{DynamicResource SizeSelectorButtonTextColor}">
+                    CommandParameter="TV">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="FontSize" Value="{StaticResource ComponentIconSizePhoneSmall}" />
                         <Setter Property="Padding" Value="12,6" />
+                        <Setter Property="BackgroundColor" Value="{DynamicResource SizeSelectorButtonBackgroundColor}" />
+                        <Setter Property="TextColor" Value="{DynamicResource SizeSelectorButtonTextColor}" />
                         <Style.Triggers>
                             <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                                 <Setter Property="FontSize" Value="{StaticResource ComponentIconSizeTabletSmall}" />
@@ -113,4 +113,4 @@
         </HorizontalStackLayout>
     </Border>
 
-</base:SizeableComponent>
+</base:AdaptiveComponent>

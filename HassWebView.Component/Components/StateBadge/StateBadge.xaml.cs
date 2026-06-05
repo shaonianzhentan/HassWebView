@@ -2,7 +2,7 @@ namespace HassWebView.Component.Components;
 
 using HassWebView.Component.Components.Base;
 
-public partial class StateBadge : SizeableComponent
+public partial class StateBadge : AdaptiveComponent
 {
     public static readonly BindableProperty StateProperty =
         BindableProperty.Create(nameof(State), typeof(string), typeof(StateBadge), string.Empty,

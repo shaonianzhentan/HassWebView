@@ -2,7 +2,7 @@ namespace HassWebView.Component.Components;
 
 using HassWebView.Component.Components.Base;
 
-public partial class EntityListGroup : SizeableComponent
+public partial class EntityListGroup : AdaptiveComponent
 {
     public EntityListGroup()
     {

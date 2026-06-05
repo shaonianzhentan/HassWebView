@@ -2,7 +2,7 @@ namespace HassWebView.Component.Components;
 
 using HassWebView.Component.Components.Base;
 
-public partial class ControlSwitch : SizeableComponent
+public partial class ControlSwitch : AdaptiveComponent
 {
     public static readonly BindableProperty IsToggledProperty =
         BindableProperty.Create(nameof(IsToggled), typeof(bool), typeof(ControlSwitch), false,

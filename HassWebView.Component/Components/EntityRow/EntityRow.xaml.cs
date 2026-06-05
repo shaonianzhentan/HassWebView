@@ -2,7 +2,7 @@ namespace HassWebView.Component.Components;
 
 using HassWebView.Component.Components.Base;
 
-public partial class EntityRow : SizeableComponent
+public partial class EntityRow : AdaptiveComponent
 {
     public EntityRow()
     {

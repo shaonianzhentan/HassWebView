@@ -2,7 +2,7 @@ namespace HassWebView.Component.Components;
 
 using HassWebView.Component.Components.Base;
 
-public partial class SliderCard : SizeableComponent
+public partial class SliderCard : AdaptiveComponent
 {
     public SliderCard()
     {

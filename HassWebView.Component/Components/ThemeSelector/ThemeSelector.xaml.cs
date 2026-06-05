@@ -2,24 +2,89 @@ namespace HassWebView.Component.Components;
 
 using HassWebView.Component.Components.Base;
 using HassWebView.Component.Models;
+using Microsoft.Maui.Controls;
+using System;
 
-public partial class ThemeSelector : SizeableComponent
+public partial class ThemeSelector : AdaptiveComponent
 {
     public ThemeSelector()
     {
         InitializeComponent();
-        UpdateButtonStates();
+        
+        // 监听组件加载事件
+        Loaded += OnLoaded;
+        
+        // 监听组件卸载事件
+        Unloaded += OnUnloaded;
+    }
+    
+    private void OnLoaded(object? sender, EventArgs e)
+    {
+        try
+        {
+            System.Diagnostics.Debug.WriteLine($"ThemeSelector loaded, CurrentTheme: {ThemeManager.CurrentTheme}");
+            
+            // 同步当前状态
+            UpdateButtonStates();
+            
+            // 订阅主题变化事件
+            ThemeManager.ThemeChanged += OnThemeChanged;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"ThemeSelector.OnLoaded failed: {ex}");
+        }
+    }
+    
+    private void OnUnloaded(object? sender, EventArgs e)
+    {
+        try
+        {
+            System.Diagnostics.Debug.WriteLine($"ThemeSelector unloaded");
+            
+            // 取消订阅主题变化事件
+            ThemeManager.ThemeChanged -= OnThemeChanged;
+            
+            // 取消订阅自身事件
+            Loaded -= OnLoaded;
+            Unloaded -= OnUnloaded;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"ThemeSelector.OnUnloaded failed: {ex}");
+        }
+    }
+    
+    private void OnThemeChanged(object? sender, EventArgs e)
+    {
+        try
+        {
+            System.Diagnostics.Debug.WriteLine($"ThemeSelector.OnThemeChanged: {ThemeManager.CurrentTheme}");
+            UpdateButtonStates();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"ThemeSelector.OnThemeChanged failed: {ex}");
+        }
     }
 
     private void OnThemeClicked(object sender, EventArgs e)
     {
-        if (sender is Button btn && btn.CommandParameter is string themeStr)
+        try
         {
-            if (Enum.TryParse<ThemeMode>(themeStr, out var theme))
+            if (sender is Button btn && btn.CommandParameter is string themeStr)
             {
-                ThemeManager.SetTheme(theme);
-                UpdateButtonStates();
+                System.Diagnostics.Debug.WriteLine($"ThemeSelector.OnThemeClicked: {themeStr}");
+                
+                if (Enum.TryParse<ThemeMode>(themeStr, out var theme))
+                {
+                    ThemeManager.SetTheme(theme);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"ThemeSelector.OnThemeClicked failed: {ex}");
         }
     }
 

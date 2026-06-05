@@ -2,7 +2,7 @@ namespace HassWebView.Component.Components;
 
 using HassWebView.Component.Components.Base;
 
-public partial class SettingsGroup : SizeableComponent
+public partial class SettingsGroup : AdaptiveComponent
 {
     public static readonly BindableProperty TitleProperty =
         BindableProperty.Create(nameof(Title), typeof(string), typeof(SettingsGroup), string.Empty);

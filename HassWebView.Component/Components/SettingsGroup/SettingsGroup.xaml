@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<base:SizeableComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<base:AdaptiveComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                         xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
                         xmlns:models="clr-namespace:HassWebView.Component.Models"
@@ -13,27 +13,17 @@
             <RoundRectangle CornerRadius="12" />
         </Border.StrokeShape>
         <Border.Stroke>
-            <SolidColorBrush Color="{StaticResource BorderColor}" />
+            <SolidColorBrush Color="{DynamicResource BorderColor}" />
         </Border.Stroke>
         <VerticalStackLayout>
             <Label x:Name="TitleLabel"
                    Text="{Binding Source={x:Reference this}, Path=Title}"
-                   TextColor="{StaticResource PrimaryTextColor}"
+                   TextColor="{DynamicResource PrimaryTextColor}"
                    FontAttributes="Bold">
                 <Label.Style>
                     <Style TargetType="Label">
-                        <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizePhoneSmall}" />
-                        <Setter Property="Padding" Value="{StaticResource ComponentPaddingPhoneSmall}" />
-                        <Style.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
-                                <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTabletSmall}" />
-                                <Setter Property="Padding" Value="{StaticResource ComponentPaddingTabletSmall}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
-                                <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTVSmall}" />
-                                <Setter Property="Padding" Value="{StaticResource ComponentPaddingTVSmall}" />
-                            </DataTrigger>
-                        </Style.Triggers>
+                        <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeSmall}" />
+                        <Setter Property="Padding" Value="{StaticResource ComponentPaddingSmall}" />
                     </Style>
                 </Label.Style>
             </Label>
@@ -41,4 +31,4 @@
         </VerticalStackLayout>
     </Border>
 
-</base:SizeableComponent>
+</base:AdaptiveComponent>

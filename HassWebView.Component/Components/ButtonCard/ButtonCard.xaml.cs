@@ -2,7 +2,7 @@ namespace HassWebView.Component.Components;
 
 using HassWebView.Component.Components.Base;
 
-public partial class ButtonCard : SizeableComponent
+public partial class ButtonCard : AdaptiveComponent
 {
     public static readonly BindableProperty IconProperty =
         BindableProperty.Create(nameof(Icon), typeof(string), typeof(ButtonCard), string.Empty);
