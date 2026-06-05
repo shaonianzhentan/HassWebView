@@ -7,6 +7,33 @@ using System;
 
 public partial class ThemeSelector : AdaptiveComponent
 {
+    public static readonly BindableProperty IsLightSelectedProperty = BindableProperty.Create(
+        nameof(IsLightSelected), typeof(bool), typeof(ThemeSelector), false);
+
+    public static readonly BindableProperty IsDarkSelectedProperty = BindableProperty.Create(
+        nameof(IsDarkSelected), typeof(bool), typeof(ThemeSelector), false);
+
+    public static readonly BindableProperty IsSystemSelectedProperty = BindableProperty.Create(
+        nameof(IsSystemSelected), typeof(bool), typeof(ThemeSelector), false);
+
+    public bool IsLightSelected
+    {
+        get => (bool)GetValue(IsLightSelectedProperty);
+        set => SetValue(IsLightSelectedProperty, value);
+    }
+
+    public bool IsDarkSelected
+    {
+        get => (bool)GetValue(IsDarkSelectedProperty);
+        set => SetValue(IsDarkSelectedProperty, value);
+    }
+
+    public bool IsSystemSelected
+    {
+        get => (bool)GetValue(IsSystemSelectedProperty);
+        set => SetValue(IsSystemSelectedProperty, value);
+    }
+
     public ThemeSelector()
     {
         InitializeComponent();
@@ -92,42 +119,20 @@ public partial class ThemeSelector : AdaptiveComponent
     {
         try
         {
-            UpdateButtonStyle(LightBtn, ThemeManager.CurrentTheme == ThemeMode.Light);
-            UpdateButtonStyle(DarkBtn, ThemeManager.CurrentTheme == ThemeMode.Dark);
-            UpdateButtonStyle(SystemBtn, ThemeManager.CurrentTheme == ThemeMode.System);
+            var lightSelected = ThemeManager.CurrentTheme == ThemeMode.Light;
+            var darkSelected = ThemeManager.CurrentTheme == ThemeMode.Dark;
+            var systemSelected = ThemeManager.CurrentTheme == ThemeMode.System;
+            
+            System.Diagnostics.Debug.WriteLine($"UpdateButtonStates: Light={lightSelected}, Dark={darkSelected}, System={systemSelected}");
+            
+            // 更新按钮状态
+            IsLightSelected = lightSelected;
+            IsDarkSelected = darkSelected;
+            IsSystemSelected = systemSelected;
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"UpdateButtonStates failed: {ex}");
-        }
-    }
-
-    private void UpdateButtonStyle(Button button, bool isSelected)
-    {
-        if (button == null) return;
-        
-        var accentColor = Application.Current?.Resources.TryGetValue("AccentColor", out var accent) == true 
-            ? accent as Color 
-            : Color.FromArgb("#007AFF");
-        var cardBackgroundColor = Application.Current?.Resources.TryGetValue("CardBackgroundColor", out var cardBg) == true 
-            ? cardBg as Color 
-            : Color.FromArgb("#EFEFF4");
-        var secondaryTextColor = Application.Current?.Resources.TryGetValue("SecondaryTextColor", out var secondaryText) == true 
-            ? secondaryText as Color 
-            : Color.FromArgb("#636366");
-        var buttonTextColor = Application.Current?.Resources.TryGetValue("ButtonTextColor", out var btnText) == true 
-            ? btnText as Color 
-            : Colors.White;
-        
-        if (isSelected)
-        {
-            button.BackgroundColor = accentColor;
-            button.TextColor = buttonTextColor;
-        }
-        else
-        {
-            button.BackgroundColor = cardBackgroundColor;
-            button.TextColor = secondaryTextColor;
         }
     }
 }

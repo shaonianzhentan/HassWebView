@@ -7,19 +7,14 @@ using System;
 
 public partial class SizeSelector : AdaptiveComponent
 {
-    private bool _isUpdatingFromBinding = false;
-    
     public static readonly BindableProperty IsPhoneSelectedProperty = BindableProperty.Create(
-        nameof(IsPhoneSelected), typeof(bool), typeof(SizeSelector), false,
-        propertyChanged: OnIsPhoneSelectedChanged);
+        nameof(IsPhoneSelected), typeof(bool), typeof(SizeSelector), false);
 
     public static readonly BindableProperty IsTabletSelectedProperty = BindableProperty.Create(
-        nameof(IsTabletSelected), typeof(bool), typeof(SizeSelector), false,
-        propertyChanged: OnIsTabletSelectedChanged);
+        nameof(IsTabletSelected), typeof(bool), typeof(SizeSelector), false);
 
     public static readonly BindableProperty IsTVSelectedProperty = BindableProperty.Create(
-        nameof(IsTVSelected), typeof(bool), typeof(SizeSelector), false,
-        propertyChanged: OnIsTVSelectedChanged);
+        nameof(IsTVSelected), typeof(bool), typeof(SizeSelector), false);
 
     public bool IsPhoneSelected
     {
@@ -100,39 +95,6 @@ public partial class SizeSelector : AdaptiveComponent
         }
     }
 
-    private static void OnIsPhoneSelectedChanged(BindableObject bindable, object oldValue, object newValue)
-    {
-        if (bindable is SizeSelector selector && (bool)newValue)
-        {
-            System.Diagnostics.Debug.WriteLine($"IsPhoneSelected changed to true");
-            selector._isUpdatingFromBinding = true;
-            SizeManager.SetSize(ComponentSize.Phone);
-            selector._isUpdatingFromBinding = false;
-        }
-    }
-
-    private static void OnIsTabletSelectedChanged(BindableObject bindable, object oldValue, object newValue)
-    {
-        if (bindable is SizeSelector selector && (bool)newValue)
-        {
-            System.Diagnostics.Debug.WriteLine($"IsTabletSelected changed to true");
-            selector._isUpdatingFromBinding = true;
-            SizeManager.SetSize(ComponentSize.Tablet);
-            selector._isUpdatingFromBinding = false;
-        }
-    }
-
-    private static void OnIsTVSelectedChanged(BindableObject bindable, object oldValue, object newValue)
-    {
-        if (bindable is SizeSelector selector && (bool)newValue)
-        {
-            System.Diagnostics.Debug.WriteLine($"IsTVSelected changed to true");
-            selector._isUpdatingFromBinding = true;
-            SizeManager.SetSize(ComponentSize.TV);
-            selector._isUpdatingFromBinding = false;
-        }
-    }
-
     private void OnSizeClicked(object sender, EventArgs e)
     {
         try
@@ -157,13 +119,6 @@ public partial class SizeSelector : AdaptiveComponent
     {
         try
         {
-            // 如果正在从绑定更新，跳过此方法以防止循环
-            if (_isUpdatingFromBinding)
-            {
-                System.Diagnostics.Debug.WriteLine("UpdateButtonStates skipped due to _isUpdatingFromBinding");
-                return;
-            }
-            
             var phoneSelected = SizeManager.CurrentSize == ComponentSize.Phone;
             var tabletSelected = SizeManager.CurrentSize == ComponentSize.Tablet;
             var tvSelected = SizeManager.CurrentSize == ComponentSize.TV;
