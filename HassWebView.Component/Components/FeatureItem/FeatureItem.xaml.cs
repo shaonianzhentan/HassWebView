@@ -1,6 +1,8 @@
 namespace HassWebView.Component.Components;
 
-public partial class FeatureItem : ContentView
+using HassWebView.Component.Components.Base;
+
+public partial class FeatureItem : SizeableComponent
 {
     public static readonly BindableProperty TextProperty =
         BindableProperty.Create(nameof(Text), typeof(string), typeof(FeatureItem), string.Empty);

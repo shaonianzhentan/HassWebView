@@ -1,72 +1,115 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="HassWebView.Component.Components.SizeSelector"
-             x:Name="this">
+<base:SizeableComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                        xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
+                        x:Class="HassWebView.Component.Components.SizeSelector"
+                        x:Name="this">
 
-    <Border Padding="8"
-            BackgroundColor="{DynamicResource CardBackgroundColor}"
-            Stroke="{DynamicResource BorderColor}"
+    <Border BackgroundColor="{DynamicResource CardBackgroundColor}"
+            Stroke="{StaticResource BorderColor}"
             StrokeThickness="1">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Padding" Value="{StaticResource ComponentPaddingPhoneSmall}" />
+                <Style.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                        <Setter Property="Padding" Value="{StaticResource ComponentPaddingTabletSmall}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                        <Setter Property="Padding" Value="{StaticResource ComponentPaddingTVSmall}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="12" />
         </Border.StrokeShape>
         <HorizontalStackLayout Spacing="4">
             <Button x:Name="MediumBtn"
                     Text="📱"
-                    FontSize="16"
                     CornerRadius="8"
-                    Padding="12,6"
                     Clicked="OnSizeClicked"
                     CommandParameter="Phone"
                     BackgroundColor="{DynamicResource SizeSelectorButtonBackgroundColor}"
                     TextColor="{DynamicResource SizeSelectorButtonTextColor}">
-                <Button.Triggers>
-                    <DataTrigger TargetType="Button"
-                                 Binding="{Binding Source={x:Reference this}, Path=IsPhoneSelected}"
-                                 Value="True">
-                        <Setter Property="BackgroundColor" Value="{DynamicResource SizeSelectorButtonSelectedBackgroundColor}" />
-                        <Setter Property="TextColor" Value="{DynamicResource SizeSelectorButtonSelectedTextColor}" />
-                    </DataTrigger>
-                </Button.Triggers>
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="FontSize" Value="{StaticResource ComponentIconSizePhoneSmall}" />
+                        <Setter Property="Padding" Value="12,6" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentIconSizeTabletSmall}" />
+                                <Setter Property="Padding" Value="16,8" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentIconSizeTVSmall}" />
+                                <Setter Property="Padding" Value="20,10" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=IsPhoneSelected}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{DynamicResource SizeSelectorButtonSelectedBackgroundColor}" />
+                                <Setter Property="TextColor" Value="{DynamicResource SizeSelectorButtonSelectedTextColor}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
             </Button>
             <Button x:Name="LargeBtn"
                     Text="📲"
-                    FontSize="16"
                     CornerRadius="8"
-                    Padding="12,6"
                     Clicked="OnSizeClicked"
                     CommandParameter="Tablet"
                     BackgroundColor="{DynamicResource SizeSelectorButtonBackgroundColor}"
                     TextColor="{DynamicResource SizeSelectorButtonTextColor}">
-                <Button.Triggers>
-                    <DataTrigger TargetType="Button"
-                                 Binding="{Binding Source={x:Reference this}, Path=IsTabletSelected}"
-                                 Value="True">
-                        <Setter Property="BackgroundColor" Value="{DynamicResource SizeSelectorButtonSelectedBackgroundColor}" />
-                        <Setter Property="TextColor" Value="{DynamicResource SizeSelectorButtonSelectedTextColor}" />
-                    </DataTrigger>
-                </Button.Triggers>
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="FontSize" Value="{StaticResource ComponentIconSizePhoneSmall}" />
+                        <Setter Property="Padding" Value="12,6" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentIconSizeTabletSmall}" />
+                                <Setter Property="Padding" Value="16,8" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentIconSizeTVSmall}" />
+                                <Setter Property="Padding" Value="20,10" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=IsTabletSelected}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{DynamicResource SizeSelectorButtonSelectedBackgroundColor}" />
+                                <Setter Property="TextColor" Value="{DynamicResource SizeSelectorButtonSelectedTextColor}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
             </Button>
             <Button x:Name="ExtraLargeBtn"
                     Text="📺"
-                    FontSize="16"
                     CornerRadius="8"
-                    Padding="12,6"
                     Clicked="OnSizeClicked"
                     CommandParameter="TV"
                     BackgroundColor="{DynamicResource SizeSelectorButtonBackgroundColor}"
                     TextColor="{DynamicResource SizeSelectorButtonTextColor}">
-                <Button.Triggers>
-                    <DataTrigger TargetType="Button"
-                                 Binding="{Binding Source={x:Reference this}, Path=IsTVSelected}"
-                                 Value="True">
-                        <Setter Property="BackgroundColor" Value="{DynamicResource SizeSelectorButtonSelectedBackgroundColor}" />
-                        <Setter Property="TextColor" Value="{DynamicResource SizeSelectorButtonSelectedTextColor}" />
-                    </DataTrigger>
-                </Button.Triggers>
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="FontSize" Value="{StaticResource ComponentIconSizePhoneSmall}" />
+                        <Setter Property="Padding" Value="12,6" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentIconSizeTabletSmall}" />
+                                <Setter Property="Padding" Value="16,8" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentIconSizeTVSmall}" />
+                                <Setter Property="Padding" Value="20,10" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=IsTVSelected}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{DynamicResource SizeSelectorButtonSelectedBackgroundColor}" />
+                                <Setter Property="TextColor" Value="{DynamicResource SizeSelectorButtonSelectedTextColor}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
             </Button>
         </HorizontalStackLayout>
     </Border>
 
-</ContentView>
+</base:SizeableComponent>

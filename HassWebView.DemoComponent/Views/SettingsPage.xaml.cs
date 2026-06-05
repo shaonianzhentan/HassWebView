@@ -6,8 +6,8 @@ namespace HassWebView.DemoComponent.Views;
 
 public partial class SettingsPage : ContentPage
 {
-    private string _currentThemeText;
-    public string CurrentThemeText
+    private string? _currentThemeText;
+    public string? CurrentThemeText
     {
         get => _currentThemeText;
         set
@@ -17,8 +17,8 @@ public partial class SettingsPage : ContentPage
         }
     }
 
-    private string _currentSizeText;
-    public string CurrentSizeText
+    private string? _currentSizeText;
+    public string? CurrentSizeText
     {
         get => _currentSizeText;
         set
@@ -62,7 +62,7 @@ public partial class SettingsPage : ContentPage
         UpdateCurrentSettings();
     }
 
-    private void OnAboutClicked(object sender, EventArgs e)
+    private void OnAboutClicked(object? sender, EventArgs e)
     {
         Navigation.PushAsync(new AboutPage());
     }

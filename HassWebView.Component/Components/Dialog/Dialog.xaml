@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="HassWebView.Component.Components.Dialog"
-             x:Name="this"
-             IsVisible="False"
-             BackgroundColor="Transparent"
-             HorizontalOptions="FillAndExpand"
-             VerticalOptions="FillAndExpand">
+<base:SizeableComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                        xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
+                        x:Class="HassWebView.Component.Components.Dialog"
+                        x:Name="this"
+                        IsVisible="False"
+                        BackgroundColor="Transparent"
+                        HorizontalOptions="FillAndExpand"
+                        VerticalOptions="FillAndExpand">
 
-    <!-- 使用 AbsoluteLayout 确保全屏覆盖 -->
     <AbsoluteLayout HorizontalOptions="FillAndExpand"
                     VerticalOptions="FillAndExpand">
         <!-- 背景遮罩 - 铺满全屏 -->
@@ -25,10 +25,24 @@
         <Border x:Name="DialogBorder"
                 AbsoluteLayout.LayoutFlags="PositionProportional"
                 AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
-                Padding="24"
-                BackgroundColor="{DynamicResource CardBackgroundColor}"
+                BackgroundColor="{StaticResource CardBackgroundColor}"
                 WidthRequest="320"
                 Opacity="1">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Padding" Value="{StaticResource ComponentPaddingPhoneLarge}" />
+                    <Style.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                            <Setter Property="Padding" Value="{StaticResource ComponentPaddingTabletLarge}" />
+                            <Setter Property="WidthRequest" Value="480" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                            <Setter Property="Padding" Value="{StaticResource ComponentPaddingTVLarge}" />
+                            <Setter Property="WidthRequest" Value="640" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="16" />
             </Border.StrokeShape>
@@ -37,36 +51,94 @@
                 <!-- 标题 -->
                 <Label x:Name="TitleLabel"
                        Text="{Binding Source={x:Reference this}, Path=Title}"
-                       FontSize="{DynamicResource ComponentTitleSizePhoneLarge}"
                        FontAttributes="Bold"
-                       TextColor="{DynamicResource PrimaryTextColor}" />
+                       TextColor="{StaticResource PrimaryTextColor}">
+                    <Label.Style>
+                        <Style TargetType="Label">
+                            <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizePhoneLarge}" />
+                            <Style.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                    <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTabletLarge}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                    <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTVLarge}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
                 
                 <!-- 内容 -->
                 <Label x:Name="ContentLabel"
                        Text="{Binding Source={x:Reference this}, Path=Message}"
-                       FontSize="{DynamicResource ComponentBodySizePhoneMedium}"
-                       TextColor="{DynamicResource SecondaryTextColor}"
-                       LineBreakMode="WordWrap" />
+                       TextColor="{StaticResource SecondaryTextColor}"
+                       LineBreakMode="WordWrap">
+                    <Label.Style>
+                        <Style TargetType="Label">
+                            <Setter Property="FontSize" Value="{StaticResource ComponentBodySizePhoneMedium}" />
+                            <Style.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                    <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTabletMedium}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                    <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTVMedium}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
                 
                 <!-- 按钮区域 -->
                 <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
                     <Button x:Name="CancelBtn"
                             Text="{Binding Source={x:Reference this}, Path=CancelText}"
-                            FontSize="{DynamicResource ComponentBodySizePhoneMedium}"
-                            TextColor="{DynamicResource AccentColor}"
+                            TextColor="{StaticResource AccentColor}"
                             BackgroundColor="Transparent"
                             CornerRadius="8"
-                            Clicked="OnCancelClicked" />
+                            Clicked="OnCancelClicked">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentBodySizePhoneSmall}" />
+                                <Setter Property="Padding" Value="16,8" />
+                                <Style.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                        <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTabletSmall}" />
+                                        <Setter Property="Padding" Value="24,12" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                        <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTVSmall}" />
+                                        <Setter Property="Padding" Value="32,16" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                     <Button x:Name="ConfirmBtn"
                             Text="{Binding Source={x:Reference this}, Path=ConfirmText}"
-                            FontSize="{DynamicResource ComponentBodySizePhoneMedium}"
-                            TextColor="{DynamicResource ButtonTextColor}"
-                            BackgroundColor="{DynamicResource ButtonBackgroundColor}"
+                            TextColor="{StaticResource ButtonTextColor}"
+                            BackgroundColor="{StaticResource ButtonBackgroundColor}"
                             CornerRadius="8"
-                            Clicked="OnConfirmClicked" />
+                            Clicked="OnConfirmClicked">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentBodySizePhoneSmall}" />
+                                <Setter Property="Padding" Value="16,8" />
+                                <Style.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                        <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTabletSmall}" />
+                                        <Setter Property="Padding" Value="24,12" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                        <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTVSmall}" />
+                                        <Setter Property="Padding" Value="32,16" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </Border>
     </AbsoluteLayout>
 
-</ContentView>
+</base:SizeableComponent>

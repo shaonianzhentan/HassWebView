@@ -1,6 +1,8 @@
 namespace HassWebView.Component.Components;
 
-public partial class Alert : ContentView
+using HassWebView.Component.Components.Base;
+
+public partial class Alert : SizeableComponent
 {
     public static readonly BindableProperty TitleProperty =
         BindableProperty.Create(nameof(Title), typeof(string), typeof(Alert), string.Empty);

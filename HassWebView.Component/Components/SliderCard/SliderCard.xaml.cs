@@ -1,13 +1,12 @@
 namespace HassWebView.Component.Components;
 
-using HassWebView.Component.Models;
+using HassWebView.Component.Components.Base;
 
-public partial class SliderCard : ContentView
+public partial class SliderCard : SizeableComponent
 {
     public SliderCard()
     {
         InitializeComponent();
-        UpdateSize();
     }
 
     public static readonly BindableProperty TitleProperty =
@@ -83,34 +82,5 @@ public partial class SliderCard : ContentView
             return Math.Round(value).ToString();
         }
         return value.ToString($"F{precision}");
-    }
-
-    private void UpdateSize()
-    {
-        try
-        {
-            var resources = Application.Current?.Resources;
-            if (resources == null) return;
-            
-            if (resources.TryGetValue("ComponentPaddingMedium", out var padMed) && padMed is Thickness padMedVal)
-                CardBorder.Padding = padMedVal;
-            
-            if (resources.TryGetValue("ComponentTitleSizeMedium", out var titleMed) && titleMed is double titleMedVal)
-            {
-                TitleLabel.FontSize = titleMedVal;
-                ValueLabel.FontSize = titleMedVal;
-            }
-            
-            ValueSlider.HeightRequest = SizeManager.CurrentSize switch
-            {
-                Models.ComponentSize.Tablet => 56,
-                Models.ComponentSize.TV => 72,
-                _ => 40
-            };
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"SliderCard.UpdateSize failed: {ex}");
-        }
     }
 }

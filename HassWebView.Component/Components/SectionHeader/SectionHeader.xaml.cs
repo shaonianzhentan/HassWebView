@@ -1,13 +1,12 @@
 namespace HassWebView.Component.Components;
 
-using HassWebView.Component.Models;
+using HassWebView.Component.Components.Base;
 
-public partial class SectionHeader : ContentView
+public partial class SectionHeader : SizeableComponent
 {
     public SectionHeader()
     {
         InitializeComponent();
-        UpdateSize();
     }
 
     public event EventHandler? ActionTapped;
@@ -33,26 +32,6 @@ public partial class SectionHeader : ContentView
     {
         get => (string?)GetValue(ActionProperty);
         set => SetValue(ActionProperty, value);
-    }
-
-    private void UpdateSize()
-    {
-        try
-        {
-            var resources = Application.Current?.Resources;
-            if (resources == null) return;
-            
-            // 从资源字典读取字体大小
-            if (resources.TryGetValue("ComponentTitleSizeSmall", out var titleSmall) && titleSmall is double titleSmallVal)
-            {
-                TitleLabel.FontSize = titleSmallVal;
-                ActionLabel.FontSize = titleSmallVal;
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"SectionHeader.UpdateSize failed: {ex}");
-        }
     }
 
     private void OnActionTapped(object sender, TappedEventArgs e)

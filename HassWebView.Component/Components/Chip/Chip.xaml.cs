@@ -1,6 +1,8 @@
 namespace HassWebView.Component.Components;
 
-public partial class Chip : ContentView
+using HassWebView.Component.Components.Base;
+
+public partial class Chip : SizeableComponent
 {
     public static readonly BindableProperty TextProperty =
         BindableProperty.Create(nameof(Text), typeof(string), typeof(Chip), string.Empty);

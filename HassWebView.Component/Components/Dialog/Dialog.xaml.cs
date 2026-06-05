@@ -1,6 +1,8 @@
 namespace HassWebView.Component.Components;
 
-public partial class Dialog : ContentView
+using HassWebView.Component.Components.Base;
+
+public partial class Dialog : SizeableComponent
 {
     public static readonly BindableProperty TitleProperty =
         BindableProperty.Create(nameof(Title), typeof(string), typeof(Dialog), string.Empty);

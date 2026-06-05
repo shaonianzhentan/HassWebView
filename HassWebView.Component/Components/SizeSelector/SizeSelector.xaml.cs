@@ -1,8 +1,9 @@
 namespace HassWebView.Component.Components;
 
+using HassWebView.Component.Components.Base;
 using HassWebView.Component.Models;
 
-public partial class SizeSelector : ContentView
+public partial class SizeSelector : SizeableComponent
 {
     public static readonly BindableProperty IsPhoneSelectedProperty = BindableProperty.Create(
         nameof(IsPhoneSelected), typeof(bool), typeof(SizeSelector), false);
@@ -39,6 +40,23 @@ public partial class SizeSelector : ContentView
         {
             UpdateButtonStates();
         });
+        
+        // 监听尺寸变化事件
+        SizeManager.SizeChanged += OnSizeChanged;
+        
+        // 监听组件卸载事件
+        Unloaded += OnUnloaded;
+    }
+    
+    private void OnSizeChanged(object? sender, EventArgs e)
+    {
+        UpdateButtonStates();
+    }
+    
+    private void OnUnloaded(object? sender, EventArgs e)
+    {
+        SizeManager.SizeChanged -= OnSizeChanged;
+        Unloaded -= OnUnloaded;
     }
 
     private void OnSizeClicked(object sender, EventArgs e)

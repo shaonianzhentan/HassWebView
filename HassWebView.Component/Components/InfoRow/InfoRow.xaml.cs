@@ -1,8 +1,8 @@
 namespace HassWebView.Component.Components;
 
-using HassWebView.Component.Models;
+using HassWebView.Component.Components.Base;
 
-public partial class InfoRow : ContentView
+public partial class InfoRow : SizeableComponent
 {
     public InfoRow()
     {

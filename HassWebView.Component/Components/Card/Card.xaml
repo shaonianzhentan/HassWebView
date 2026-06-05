@@ -1,12 +1,25 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="HassWebView.Component.Components.Card"
-             x:Name="this">
+<base:SizeableComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                        xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
+                        x:Class="HassWebView.Component.Components.Card"
+                        x:Name="this">
 
     <Border x:Name="CardBorder"
-            BackgroundColor="{DynamicResource CardBackgroundColor}"
-            Padding="16">
+            BackgroundColor="{DynamicResource CardBackgroundColor}">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Padding" Value="{StaticResource ComponentPaddingPhoneLarge}" />
+                <Style.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                        <Setter Property="Padding" Value="{StaticResource ComponentPaddingTabletLarge}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                        <Setter Property="Padding" Value="{StaticResource ComponentPaddingTVLarge}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="12" />
         </Border.StrokeShape>
@@ -16,4 +29,4 @@
         <ContentPresenter Content="{Binding Source={x:Reference this}, Path=Content}" />
     </Border>
 
-</ContentView>
+</base:SizeableComponent>

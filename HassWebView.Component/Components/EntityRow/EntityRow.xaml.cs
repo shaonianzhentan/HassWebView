@@ -1,27 +1,13 @@
 namespace HassWebView.Component.Components;
 
-using HassWebView.Component.Models;
+using HassWebView.Component.Components.Base;
 
-public partial class EntityRow : ContentView
+public partial class EntityRow : SizeableComponent
 {
-    private bool _isInitialized = false;
-
     public EntityRow()
     {
         InitializeComponent();
-        
-        Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
-        {
-            try
-            {
-                UpdateColors();
-                _isInitialized = true;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"EntityRow initialization failed: {ex}");
-            }
-        });
+        UpdateStateColorType();
     }
 
     public static readonly BindableProperty IconTextProperty =
@@ -47,7 +33,7 @@ public partial class EntityRow : ContentView
             propertyChanged: (b, _, __) =>
             {
                 if (b is EntityRow row)
-                    row.SafeUpdateColors();
+                    row.UpdateStateColorType();
             });
 
     public string State
@@ -61,7 +47,7 @@ public partial class EntityRow : ContentView
             propertyChanged: (b, _, __) =>
             {
                 if (b is EntityRow row)
-                    row.SafeUpdateColors();
+                    row.UpdateStateColorType();
             });
 
     public bool IsActive
@@ -70,67 +56,29 @@ public partial class EntityRow : ContentView
         set => SetValue(IsActiveProperty, value);
     }
 
-    public Color IconBackgroundColor
+    public static readonly BindableProperty StateColorTypeProperty =
+        BindableProperty.Create(nameof(StateColorType), typeof(StateColorType), typeof(EntityRow), StateColorType.Default);
+
+    public StateColorType StateColorType
     {
-        get => (Color)GetValue(IconBackgroundColorProperty);
-        set => SetValue(IconBackgroundColorProperty, value);
+        get => (StateColorType)GetValue(StateColorTypeProperty);
+        set => SetValue(StateColorTypeProperty, value);
     }
 
-    public static readonly BindableProperty IconBackgroundColorProperty =
-        BindableProperty.Create(nameof(IconBackgroundColor), typeof(Color), typeof(EntityRow), Colors.Transparent);
-
-    public Color IconTextColor
-    {
-        get => (Color)GetValue(IconTextColorProperty);
-        set => SetValue(IconTextColorProperty, value);
-    }
-
-    public static readonly BindableProperty IconTextColorProperty =
-        BindableProperty.Create(nameof(IconTextColor), typeof(Color), typeof(EntityRow), Colors.Black);
-
-    public Color StateColor
-    {
-        get => (Color)GetValue(StateColorProperty);
-        set => SetValue(StateColorProperty, value);
-    }
-
-    public static readonly BindableProperty StateColorProperty =
-        BindableProperty.Create(nameof(StateColor), typeof(Color), typeof(EntityRow), Colors.Gray);
-
-    private void SafeUpdateColors()
-    {
-        if (_isInitialized)
-        {
-            UpdateColors();
-        }
-    }
-
-    private void UpdateColors()
+    private void UpdateStateColorType()
     {
         try
         {
-            var resources = Application.Current?.Resources;
-            if (resources == null) return;
-
-            var isDark = Application.Current.RequestedTheme == AppTheme.Dark;
             var isActive = IsActive || (State?.ToLower() == "on" || State?.ToLower() == "open");
-
-            if (isActive)
-            {
-                IconBackgroundColor = (Color)resources["SuccessColor"];
-                IconTextColor = Colors.White;
-                StateColor = (Color)resources["SuccessColor"];
-            }
-            else
-            {
-                IconBackgroundColor = isDark ? Color.FromArgb("#3A3A3C") : Color.FromArgb("#EFEFF4");
-                IconTextColor = isDark ? Color.FromArgb("#FFFFFF") : Color.FromArgb("#1D1D1F");
-                StateColor = isDark ? Color.FromArgb("#8E8E93") : Color.FromArgb("#636366");
-            }
+            
+            StateColorType colorType = isActive ? StateColorType.Success :
+                (State?.ToLower() == "unavailable" ? StateColorType.Error : StateColorType.Default);
+            
+            StateColorType = colorType;
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"EntityRow.UpdateColors failed: {ex}");
+            System.Diagnostics.Debug.WriteLine($"EntityRow.UpdateStateColorType failed: {ex}");
         }
     }
 }

@@ -1,27 +1,65 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="HassWebView.Component.Components.SectionHeader"
-             x:Name="this">
+<base:SizeableComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                        xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
+                        x:Class="HassWebView.Component.Components.SectionHeader"
+                        x:Name="this">
 
-    <Grid ColumnDefinitions="*,Auto"
-          Padding="16,8,16,4">
+    <Grid ColumnDefinitions="*,Auto">
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Setter Property="Padding" Value="{StaticResource ComponentPaddingPhoneSmall}" />
+                <Style.Triggers>
+                    <DataTrigger TargetType="Grid" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                        <Setter Property="Padding" Value="{StaticResource ComponentPaddingTabletSmall}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Grid" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                        <Setter Property="Padding" Value="{StaticResource ComponentPaddingTVSmall}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
 
         <Label x:Name="TitleLabel"
                Grid.Column="0"
                Text="{Binding Source={x:Reference this}, Path=Title}"
-               FontSize="12"
-               TextColor="{DynamicResource TertiaryTextColor}"
+               TextColor="{StaticResource TertiaryTextColor}"
                FontAttributes="Bold"
-               VerticalOptions="Center" />
+               VerticalOptions="Center">
+            <Label.Style>
+                <Style TargetType="Label">
+                    <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizePhoneSmall}" />
+                    <Style.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                            <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTabletSmall}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                            <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTVSmall}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
 
         <Label x:Name="ActionLabel"
                Grid.Column="1"
                Text="{Binding Source={x:Reference this}, Path=Action}"
-               FontSize="14"
-               TextColor="{DynamicResource AccentColor}"
+               TextColor="{StaticResource AccentColor}"
                VerticalOptions="Center"
                IsVisible="False">
+            <Label.Style>
+                <Style TargetType="Label">
+                    <Setter Property="FontSize" Value="{StaticResource ComponentBodySizePhoneSmall}" />
+                    <Style.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                            <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTabletSmall}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                            <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTVSmall}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
             <Label.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnActionTapped" />
             </Label.GestureRecognizers>
@@ -29,4 +67,4 @@
 
     </Grid>
 
-</ContentView>
+</base:SizeableComponent>

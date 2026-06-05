@@ -1,6 +1,8 @@
 namespace HassWebView.Component.Components;
 
-public partial class SettingsGroup : ContentView
+using HassWebView.Component.Components.Base;
+
+public partial class SettingsGroup : SizeableComponent
 {
     public static readonly BindableProperty TitleProperty =
         BindableProperty.Create(nameof(Title), typeof(string), typeof(SettingsGroup), string.Empty);

@@ -1,6 +1,8 @@
 namespace HassWebView.Component.Components;
 
-public partial class StateBadge : ContentView
+using HassWebView.Component.Components.Base;
+
+public partial class StateBadge : SizeableComponent
 {
     public static readonly BindableProperty StateProperty =
         BindableProperty.Create(nameof(State), typeof(string), typeof(StateBadge), string.Empty,

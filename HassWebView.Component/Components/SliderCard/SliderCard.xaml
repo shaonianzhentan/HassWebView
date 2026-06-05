@@ -1,12 +1,25 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="HassWebView.Component.Components.SliderCard"
-             x:Name="this">
+<base:SizeableComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                        xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
+                        x:Class="HassWebView.Component.Components.SliderCard"
+                        x:Name="this">
 
     <Border x:Name="CardBorder"
-            Padding="16"
             BackgroundColor="{DynamicResource CardBackgroundColor}">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Padding" Value="{StaticResource ComponentPaddingPhoneLarge}" />
+                <Style.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                        <Setter Property="Padding" Value="{StaticResource ComponentPaddingTabletLarge}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                        <Setter Property="Padding" Value="{StaticResource ComponentPaddingTVLarge}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="12" />
         </Border.StrokeShape>
@@ -15,13 +28,38 @@
                 <Label x:Name="TitleLabel"
                        Grid.Column="0"
                        Text="{Binding Source={x:Reference this}, Path=Title}"
-                       FontSize="14"
-                       TextColor="{DynamicResource PrimaryTextColor}" />
+                       TextColor="{StaticResource PrimaryTextColor}">
+                    <Label.Style>
+                        <Style TargetType="Label">
+                            <Setter Property="FontSize" Value="{StaticResource ComponentBodySizePhoneMedium}" />
+                            <Style.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                    <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTabletMedium}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                    <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTVMedium}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
                 <Label x:Name="ValueLabel"
                        Grid.Column="1"
-                       FontSize="16"
                        FontAttributes="Bold"
-                       TextColor="{DynamicResource PrimaryTextColor}">
+                       TextColor="{StaticResource PrimaryTextColor}">
+                    <Label.Style>
+                        <Style TargetType="Label">
+                            <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizePhoneMedium}" />
+                            <Style.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                    <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTabletMedium}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                    <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTVMedium}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
                     <Label.FormattedText>
                         <FormattedString>
                             <Span Text="{Binding Source={x:Reference this}, Path=DisplayValue}" />
@@ -34,10 +72,24 @@
                     Minimum="{Binding Source={x:Reference this}, Path=Min}"
                     Maximum="{Binding Source={x:Reference this}, Path=Max}"
                     Value="{Binding Source={x:Reference this}, Path=Value}"
-                    ThumbColor="{DynamicResource AccentColor}"
-                    MinimumTrackColor="{DynamicResource AccentColor}"
-                    MaximumTrackColor="{DynamicResource TertiaryTextColor}" />
+                    ThumbColor="{StaticResource AccentColor}"
+                    MinimumTrackColor="{StaticResource AccentColor}"
+                    MaximumTrackColor="{StaticResource TertiaryTextColor}">
+                <Slider.Style>
+                    <Style TargetType="Slider">
+                        <Setter Property="HeightRequest" Value="40" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Slider" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                <Setter Property="HeightRequest" Value="56" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Slider" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                <Setter Property="HeightRequest" Value="72" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Slider.Style>
+            </Slider>
         </VerticalStackLayout>
     </Border>
 
-</ContentView>
+</base:SizeableComponent>

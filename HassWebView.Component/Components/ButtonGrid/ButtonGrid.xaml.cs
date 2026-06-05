@@ -1,6 +1,8 @@
 namespace HassWebView.Component.Components;
 
-public partial class ButtonGrid : ContentView
+using HassWebView.Component.Components.Base;
+
+public partial class ButtonGrid : SizeableComponent
 {
     public ButtonGrid()
     {

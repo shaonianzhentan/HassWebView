@@ -1,8 +1,9 @@
 namespace HassWebView.Component.Components;
 
+using HassWebView.Component.Components.Base;
 using HassWebView.Component.Models;
 
-public partial class ThemeSelector : ContentView
+public partial class ThemeSelector : SizeableComponent
 {
     public ThemeSelector()
     {
@@ -40,7 +41,6 @@ public partial class ThemeSelector : ContentView
     {
         if (button == null) return;
         
-        // 使用 DynamicResource 获取主题颜色
         var accentColor = Application.Current?.Resources.TryGetValue("AccentColor", out var accent) == true 
             ? accent as Color 
             : Color.FromArgb("#007AFF");

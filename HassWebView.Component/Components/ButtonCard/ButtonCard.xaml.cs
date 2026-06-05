@@ -1,6 +1,8 @@
 namespace HassWebView.Component.Components;
 
-public partial class ButtonCard : ContentView
+using HassWebView.Component.Components.Base;
+
+public partial class ButtonCard : SizeableComponent
 {
     public static readonly BindableProperty IconProperty =
         BindableProperty.Create(nameof(Icon), typeof(string), typeof(ButtonCard), string.Empty);
@@ -13,7 +15,7 @@ public partial class ButtonCard : ContentView
             propertyChanged: (b, _, __) =>
             {
                 if (b is ButtonCard card)
-                    card.UpdateStateColor();
+                    card.UpdateStateColorType();
             });
 
     public static readonly BindableProperty IsActiveProperty =
@@ -22,26 +24,13 @@ public partial class ButtonCard : ContentView
     public static readonly BindableProperty ShowBadgeProperty =
         BindableProperty.Create(nameof(ShowBadge), typeof(bool), typeof(ButtonCard), false);
 
-    public static readonly BindableProperty StateColorProperty =
-        BindableProperty.Create(nameof(StateColor), typeof(Color), typeof(ButtonCard), null,
-            propertyChanged: (b, _, __) =>
-            {
-                if (b is ButtonCard card)
-                    card.UpdateStateLabelColor();
-            });
-
     public static readonly BindableProperty StateColorTypeProperty =
-        BindableProperty.Create(nameof(StateColorType), typeof(StateColorType), typeof(ButtonCard), StateColorType.Default,
-            propertyChanged: (b, _, __) =>
-            {
-                if (b is ButtonCard card)
-                    card.ApplyStateColorType();
-            });
+        BindableProperty.Create(nameof(StateColorType), typeof(StateColorType), typeof(ButtonCard), StateColorType.Default);
 
     public ButtonCard()
     {
         InitializeComponent();
-        UpdateStateColor();
+        UpdateStateColorType();
     }
 
     public string Icon
@@ -74,26 +63,14 @@ public partial class ButtonCard : ContentView
         set => SetValue(ShowBadgeProperty, value);
     }
 
-    public Color StateColor
-    {
-        get => (Color)GetValue(StateColorProperty);
-        set => SetValue(StateColorProperty, value);
-    }
-
     public StateColorType StateColorType
     {
         get => (StateColorType)GetValue(StateColorTypeProperty);
         set => SetValue(StateColorTypeProperty, value);
     }
 
-    private void UpdateStateColor()
+    private void UpdateStateColorType()
     {
-        if (StateColor != null)
-        {
-            UpdateStateLabelColor();
-            return;
-        }
-
         StateColorType colorType = State?.ToLower() switch
         {
             "on" => StateColorType.Success,
@@ -105,35 +82,5 @@ public partial class ButtonCard : ContentView
             _ => StateColorType.Default
         };
         StateColorType = colorType;
-    }
-
-    private void ApplyStateColorType()
-    {
-        if (StateColor != null)
-            return;
-
-        var resources = Application.Current?.Resources;
-        if (resources == null) return;
-
-        string resourceKey = StateColorType switch
-        {
-            StateColorType.Success => "SuccessColor",
-            StateColorType.Warning => "WarningColor",
-            StateColorType.Error => "ErrorColor",
-            _ => "SecondaryTextColor"
-        };
-
-        if (resources.TryGetValue(resourceKey, out var value) && value is Color color)
-        {
-            StateColor = color;
-        }
-    }
-
-    private void UpdateStateLabelColor()
-    {
-        if (StateLabel != null && StateColor != null)
-        {
-            StateLabel.TextColor = StateColor;
-        }
     }
 }

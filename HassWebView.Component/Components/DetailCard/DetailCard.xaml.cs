@@ -1,19 +1,13 @@
 namespace HassWebView.Component.Components;
 
-using HassWebView.Component.Models;
+using HassWebView.Component.Components.Base;
 
-public partial class DetailCard : ContentView
+public partial class DetailCard : SizeableComponent
 {
     public DetailCard()
     {
         InitializeComponent();
-        
-        // 延迟初始化以避免应用未完全启动时访问 Application.Current
-        Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
-        {
-            UpdateStateColor();
-            UpdateSize();
-        });
+        UpdateStateColorType();
     }
 
     public static readonly BindableProperty TitleProperty =
@@ -39,7 +33,7 @@ public partial class DetailCard : ContentView
             propertyChanged: (b, _, __) =>
             {
                 if (b is DetailCard card)
-                    card.UpdateStateColor();
+                    card.UpdateStateColorType();
             });
 
     public string State
@@ -48,67 +42,33 @@ public partial class DetailCard : ContentView
         set => SetValue(StateProperty, value);
     }
 
-    public Color StateColor
+    public static readonly BindableProperty StateColorTypeProperty =
+        BindableProperty.Create(nameof(StateColorType), typeof(StateColorType), typeof(DetailCard), StateColorType.Success);
+
+    public StateColorType StateColorType
     {
-        get => (Color)GetValue(StateColorProperty);
-        set => SetValue(StateColorProperty, value);
+        get => (StateColorType)GetValue(StateColorTypeProperty);
+        set => SetValue(StateColorTypeProperty, value);
     }
 
-    public static readonly BindableProperty StateColorProperty =
-        BindableProperty.Create(nameof(StateColor), typeof(Color), typeof(DetailCard), Color.FromArgb("#34C759"));
-
-    private void UpdateStateColor()
+    private void UpdateStateColorType()
     {
         try
         {
-            Color color = State?.ToLower() switch
+            StateColorType colorType = State?.ToLower() switch
             {
-                "on" => Color.FromArgb("#34C759"),
-                "open" => Color.FromArgb("#34C759"),
-                "off" => Color.FromArgb("#8E8E93"),
-                "closed" => Color.FromArgb("#8E8E93"),
-                "unavailable" => Color.FromArgb("#FF3B30"),
-                _ => Color.FromArgb("#34C759")
+                "on" => StateColorType.Success,
+                "open" => StateColorType.Success,
+                "off" => StateColorType.Default,
+                "closed" => StateColorType.Default,
+                "unavailable" => StateColorType.Error,
+                _ => StateColorType.Success
             };
-            StateColor = color;
+            StateColorType = colorType;
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"DetailCard.UpdateStateColor failed: {ex}");
-        }
-    }
-
-    private void UpdateSize()
-    {
-        try
-        {
-            var resources = Application.Current?.Resources;
-            if (resources == null) return;
-            
-            // 从资源字典读取尺寸值
-            if (resources.TryGetValue("ComponentPaddingLarge", out var padLg) && padLg is Thickness padLgVal)
-                CardFrame.Padding = padLgVal;
-            
-            if (resources.TryGetValue("ComponentTitleSizeLarge", out var titleLg) && titleLg is double titleLgVal)
-                TitleLabel.FontSize = titleLgVal;
-            
-            if (resources.TryGetValue("ComponentBodySizeLarge", out var bodyLg) && bodyLg is double bodyLgVal)
-                SubtitleLabel.FontSize = bodyLgVal;
-            
-            if (resources.TryGetValue("ComponentBodySizeMedium", out var bodyMed) && bodyMed is double bodyMedVal)
-                StateLabel.FontSize = bodyMedVal;
-            
-            // StateFrame padding 使用特定值
-            StateFrame.Padding = SizeManager.CurrentSize switch
-            {
-                Models.ComponentSize.Tablet => new Thickness(20, 10),
-                Models.ComponentSize.TV => new Thickness(28, 14),
-                _ => new Thickness(12, 6)
-            };
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"DetailCard.UpdateSize failed: {ex}");
+            System.Diagnostics.Debug.WriteLine($"DetailCard.UpdateStateColorType failed: {ex}");
         }
     }
 }

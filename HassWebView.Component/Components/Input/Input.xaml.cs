@@ -1,8 +1,8 @@
 namespace HassWebView.Component.Components;
 
-using HassWebView.Component.Models;
+using HassWebView.Component.Components.Base;
 
-public partial class Input : ContentView
+public partial class Input : SizeableComponent
 {
     public static readonly BindableProperty TextProperty =
         BindableProperty.Create(nameof(Text), typeof(string), typeof(Input), string.Empty);
@@ -33,7 +33,6 @@ public partial class Input : ContentView
         InitializeComponent();
         InputEntry.Focused += OnFocused;
         InputEntry.Unfocused += OnUnfocused;
-        UpdateInputSize();
     }
 
     protected override void OnHandlerChanging(HandlerChangingEventArgs args)
@@ -94,42 +93,15 @@ public partial class Input : ContentView
         set => SetValue(HasErrorProperty, value);
     }
 
-    private void UpdateInputSize()
-    {
-        try
-        {
-            var resources = Application.Current?.Resources;
-            if (resources == null) return;
-            
-            // 从资源字典读取字体大小
-            if (resources.TryGetValue("ComponentBodySizeMedium", out var bodyMed) && bodyMed is double bodyMedVal)
-                LabelLabel.FontSize = bodyMedVal;
-            
-            if (resources.TryGetValue("ComponentTitleSizeLarge", out var titleLg) && titleLg is double titleLgVal)
-                InputEntry.FontSize = titleLgVal;
-            
-            if (resources.TryGetValue("ComponentBodySizeSmall", out var bodySmall) && bodySmall is double bodySmallVal)
-                ErrorLabel.FontSize = bodySmallVal;
-            
-            // Padding
-            if (resources.TryGetValue("ComponentPaddingMedium", out var padMed) && padMed is Thickness padMedVal)
-                InputBorder.Padding = padMedVal;
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Input.UpdateInputSize failed: {ex}");
-        }
-    }
+    
 
     private void OnFocused(object? sender, FocusEventArgs e)
     {
-        // 使用主题颜色表示聚焦状态
-        InputBorder.Stroke = new SolidColorBrush(Color.FromArgb("#007AFF"));
+        Focus();
     }
 
     private void OnUnfocused(object? sender, FocusEventArgs e)
     {
-        // 恢复默认边框颜色
-        InputBorder.Stroke = new SolidColorBrush(Color.FromArgb("#E5E5EA"));
+        Unfocus();
     }
 }

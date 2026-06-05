@@ -11,6 +11,8 @@ public enum ThemeMode
 
 public static class ThemeManager
 {
+    private const string ThemeKey = "HassWebView.ThemeMode";
+    
     public static ThemeMode CurrentTheme { get; private set; } = ThemeMode.Dark;
     
     public static event EventHandler? ThemeChanged;
@@ -18,7 +20,10 @@ public static class ThemeManager
     private static bool _isInitialized = false;
     private static ResourceDictionary? _currentThemeDictionary;
     
-    public static void Initialize()
+    /// <summary>
+    /// 初始化主题管理器，优先从存储加载，否则使用默认值
+    /// </summary>
+    public static void Initialize(ThemeMode defaultTheme = ThemeMode.Dark)
     {
         System.Diagnostics.Debug.WriteLine($"[ThemeManager] Initialize called. _isInitialized={_isInitialized}");
         
@@ -38,8 +43,18 @@ public static class ThemeManager
         
         _isInitialized = true;
         
-        // 直接设置深色主题为默认
-        SetTheme(ThemeMode.Dark);
+        // 尝试从存储读取，否则使用默认值
+        ThemeMode themeToSet = defaultTheme;
+        if (Preferences.ContainsKey(ThemeKey))
+        {
+            var saved = Preferences.Get(ThemeKey, "");
+            if (Enum.TryParse<ThemeMode>(saved, out var theme))
+            {
+                themeToSet = theme;
+            }
+        }
+        
+        SetTheme(themeToSet);
         
         System.Diagnostics.Debug.WriteLine($"[ThemeManager] Initialized successfully. Current theme: {CurrentTheme}");
     }
@@ -55,6 +70,7 @@ public static class ThemeManager
         }
             
         CurrentTheme = theme;
+        Preferences.Set(ThemeKey, theme.ToString());
         
         // 使用官方推荐的方式切换主题
         if (Application.Current?.Resources != null)

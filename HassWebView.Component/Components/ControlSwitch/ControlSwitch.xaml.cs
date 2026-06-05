@@ -1,8 +1,8 @@
 namespace HassWebView.Component.Components;
 
-using HassWebView.Component.Models;
+using HassWebView.Component.Components.Base;
 
-public partial class ControlSwitch : ContentView
+public partial class ControlSwitch : SizeableComponent
 {
     public static readonly BindableProperty IsToggledProperty =
         BindableProperty.Create(nameof(IsToggled), typeof(bool), typeof(ControlSwitch), false,
@@ -14,7 +14,6 @@ public partial class ControlSwitch : ContentView
     public ControlSwitch()
     {
         InitializeComponent();
-        UpdateSwitchSize();
         UpdateThumbPosition(false);
     }
 
@@ -38,35 +37,6 @@ public partial class ControlSwitch : ContentView
         {
             switchControl.UpdateThumbPosition(true);
             switchControl.Toggled?.Invoke(switchControl, new ToggledEventArgs((bool)newValue));
-        }
-    }
-
-    private void UpdateSwitchSize()
-    {
-        try
-        {
-            switch (SizeManager.CurrentSize)
-            {
-                case Models.ComponentSize.Tablet:
-                    SwitchBorder.WidthRequest = SwitchGrid.WidthRequest = 76;
-                    SwitchBorder.HeightRequest = SwitchGrid.HeightRequest = 46;
-                    Thumb.WidthRequest = Thumb.HeightRequest = 40;
-                    break;
-                case Models.ComponentSize.TV:
-                    SwitchBorder.WidthRequest = SwitchGrid.WidthRequest = 102;
-                    SwitchBorder.HeightRequest = SwitchGrid.HeightRequest = 62;
-                    Thumb.WidthRequest = Thumb.HeightRequest = 54;
-                    break;
-                default: // Phone
-                    SwitchBorder.WidthRequest = SwitchGrid.WidthRequest = 51;
-                    SwitchBorder.HeightRequest = SwitchGrid.HeightRequest = 31;
-                    Thumb.WidthRequest = Thumb.HeightRequest = 27;
-                    break;
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"ControlSwitch.UpdateSwitchSize failed: {ex}");
         }
     }
 

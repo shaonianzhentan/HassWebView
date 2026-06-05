@@ -1,6 +1,8 @@
 namespace HassWebView.Component.Components;
 
-public partial class Card : ContentView
+using HassWebView.Component.Components.Base;
+
+public partial class Card : SizeableComponent
 {
     public Card()
     {

@@ -1,6 +1,8 @@
 namespace HassWebView.Component.Components;
 
-public partial class EntityListGroup : ContentView
+using HassWebView.Component.Components.Base;
+
+public partial class EntityListGroup : SizeableComponent
 {
     public EntityListGroup()
     {

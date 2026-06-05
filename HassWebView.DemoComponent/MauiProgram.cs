@@ -14,10 +14,12 @@ public static class MauiProgram
         {
             builder
                 .UseMauiApp<App>()
-                // 使用默认配置（默认尺寸为 Phone）
-                .UseHassComponents()
-                // 或者自定义默认尺寸：
-                // .UseHassComponents(options => options.DefaultSize = HassWebView.Component.Models.ComponentSize.Tablet)
+                // 自定义配置：平板模式 + 暗色主题
+                .UseHassComponents(options =>
+                {
+                    options.DefaultSize = HassWebView.Component.Models.ComponentSize.Tablet;
+                    options.DefaultTheme = HassWebView.Component.Models.ThemeMode.Dark;
+                })
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

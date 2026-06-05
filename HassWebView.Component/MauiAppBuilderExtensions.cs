@@ -28,6 +28,10 @@ public static class MauiAppBuilderExtensions
         var options = new HassComponentOptions();
         configure?.Invoke(options);
 
+        // 初始化尺寸管理器（会自动从存储加载）
+        var defaultSize = options.DefaultSize ?? ComponentSize.Phone;
+        SizeManager.Initialize(defaultSize);
+
         // 设置默认尺寸或启用自适应
         if (options.AutoDetectSize)
         {
@@ -55,11 +59,9 @@ public static class MauiAppBuilderExtensions
                 }
             });
         }
-        else if (options.DefaultSize.HasValue)
-        {
-            SizeManager.SetSize(options.DefaultSize.Value);
-        }
 
+        // 注册初始化服务，传递配置选项
+        builder.Services.AddSingleton(options);
         builder.Services.AddSingleton<IMauiInitializeService, HassComponentInitializer>();
         return builder;
     }
@@ -81,4 +83,9 @@ public class HassComponentOptions
     /// Default is false.
     /// </summary>
     public bool AutoDetectSize { get; set; }
+
+    /// <summary>
+    /// Gets or sets the default theme mode. If null, defaults to ThemeMode.Dark.
+    /// </summary>
+    public ThemeMode? DefaultTheme { get; set; }
 }

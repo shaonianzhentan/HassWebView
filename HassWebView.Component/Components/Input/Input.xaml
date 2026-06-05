@@ -1,41 +1,97 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="HassWebView.Component.Components.Input"
-             x:Name="this">
+<base:SizeableComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                        xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
+                        x:Class="HassWebView.Component.Components.Input"
+                        x:Name="this">
 
     <VerticalStackLayout Spacing="4">
         <Label x:Name="LabelLabel"
                Text="{Binding Source={x:Reference this}, Path=Label}"
-               FontSize="{DynamicResource ComponentBodySizeMedium}"
-               TextColor="{DynamicResource PrimaryTextColor}"
-               IsVisible="{Binding Source={x:Reference this}, Path=ShowLabel}" />
+               TextColor="{StaticResource PrimaryTextColor}"
+               IsVisible="{Binding Source={x:Reference this}, Path=ShowLabel}">
+            <Label.Style>
+                <Style TargetType="Label">
+                    <Setter Property="FontSize" Value="{StaticResource ComponentBodySizePhoneMedium}" />
+                    <Style.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                            <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTabletMedium}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                            <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTVMedium}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
         
-        <Border x:Name="InputBorder"
-                BackgroundColor="{DynamicResource InputBackgroundColor}"
-                Padding="12">
+        <Border x:Name="InputBorder">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Padding" Value="{StaticResource ComponentPaddingPhoneMedium}" />
+                    <Setter Property="BackgroundColor" Value="{StaticResource InputBackgroundColor}" />
+                    <Setter Property="Stroke" Value="{StaticResource BorderColor}" />
+                    <Style.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                            <Setter Property="Padding" Value="{StaticResource ComponentPaddingTabletMedium}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                            <Setter Property="Padding" Value="{StaticResource ComponentPaddingTVMedium}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=IsFocused}" Value="true">
+                            <Setter Property="Stroke" Value="{StaticResource AccentColor}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=HasError}" Value="true">
+                            <Setter Property="Stroke" Value="{StaticResource ErrorColor}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="8" />
             </Border.StrokeShape>
-            <Border.Stroke>
-                <SolidColorBrush Color="{DynamicResource BorderColor}" />
-            </Border.Stroke>
             <Entry x:Name="InputEntry"
                    Text="{Binding Source={x:Reference this}, Path=Text, Mode=TwoWay}"
                    Placeholder="{Binding Source={x:Reference this}, Path=Placeholder}"
-                   FontSize="{DynamicResource ComponentTitleSizeMedium}"
-                   TextColor="{DynamicResource PrimaryTextColor}"
-                   PlaceholderColor="{DynamicResource TertiaryTextColor}"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   PlaceholderColor="{StaticResource TertiaryTextColor}"
                    BackgroundColor="Transparent"
                    IsPassword="{Binding Source={x:Reference this}, Path=IsPassword}"
-                   Keyboard="{Binding Source={x:Reference this}, Path=KeyboardType}" />
+                   Keyboard="{Binding Source={x:Reference this}, Path=KeyboardType}">
+                <Entry.Style>
+                    <Style TargetType="Entry">
+                        <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizePhoneMedium}" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Entry" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTabletMedium}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Entry" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTVMedium}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Entry.Style>
+            </Entry>
         </Border>
         
         <Label x:Name="ErrorLabel"
                Text="{Binding Source={x:Reference this}, Path=ErrorText}"
-               FontSize="{DynamicResource ComponentBodySizeSmall}"
-               TextColor="{DynamicResource ErrorColor}"
-               IsVisible="{Binding Source={x:Reference this}, Path=HasError}" />
+               TextColor="{StaticResource ErrorColor}"
+               IsVisible="{Binding Source={x:Reference this}, Path=HasError}">
+            <Label.Style>
+                <Style TargetType="Label">
+                    <Setter Property="FontSize" Value="{StaticResource ComponentBodySizePhoneSmall}" />
+                    <Style.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                            <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTabletSmall}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                            <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTVSmall}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
     </VerticalStackLayout>
 
-</ContentView>
+</base:SizeableComponent>

@@ -1,49 +1,144 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="HassWebView.Component.Components.EntityRow"
-             x:Name="this">
+<base:SizeableComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                        xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
+                        xmlns:local="clr-namespace:HassWebView.Component.Components"
+                        x:Class="HassWebView.Component.Components.EntityRow"
+                        x:Name="this">
 
     <Grid ColumnDefinitions="Auto,*,Auto" Padding="16" ColumnSpacing="12">
         <!-- 图标区域 -->
         <Border x:Name="IconBorder"
-                WidthRequest="48"
-                HeightRequest="48"
-                BackgroundColor="{Binding Source={x:Reference this}, Path=IconBackgroundColor}"
                 HorizontalOptions="Center"
                 VerticalOptions="Center">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="WidthRequest" Value="36" />
+                    <Setter Property="HeightRequest" Value="36" />
+                    <Setter Property="BackgroundColor" Value="{StaticResource CardBackgroundColor}" />
+                    <Style.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                            <Setter Property="WidthRequest" Value="44" />
+                            <Setter Property="HeightRequest" Value="44" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                            <Setter Property="WidthRequest" Value="52" />
+                            <Setter Property="HeightRequest" Value="52" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=StateColorType}" Value="{x:Static local:StateColorType.Success}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource SuccessColor}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=StateColorType}" Value="{x:Static local:StateColorType.Warning}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource WarningColor}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=StateColorType}" Value="{x:Static local:StateColorType.Error}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource ErrorColor}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="14" />
             </Border.StrokeShape>
             <Label x:Name="IconLabel"
                    Text="{Binding Source={x:Reference this}, Path=IconText}"
-                   FontSize="24"
                    HorizontalOptions="Center"
                    VerticalOptions="Center"
-                   TextColor="{Binding Source={x:Reference this}, Path=IconTextColor}"
-                   LineBreakMode="NoWrap" />
+                   LineBreakMode="NoWrap">
+                <Label.Style>
+                    <Style TargetType="Label">
+                        <Setter Property="FontSize" Value="18" />
+                        <Setter Property="TextColor" Value="{StaticResource PrimaryTextColor}" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                <Setter Property="FontSize" Value="22" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                <Setter Property="FontSize" Value="26" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=StateColorType}" Value="{x:Static local:StateColorType.Success}">
+                                <Setter Property="TextColor" Value="White" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=StateColorType}" Value="{x:Static local:StateColorType.Warning}">
+                                <Setter Property="TextColor" Value="White" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=StateColorType}" Value="{x:Static local:StateColorType.Error}">
+                                <Setter Property="TextColor" Value="White" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Label.Style>
+            </Label>
         </Border>
         
         <!-- 内容区域 -->
         <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
             <Label x:Name="TitleLabel"
                    Text="{Binding Source={x:Reference this}, Path=Title}"
-                   FontSize="{DynamicResource ComponentTitleSizePhoneLarge}"
-                   TextColor="{DynamicResource PrimaryTextColor}"
-                   FontAttributes="Bold" />
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   FontAttributes="Bold">
+                <Label.Style>
+                    <Style TargetType="Label">
+                        <Setter Property="FontSize" Value="{StaticResource ComponentBodySizePhoneMedium}" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTabletMedium}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTVMedium}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Label.Style>
+            </Label>
             <Label x:Name="StateLabel"
-                   Text="{Binding Source={x:Reference this}, Path=State}"
-                   FontSize="{DynamicResource ComponentBodySizePhoneMedium}"
-                   TextColor="{Binding Source={x:Reference this}, Path=StateColor}" />
+                   Text="{Binding Source={x:Reference this}, Path=State}">
+                <Label.Style>
+                    <Style TargetType="Label">
+                        <Setter Property="FontSize" Value="{StaticResource ComponentBodySizePhoneSmall}" />
+                        <Setter Property="TextColor" Value="{StaticResource SecondaryTextColor}" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTabletSmall}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTVSmall}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=StateColorType}" Value="{x:Static local:StateColorType.Success}">
+                                <Setter Property="TextColor" Value="{StaticResource SuccessColor}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=StateColorType}" Value="{x:Static local:StateColorType.Warning}">
+                                <Setter Property="TextColor" Value="{StaticResource WarningColor}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=StateColorType}" Value="{x:Static local:StateColorType.Error}">
+                                <Setter Property="TextColor" Value="{StaticResource ErrorColor}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Label.Style>
+            </Label>
         </VerticalStackLayout>
         
         <!-- 箭头 -->
         <Label x:Name="ArrowLabel"
                Grid.Column="2"
                Text="›"
-               FontSize="32"
-               TextColor="{DynamicResource TertiaryTextColor}"
-               VerticalOptions="Center" />
+               TextColor="{StaticResource TertiaryTextColor}"
+               VerticalOptions="Center">
+            <Label.Style>
+                <Style TargetType="Label">
+                    <Setter Property="FontSize" Value="28" />
+                    <Style.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                            <Setter Property="FontSize" Value="32" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                            <Setter Property="FontSize" Value="36" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
     </Grid>
 
-</ContentView>
+</base:SizeableComponent>

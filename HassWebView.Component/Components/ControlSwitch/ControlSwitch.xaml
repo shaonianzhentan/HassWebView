@@ -1,65 +1,89 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="HassWebView.Component.Components.ControlSwitch"
-             x:Name="this">
+<base:SizeableComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                        xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
+                        x:Class="HassWebView.Component.Components.ControlSwitch"
+                        x:Name="this">
     
-    <Border x:Name="SwitchBorder"
-            WidthRequest="51"
-            HeightRequest="31">
+    <Border x:Name="SwitchBorder">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="WidthRequest" Value="51" />
+                <Setter Property="HeightRequest" Value="31" />
+                <Setter Property="BackgroundColor" Value="{StaticResource SwitchOffBackgroundColor}" />
+                <Style.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                        <Setter Property="WidthRequest" Value="76" />
+                        <Setter Property="HeightRequest" Value="46" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                        <Setter Property="WidthRequest" Value="102" />
+                        <Setter Property="HeightRequest" Value="62" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Disabled}" Value="true">
+                        <Setter Property="BackgroundColor" Value="{StaticResource SwitchDisabledBackgroundColor}" />
+                    </DataTrigger>
+                    <MultiTrigger TargetType="Border">
+                        <MultiTrigger.Conditions>
+                            <BindingCondition Binding="{Binding Source={x:Reference this}, Path=Disabled}" Value="false" />
+                            <BindingCondition Binding="{Binding Source={x:Reference this}, Path=IsToggled}" Value="true" />
+                        </MultiTrigger.Conditions>
+                        <Setter Property="BackgroundColor" Value="{StaticResource SwitchOnBackgroundColor}" />
+                    </MultiTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="15" />
         </Border.StrokeShape>
-        <Border.Triggers>
-            <MultiTrigger TargetType="Border">
-                <MultiTrigger.Conditions>
-                    <BindingCondition Binding="{Binding Source={x:Reference this}, Path=Disabled}" Value="true" />
-                </MultiTrigger.Conditions>
-                <Setter Property="BackgroundColor" Value="{DynamicResource SwitchDisabledBackgroundColor}" />
-            </MultiTrigger>
-            <MultiTrigger TargetType="Border">
-                <MultiTrigger.Conditions>
-                    <BindingCondition Binding="{Binding Source={x:Reference this}, Path=Disabled}" Value="false" />
-                    <BindingCondition Binding="{Binding Source={x:Reference this}, Path=IsToggled}" Value="true" />
-                </MultiTrigger.Conditions>
-                <Setter Property="BackgroundColor" Value="{DynamicResource SwitchOnBackgroundColor}" />
-            </MultiTrigger>
-            <MultiTrigger TargetType="Border">
-                <MultiTrigger.Conditions>
-                    <BindingCondition Binding="{Binding Source={x:Reference this}, Path=Disabled}" Value="false" />
-                    <BindingCondition Binding="{Binding Source={x:Reference this}, Path=IsToggled}" Value="false" />
-                </MultiTrigger.Conditions>
-                <Setter Property="BackgroundColor" Value="{DynamicResource SwitchOffBackgroundColor}" />
-            </MultiTrigger>
-        </Border.Triggers>
         
-        <Grid x:Name="SwitchGrid"
-              WidthRequest="51"
-              HeightRequest="31">
+        <Grid x:Name="SwitchGrid">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="WidthRequest" Value="51" />
+                    <Setter Property="HeightRequest" Value="31" />
+                    <Style.Triggers>
+                        <DataTrigger TargetType="Grid" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                            <Setter Property="WidthRequest" Value="76" />
+                            <Setter Property="HeightRequest" Value="46" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Grid" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                            <Setter Property="WidthRequest" Value="102" />
+                            <Setter Property="HeightRequest" Value="62" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
             <Grid.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnTapped" />
             </Grid.GestureRecognizers>
             
-            <Ellipse x:Name="Thumb"
-                     WidthRequest="27"
-                     HeightRequest="27"
-                     Fill="{DynamicResource SwitchThumbColor}"
-                     Margin="2"
-                     HorizontalOptions="Start">
-                <Ellipse.Triggers>
-                    <DataTrigger TargetType="Ellipse"
-                                 Binding="{Binding Source={x:Reference this}, Path=Disabled}"
-                                 Value="true">
-                        <Setter Property="Opacity" Value="0.6" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Ellipse"
-                                 Binding="{Binding Source={x:Reference this}, Path=Disabled}"
-                                 Value="false">
+            <Ellipse x:Name="Thumb">
+                <Ellipse.Style>
+                    <Style TargetType="Ellipse">
+                        <Setter Property="WidthRequest" Value="27" />
+                        <Setter Property="HeightRequest" Value="27" />
+                        <Setter Property="Fill" Value="{StaticResource SwitchThumbColor}" />
+                        <Setter Property="Margin" Value="2" />
+                        <Setter Property="HorizontalOptions" Value="Start" />
                         <Setter Property="Opacity" Value="1" />
-                    </DataTrigger>
-                </Ellipse.Triggers>
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Ellipse" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                <Setter Property="WidthRequest" Value="40" />
+                                <Setter Property="HeightRequest" Value="40" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Ellipse" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                <Setter Property="WidthRequest" Value="54" />
+                                <Setter Property="HeightRequest" Value="54" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Ellipse" Binding="{Binding Source={x:Reference this}, Path=Disabled}" Value="true">
+                                <Setter Property="Opacity" Value="0.6" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Ellipse.Style>
             </Ellipse>
         </Grid>
     </Border>
 
-</ContentView>
+</base:SizeableComponent>

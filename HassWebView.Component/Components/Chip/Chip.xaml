@@ -1,90 +1,100 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:HassWebView.Component.Components"
-             x:Class="HassWebView.Component.Components.Chip"
-             x:Name="this"
-             HorizontalOptions="Start">
+<base:SizeableComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:local="clr-namespace:HassWebView.Component.Components"
+                       xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
+                       x:Class="HassWebView.Component.Components.Chip"
+                       x:Name="this"
+                       HorizontalOptions="Start">
 
-    <Border x:Name="ChipBorder"
-            Padding="{DynamicResource ComponentPaddingSmall}">
+    <Border x:Name="ChipBorder">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Padding" Value="{StaticResource ComponentPaddingPhoneSmall}" />
+                <Style.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                        <Setter Property="Padding" Value="{StaticResource ComponentPaddingTabletSmall}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                        <Setter Property="Padding" Value="{StaticResource ComponentPaddingTVSmall}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Default">
+                        <Setter Property="BackgroundColor" Value="{StaticResource ChipDefaultBackgroundColor}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Primary">
+                        <Setter Property="BackgroundColor" Value="{StaticResource ChipPrimaryBackgroundColor}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Secondary">
+                        <Setter Property="BackgroundColor" Value="{StaticResource ChipSecondaryBackgroundColor}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Success">
+                        <Setter Property="BackgroundColor" Value="{StaticResource ChipSuccessBackgroundColor}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Warning">
+                        <Setter Property="BackgroundColor" Value="{StaticResource ChipWarningBackgroundColor}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Error">
+                        <Setter Property="BackgroundColor" Value="{StaticResource ChipErrorBackgroundColor}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="16" />
         </Border.StrokeShape>
-        <Border.Triggers>
-            <DataTrigger TargetType="Border"
-                         Binding="{Binding Source={x:Reference this}, Path=Type}"
-                         Value="{x:Static local:ChipType.Default}">
-                <Setter Property="BackgroundColor" Value="{DynamicResource ChipDefaultBackgroundColor}" />
-            </DataTrigger>
-            <DataTrigger TargetType="Border"
-                         Binding="{Binding Source={x:Reference this}, Path=Type}"
-                         Value="{x:Static local:ChipType.Primary}">
-                <Setter Property="BackgroundColor" Value="{DynamicResource ChipPrimaryBackgroundColor}" />
-            </DataTrigger>
-            <DataTrigger TargetType="Border"
-                         Binding="{Binding Source={x:Reference this}, Path=Type}"
-                         Value="{x:Static local:ChipType.Secondary}">
-                <Setter Property="BackgroundColor" Value="{DynamicResource ChipSecondaryBackgroundColor}" />
-            </DataTrigger>
-            <DataTrigger TargetType="Border"
-                         Binding="{Binding Source={x:Reference this}, Path=Type}"
-                         Value="{x:Static local:ChipType.Success}">
-                <Setter Property="BackgroundColor" Value="{DynamicResource ChipSuccessBackgroundColor}" />
-            </DataTrigger>
-            <DataTrigger TargetType="Border"
-                         Binding="{Binding Source={x:Reference this}, Path=Type}"
-                         Value="{x:Static local:ChipType.Warning}">
-                <Setter Property="BackgroundColor" Value="{DynamicResource ChipWarningBackgroundColor}" />
-            </DataTrigger>
-            <DataTrigger TargetType="Border"
-                         Binding="{Binding Source={x:Reference this}, Path=Type}"
-                         Value="{x:Static local:ChipType.Error}">
-                <Setter Property="BackgroundColor" Value="{DynamicResource ChipErrorBackgroundColor}" />
-            </DataTrigger>
-        </Border.Triggers>
         
         <HorizontalStackLayout Spacing="6" HorizontalOptions="Start">
             <Label x:Name="IconLabel"
                    Text="{Binding Source={x:Reference this}, Path=IconText}"
-                   FontSize="{DynamicResource ComponentBodySizeMedium}"
-                   IsVisible="{Binding Source={x:Reference this}, Path=ShowIcon}" />
+                   IsVisible="{Binding Source={x:Reference this}, Path=ShowIcon}">
+                <Label.Style>
+                    <Style TargetType="Label">
+                        <Setter Property="FontSize" Value="{StaticResource ComponentBodySizePhoneMedium}" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTabletMedium}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTVMedium}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Label.Style>
+            </Label>
             <Label x:Name="TextLabel"
                    Text="{Binding Source={x:Reference this}, Path=Text}"
-                   FontSize="{DynamicResource ComponentBodySizeMedium}"
                    LineBreakMode="NoWrap">
-                <Label.Triggers>
-                    <DataTrigger TargetType="Label"
-                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
-                                 Value="{x:Static local:ChipType.Default}">
-                        <Setter Property="TextColor" Value="{DynamicResource ChipDefaultTextColor}" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Label"
-                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
-                                 Value="{x:Static local:ChipType.Primary}">
-                        <Setter Property="TextColor" Value="{DynamicResource ChipPrimaryTextColor}" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Label"
-                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
-                                 Value="{x:Static local:ChipType.Secondary}">
-                        <Setter Property="TextColor" Value="{DynamicResource ChipSecondaryTextColor}" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Label"
-                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
-                                 Value="{x:Static local:ChipType.Success}">
-                        <Setter Property="TextColor" Value="{DynamicResource ChipSuccessTextColor}" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Label"
-                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
-                                 Value="{x:Static local:ChipType.Warning}">
-                        <Setter Property="TextColor" Value="{DynamicResource ChipWarningTextColor}" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Label"
-                                 Binding="{Binding Source={x:Reference this}, Path=Type}"
-                                 Value="{x:Static local:ChipType.Error}">
-                        <Setter Property="TextColor" Value="{DynamicResource ChipErrorTextColor}" />
-                    </DataTrigger>
-                </Label.Triggers>
+                <Label.Style>
+                    <Style TargetType="Label">
+                        <Setter Property="FontSize" Value="{StaticResource ComponentBodySizePhoneSmall}" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTabletSmall}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTVSmall}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Default">
+                                <Setter Property="TextColor" Value="{StaticResource ChipDefaultTextColor}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Primary">
+                                <Setter Property="TextColor" Value="{StaticResource ChipPrimaryTextColor}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Secondary">
+                                <Setter Property="TextColor" Value="{StaticResource ChipSecondaryTextColor}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Success">
+                                <Setter Property="TextColor" Value="{StaticResource ChipSuccessTextColor}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Warning">
+                                <Setter Property="TextColor" Value="{StaticResource ChipWarningTextColor}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Error">
+                                <Setter Property="TextColor" Value="{StaticResource ChipErrorTextColor}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Label.Style>
             </Label>
             <Border x:Name="CloseButtonBorder"
                     WidthRequest="22"
@@ -107,4 +117,4 @@
         </HorizontalStackLayout>
     </Border>
 
-</ContentView>
+</base:SizeableComponent>

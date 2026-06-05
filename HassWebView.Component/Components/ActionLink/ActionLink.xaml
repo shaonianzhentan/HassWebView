@@ -1,15 +1,29 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="HassWebView.Component.Components.ActionLink"
-             x:Name="this">
+<base:SizeableComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                        xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
+                        x:Class="HassWebView.Component.Components.ActionLink"
+                        x:Name="this">
 
     <Button x:Name="LinkButton"
             Text="{Binding Source={x:Reference this}, Path=Text}"
-            FontSize="14"
             TextColor="{StaticResource AccentColor}"
             BackgroundColor="Transparent"
             Padding="0"
-            HorizontalOptions="Start" />
+            HorizontalOptions="Start">
+        <Button.Style>
+            <Style TargetType="Button">
+                <Setter Property="FontSize" Value="{StaticResource ComponentBodySizePhoneSmall}" />
+                <Style.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="Tablet">
+                        <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTabletSmall}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference this}, Path=Size}" Value="TV">
+                        <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTVSmall}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Button.Style>
+    </Button>
 
-</ContentView>
+</base:SizeableComponent>

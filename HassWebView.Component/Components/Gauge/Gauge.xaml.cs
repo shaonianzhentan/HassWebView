@@ -1,8 +1,8 @@
 namespace HassWebView.Component.Components;
 
-using HassWebView.Component.Models;
+using HassWebView.Component.Components.Base;
 
-public partial class Gauge : ContentView
+public partial class Gauge : SizeableComponent
 {
     public static readonly BindableProperty ValueProperty =
         BindableProperty.Create(nameof(Value), typeof(double), typeof(Gauge), 0.0,

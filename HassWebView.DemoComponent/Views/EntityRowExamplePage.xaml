@@ -9,11 +9,11 @@
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="12">
             <Label Text="用于显示 Home Assistant 实体信息的行组件" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
-            <component:EntityRow Title="客厅灯" IconText="💡" State="on" StateColor="#FCD34D" />
-            <component:EntityRow Title="卧室灯" IconText="💡" State="off" StateColor="#9CA3AF" />
-            <component:EntityRow Title="室内温度" IconText="🌡️" State="23.5°C" StateColor="#3B82F6" />
-            <component:EntityRow Title="空调" IconText="❄️" State="制冷" StateColor="#3B82F6" />
-            <component:EntityRow Title="加湿器" IconText="💧" State="开启" StateColor="#10B981" />
+            <component:EntityRow Title="客厅灯" IconText="💡" State="on" />
+            <component:EntityRow Title="卧室灯" IconText="💡" State="off" />
+            <component:EntityRow Title="室内温度" IconText="🌡️" State="23.5°C" />
+            <component:EntityRow Title="空调" IconText="❄️" State="cooling" />
+            <component:EntityRow Title="加湿器" IconText="💧" State="on" />
             
             <BoxView HeightRequest="40" />
         </VerticalStackLayout>

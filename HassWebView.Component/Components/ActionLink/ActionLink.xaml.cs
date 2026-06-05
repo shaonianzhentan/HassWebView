@@ -1,6 +1,8 @@
 namespace HassWebView.Component.Components;
 
-public partial class ActionLink : ContentView
+using HassWebView.Component.Components.Base;
+
+public partial class ActionLink : SizeableComponent
 {
     public static readonly BindableProperty TextProperty =
         BindableProperty.Create(nameof(Text), typeof(string), typeof(ActionLink), string.Empty);

@@ -7,6 +7,13 @@ namespace HassWebView.Component;
 
 public class HassComponentInitializer : IMauiInitializeService
 {
+    private readonly HassComponentOptions _options;
+    
+    public HassComponentInitializer(HassComponentOptions options)
+    {
+        _options = options;
+    }
+    
     public void Initialize(IServiceProvider serviceProvider)
     {
         System.Diagnostics.Debug.WriteLine("[HassComponentInitializer] Initialize called");
@@ -28,8 +35,9 @@ public class HassComponentInitializer : IMauiInitializeService
                 try
                 {
                     System.Diagnostics.Debug.WriteLine("[HassComponentInitializer] Calling ThemeManager.Initialize()");
-                    // 初始化主题系统（会自动加载深色主题）
-                    ThemeManager.Initialize();
+                    // 使用配置的默认主题初始化（会自动从存储加载）
+                    var defaultTheme = _options.DefaultTheme ?? ThemeMode.Dark;
+                    ThemeManager.Initialize(defaultTheme);
                     System.Diagnostics.Debug.WriteLine("[HassComponentInitializer] Theme system initialized successfully");
                 }
                 catch (Exception ex)
