@@ -139,22 +139,60 @@
             
             <Border x:Name="CloseButtonBorder"
                     Grid.Column="2"
-                    WidthRequest="22"
-                    HeightRequest="22"
+                    WidthRequest="24"
+                    HeightRequest="24"
                     Margin="8,0,0,0"
-                    BackgroundColor="{DynamicResource AlertCloseButtonBackgroundColor}">
+                    Padding="0">
                 <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="11" />
+                    <RoundRectangle CornerRadius="4" />
                 </Border.StrokeShape>
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnCloseClicked" />
                 </Border.GestureRecognizers>
-                <Label Text="X"
-                       FontSize="14"
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="BackgroundColor" Value="Transparent" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Warning">
+                                <Setter Property="BackgroundColor" Value="{DynamicResource AlertWarningCloseButtonBackgroundColor}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Error">
+                                <Setter Property="BackgroundColor" Value="{DynamicResource AlertErrorCloseButtonBackgroundColor}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Success">
+                                <Setter Property="BackgroundColor" Value="{DynamicResource AlertSuccessCloseButtonBackgroundColor}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Info">
+                                <Setter Property="BackgroundColor" Value="{DynamicResource AlertInfoCloseButtonBackgroundColor}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Label Text="✕"
+                       FontSize="16"
                        FontAttributes="Bold"
-                       TextColor="{DynamicResource AlertCloseButtonTextColor}"
                        HorizontalOptions="Center"
-                       VerticalOptions="Center" />
+                       VerticalOptions="Center">
+                    <Label.Style>
+                        <Style TargetType="Label">
+                            <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}" />
+                            <Style.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Warning">
+                                    <Setter Property="TextColor" Value="{DynamicResource AlertWarningCloseButtonTextColor}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Error">
+                                    <Setter Property="TextColor" Value="{DynamicResource AlertErrorCloseButtonTextColor}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Success">
+                                    <Setter Property="TextColor" Value="{DynamicResource AlertSuccessCloseButtonTextColor}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=Type}" Value="Info">
+                                    <Setter Property="TextColor" Value="{DynamicResource AlertInfoCloseButtonTextColor}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
             </Border>
         </Grid>
     </Border>

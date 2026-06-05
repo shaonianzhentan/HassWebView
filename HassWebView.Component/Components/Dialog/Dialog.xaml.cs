@@ -2,19 +2,23 @@ namespace HassWebView.Component.Components;
 
 using HassWebView.Component.Components.Base;
 
+[ContentProperty(nameof(Content))]
 public partial class Dialog : AdaptiveComponent
 {
     public static readonly BindableProperty TitleProperty =
-        BindableProperty.Create(nameof(Title), typeof(string), typeof(Dialog), string.Empty);
-
-    public static readonly BindableProperty MessageProperty =
-        BindableProperty.Create(nameof(Message), typeof(string), typeof(Dialog), string.Empty);
+        BindableProperty.Create(nameof(Title), typeof(string), typeof(Dialog), string.Empty, propertyChanged: OnTitlePropertyChanged);
 
     public static readonly BindableProperty CancelTextProperty =
         BindableProperty.Create(nameof(CancelText), typeof(string), typeof(Dialog), "取消");
 
     public static readonly BindableProperty ConfirmTextProperty =
         BindableProperty.Create(nameof(ConfirmText), typeof(string), typeof(Dialog), "确定");
+
+    public static readonly BindableProperty HasTitleProperty =
+        BindableProperty.Create(nameof(HasTitle), typeof(bool), typeof(Dialog), false);
+
+    public static new readonly BindableProperty ContentProperty =
+        BindableProperty.Create(nameof(Content), typeof(View), typeof(Dialog), null);
 
     public Dialog()
     {
@@ -27,12 +31,6 @@ public partial class Dialog : AdaptiveComponent
         set => SetValue(TitleProperty, value);
     }
 
-    public string Message
-    {
-        get => (string)GetValue(MessageProperty);
-        set => SetValue(MessageProperty, value);
-    }
-
     public string CancelText
     {
         get => (string)GetValue(CancelTextProperty);
@@ -43,6 +41,26 @@ public partial class Dialog : AdaptiveComponent
     {
         get => (string)GetValue(ConfirmTextProperty);
         set => SetValue(ConfirmTextProperty, value);
+    }
+
+    public bool HasTitle
+    {
+        get => (bool)GetValue(HasTitleProperty);
+        private set => SetValue(HasTitleProperty, value);
+    }
+
+    public new View Content
+    {
+        get => (View)GetValue(ContentProperty);
+        set => SetValue(ContentProperty, value);
+    }
+
+    private static void OnTitlePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        if (bindable is Dialog dialog)
+        {
+            dialog.HasTitle = !string.IsNullOrEmpty((string)newValue);
+        }
     }
 
     public event EventHandler? Confirmed;

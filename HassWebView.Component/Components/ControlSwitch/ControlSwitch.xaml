@@ -12,14 +12,17 @@
                 <Setter Property="WidthRequest" Value="51" />
                 <Setter Property="HeightRequest" Value="31" />
                 <Setter Property="BackgroundColor" Value="{StaticResource SwitchOffBackgroundColor}" />
+                <Setter Property="CornerRadius" Value="15" />
                 <Style.Triggers>
                     <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                         <Setter Property="WidthRequest" Value="76" />
                         <Setter Property="HeightRequest" Value="46" />
+                        <Setter Property="CornerRadius" Value="23" />
                     </DataTrigger>
                     <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
                         <Setter Property="WidthRequest" Value="102" />
                         <Setter Property="HeightRequest" Value="62" />
+                        <Setter Property="CornerRadius" Value="31" />
                     </DataTrigger>
                     <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=Disabled}" Value="true">
                         <Setter Property="BackgroundColor" Value="{StaticResource SwitchDisabledBackgroundColor}" />
@@ -72,10 +75,12 @@
                             <DataTrigger TargetType="Ellipse" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                                 <Setter Property="WidthRequest" Value="40" />
                                 <Setter Property="HeightRequest" Value="40" />
+                                <Setter Property="Margin" Value="3" />
                             </DataTrigger>
                             <DataTrigger TargetType="Ellipse" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
                                 <Setter Property="WidthRequest" Value="54" />
                                 <Setter Property="HeightRequest" Value="54" />
+                                <Setter Property="Margin" Value="4" />
                             </DataTrigger>
                             <DataTrigger TargetType="Ellipse" Binding="{Binding Source={x:Reference this}, Path=Disabled}" Value="true">
                                 <Setter Property="Opacity" Value="0.6" />

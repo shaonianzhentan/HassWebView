@@ -6,25 +6,30 @@
                         x:Class="HassWebView.Component.Components.EntityListGroup"
                         x:Name="this">
 
-    <Border BackgroundColor="{StaticResource CardBackgroundColor}" Padding="0">
+    <Border BackgroundColor="{DynamicResource CardBackgroundColor}" Padding="0">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="12" />
         </Border.StrokeShape>
+        <Border.Stroke>
+            <SolidColorBrush Color="{DynamicResource BorderColor}" />
+        </Border.Stroke>
         <VerticalStackLayout>
             <Label x:Name="TitleLabel"
                    Text="{Binding Source={x:Reference this}, Path=Title}"
-                   TextColor="{StaticResource TertiaryTextColor}"
-                   FontAttributes="Bold"
-                   Padding="16,12,16,8">
+                   TextColor="{DynamicResource TertiaryTextColor}"
+                   FontAttributes="Bold">
                 <Label.Style>
                     <Style TargetType="Label">
                         <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizePhoneSmall}" />
+                        <Setter Property="Padding" Value="{StaticResource ComponentPaddingPhoneSmall}" />
                         <Style.Triggers>
                             <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
                                 <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTabletSmall}" />
+                                <Setter Property="Padding" Value="{StaticResource ComponentPaddingTabletSmall}" />
                             </DataTrigger>
                             <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
                                 <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTVSmall}" />
+                                <Setter Property="Padding" Value="{StaticResource ComponentPaddingTVSmall}" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>

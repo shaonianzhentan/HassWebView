@@ -10,8 +10,9 @@
                         HorizontalOptions="FillAndExpand"
                         VerticalOptions="FillAndExpand">
 
-    <AbsoluteLayout HorizontalOptions="FillAndExpand"
-                    VerticalOptions="FillAndExpand">
+    <base:AdaptiveComponent.Content>
+        <AbsoluteLayout HorizontalOptions="FillAndExpand"
+                        VerticalOptions="FillAndExpand">
         <!-- 背景遮罩 - 铺满全屏 -->
         <Grid AbsoluteLayout.LayoutFlags="All"
               AbsoluteLayout.LayoutBounds="0,0,1,1"
@@ -26,11 +27,11 @@
         <Border x:Name="DialogBorder"
                 AbsoluteLayout.LayoutFlags="PositionProportional"
                 AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
-                BackgroundColor="{StaticResource CardBackgroundColor}"
-                WidthRequest="320"
                 Opacity="1">
             <Border.Style>
                 <Style TargetType="Border">
+                    <Setter Property="BackgroundColor" Value="{StaticResource CardBackgroundColor}" />
+                    <Setter Property="WidthRequest" Value="320" />
                     <Setter Property="Padding" Value="{StaticResource ComponentPaddingPhoneLarge}" />
                     <Style.Triggers>
                         <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
@@ -53,7 +54,8 @@
                 <Label x:Name="TitleLabel"
                        Text="{Binding Source={x:Reference this}, Path=Title}"
                        FontAttributes="Bold"
-                       TextColor="{StaticResource PrimaryTextColor}">
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       IsVisible="{Binding Source={x:Reference this}, Path=HasTitle}">
                     <Label.Style>
                         <Style TargetType="Label">
                             <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizePhoneLarge}" />
@@ -69,25 +71,9 @@
                     </Label.Style>
                 </Label>
                 
-                <!-- 内容 -->
-                <Label x:Name="ContentLabel"
-                       Text="{Binding Source={x:Reference this}, Path=Message}"
-                       TextColor="{StaticResource SecondaryTextColor}"
-                       LineBreakMode="WordWrap">
-                    <Label.Style>
-                        <Style TargetType="Label">
-                            <Setter Property="FontSize" Value="{StaticResource ComponentBodySizePhoneMedium}" />
-                            <Style.Triggers>
-                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
-                                    <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTabletMedium}" />
-                                </DataTrigger>
-                                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
-                                    <Setter Property="FontSize" Value="{StaticResource ComponentBodySizeTVMedium}" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Label.Style>
-                </Label>
+                <!-- 自定义内容区域 -->
+                <ContentPresenter x:Name="CustomContentPresenter"
+                                  Content="{Binding Source={x:Reference this}, Path=Content}" />
                 
                 <!-- 按钮区域 -->
                 <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
@@ -140,6 +126,7 @@
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </Border>
-    </AbsoluteLayout>
+        </AbsoluteLayout>
+    </base:AdaptiveComponent.Content>
 
 </base:AdaptiveComponent>

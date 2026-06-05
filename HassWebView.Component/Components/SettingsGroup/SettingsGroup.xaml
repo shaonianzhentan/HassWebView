@@ -9,6 +9,11 @@
     <Border x:Name="MainBorder"
             BackgroundColor="{DynamicResource CardBackgroundColor}"
             Padding="0">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Padding" Value="0" />
+            </Style>
+        </Border.Style>
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="12" />
         </Border.StrokeShape>
@@ -22,8 +27,18 @@
                    FontAttributes="Bold">
                 <Label.Style>
                     <Style TargetType="Label">
-                        <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeSmall}" />
-                        <Setter Property="Padding" Value="{StaticResource ComponentPaddingSmall}" />
+                        <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizePhoneSmall}" />
+                        <Setter Property="Padding" Value="{StaticResource ComponentPaddingPhoneSmall}" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTabletSmall}" />
+                                <Setter Property="Padding" Value="{StaticResource ComponentPaddingTabletSmall}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
+                                <Setter Property="FontSize" Value="{StaticResource ComponentTitleSizeTVSmall}" />
+                                <Setter Property="Padding" Value="{StaticResource ComponentPaddingTVSmall}" />
+                            </DataTrigger>
+                        </Style.Triggers>
                     </Style>
                 </Label.Style>
             </Label>

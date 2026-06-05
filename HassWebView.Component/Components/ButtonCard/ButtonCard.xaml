@@ -7,11 +7,10 @@
                          x:Class="HassWebView.Component.Components.ButtonCard"
                          x:Name="this">
 
-    <Border x:Name="CardBorder"
-            BackgroundColor="{DynamicResource CardBackgroundColor}"
-            Padding="{DynamicResource ComponentPaddingPhoneMedium}">
+    <Border x:Name="CardBorder">
         <Border.Style>
             <Style TargetType="Border">
+                <Setter Property="BackgroundColor" Value="{DynamicResource CardBackgroundColor}" />
                 <Setter Property="Padding" Value="{StaticResource ComponentPaddingPhoneMedium}" />
                 <Style.Triggers>
                     <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">

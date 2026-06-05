@@ -7,7 +7,7 @@
                         x:Name="this">
 
     <Border BackgroundColor="{DynamicResource CardBackgroundColor}"
-            Stroke="{StaticResource BorderColor}"
+            Stroke="{DynamicResource BorderColor}"
             StrokeThickness="1">
         <Border.Style>
             <Style TargetType="Border">

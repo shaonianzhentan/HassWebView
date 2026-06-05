@@ -1,5 +1,7 @@
 namespace HassWebView.DemoComponent.Views;
 
+using HassWebView.Component.Components;
+
 public partial class DialogExamplePage : ContentPage
 {
 	public DialogExamplePage()
@@ -12,8 +14,21 @@ public partial class DialogExamplePage : ContentPage
         ExampleDialog.Show();
     }
 
+    private void OnShowDialogNoTitleClicked(object? sender, EventArgs e)
+    {
+        NoTitleDialog.Show();
+    }
+
+    private void OnShowCustomDialogClicked(object? sender, EventArgs e)
+    {
+        CustomDialog.Show();
+    }
+
     private void OnDialogConfirmClicked(object? sender, EventArgs e)
     {
-        ExampleDialog.Hide();
+        if (sender is Dialog dialog)
+        {
+            dialog.Hide();
+        }
     }
 }

@@ -15,19 +15,19 @@ public class AdaptiveComponent : ContentView
     public static readonly BindableProperty SizeProperty =
         BindableProperty.Create(
             nameof(Size),
-            typeof(ComponentSize),
+            typeof(ComponentSize?),
             typeof(AdaptiveComponent),
-            ComponentSize.Phone,
+            null,
             propertyChanged: OnSizePropertyChanged);
 
     private ComponentSize _effectiveSize = SizeManager.CurrentSize;
 
     /// <summary>
-    /// 组件尺寸，默认为全局配置
+    /// 组件尺寸，null 表示使用全局配置
     /// </summary>
-    public ComponentSize Size
+    public ComponentSize? Size
     {
-        get => (ComponentSize)GetValue(SizeProperty);
+        get => (ComponentSize?)GetValue(SizeProperty);
         set => SetValue(SizeProperty, value);
     }
 
@@ -193,8 +193,6 @@ public class AdaptiveComponent : ContentView
 
     private void UpdateEffectiveSize()
     {
-        EffectiveSize = Size == ComponentSize.Phone 
-            ? SizeManager.CurrentSize 
-            : Size;
+        EffectiveSize = Size ?? SizeManager.CurrentSize;
     }
 }

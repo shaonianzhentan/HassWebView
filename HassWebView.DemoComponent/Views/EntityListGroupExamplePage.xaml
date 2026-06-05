@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:component="clr-namespace:HassWebView.Component.Components"
+             xmlns:models="clr-namespace:HassWebView.Component.Models"
              x:Class="HassWebView.DemoComponent.Views.EntityListGroupExamplePage"
              Title="EntityListGroup 组件示例"
              BackgroundColor="{DynamicResource PageBackgroundColor}">
@@ -18,6 +19,27 @@
             <component:EntityListGroup Title="卧室设备">
                 <component:EntityRow Title="卧室灯" IconText="💡" State="off" />
                 <component:EntityRow Title="加湿器" IconText="💧" State="on" />
+            </component:EntityListGroup>
+            
+            <BoxView HeightRequest="40" />
+            
+            <!-- 尺寸展示区域 -->
+            <Label Text="📱 手机尺寸（Phone）" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
+            <component:EntityListGroup Title="手机设备" Size="{x:Static models:ComponentSize.Phone}">
+                <component:EntityRow Title="灯" IconText="💡" State="on" />
+                <component:EntityRow Title="空调" IconText="❄️" State="cooling" />
+            </component:EntityListGroup>
+            
+            <Label Text="📲 平板尺寸（Tablet）" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
+            <component:EntityListGroup Title="平板设备" Size="{x:Static models:ComponentSize.Tablet}">
+                <component:EntityRow Title="灯" IconText="💡" State="on" />
+                <component:EntityRow Title="空调" IconText="❄️" State="cooling" />
+            </component:EntityListGroup>
+            
+            <Label Text="📺 TV尺寸" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
+            <component:EntityListGroup Title="TV设备" Size="{x:Static models:ComponentSize.TV}">
+                <component:EntityRow Title="灯" IconText="💡" State="on" />
+                <component:EntityRow Title="空调" IconText="❄️" State="cooling" />
             </component:EntityListGroup>
             
             <BoxView HeightRequest="40" />

@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:component="clr-namespace:HassWebView.Component.Components"
+             xmlns:models="clr-namespace:HassWebView.Component.Models"
              x:Class="HassWebView.DemoComponent.Views.AlertExamplePage"
              Title="Alert 组件示例"
              BackgroundColor="{DynamicResource PageBackgroundColor}">
@@ -13,6 +14,18 @@
             <component:Alert Type="Error" Title="错误" Message="这是一个错误提示信息" />
             <component:Alert Type="Success" Title="成功" Message="操作成功完成" />
             <component:Alert Type="Info" Title="信息" Message="这是一条信息提示" />
+            
+            <BoxView HeightRequest="40" />
+            
+            <!-- 尺寸展示区域 -->
+            <Label Text="📱 手机尺寸（Phone）" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
+            <component:Alert Type="Warning" Title="警告" Message="这是手机尺寸的警告提示" Size="{x:Static models:ComponentSize.Phone}" />
+            
+            <Label Text="📲 平板尺寸（Tablet）" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
+            <component:Alert Type="Error" Title="错误" Message="这是平板尺寸的错误提示" Size="{x:Static models:ComponentSize.Tablet}" />
+            
+            <Label Text="📺 TV尺寸" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
+            <component:Alert Type="Success" Title="成功" Message="这是TV尺寸的成功提示" Size="{x:Static models:ComponentSize.TV}" />
             
             <BoxView HeightRequest="40" />
         </VerticalStackLayout>

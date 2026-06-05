@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:component="clr-namespace:HassWebView.Component.Components"
+             xmlns:models="clr-namespace:HassWebView.Component.Models"
              x:Class="HassWebView.DemoComponent.Views.StateBadgeExamplePage"
              Title="StateBadge 组件示例"
              BackgroundColor="{DynamicResource PageBackgroundColor}">
@@ -21,6 +22,30 @@
                 <component:StateBadge State="故障" />
                 <component:StateBadge State="开启" />
                 <component:StateBadge State="关闭" />
+            </HorizontalStackLayout>
+            
+            <BoxView HeightRequest="40" />
+            
+            <!-- 尺寸展示区域 -->
+            <Label Text="📱 手机尺寸（Phone）" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
+            <HorizontalStackLayout Spacing="16" HorizontalOptions="Center">
+                <component:StateBadge State="on" Size="{x:Static models:ComponentSize.Phone}" />
+                <component:StateBadge State="off" Size="{x:Static models:ComponentSize.Phone}" />
+                <component:StateBadge State="运行中" Size="{x:Static models:ComponentSize.Phone}" />
+            </HorizontalStackLayout>
+            
+            <Label Text="📲 平板尺寸（Tablet）" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
+            <HorizontalStackLayout Spacing="16" HorizontalOptions="Center">
+                <component:StateBadge State="on" Size="{x:Static models:ComponentSize.Tablet}" />
+                <component:StateBadge State="off" Size="{x:Static models:ComponentSize.Tablet}" />
+                <component:StateBadge State="运行中" Size="{x:Static models:ComponentSize.Tablet}" />
+            </HorizontalStackLayout>
+            
+            <Label Text="📺 TV尺寸" FontSize="14" TextColor="{DynamicResource TertiaryTextColor}" />
+            <HorizontalStackLayout Spacing="16" HorizontalOptions="Center">
+                <component:StateBadge State="on" Size="{x:Static models:ComponentSize.TV}" />
+                <component:StateBadge State="off" Size="{x:Static models:ComponentSize.TV}" />
+                <component:StateBadge State="运行中" Size="{x:Static models:ComponentSize.TV}" />
             </HorizontalStackLayout>
             
             <BoxView HeightRequest="40" />

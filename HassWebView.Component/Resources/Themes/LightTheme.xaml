@@ -63,15 +63,23 @@
     <Color x:Key="AlertWarningBackgroundColor">#FFF8E6</Color>
     <Color x:Key="AlertWarningTitleColor">#1D1D1F</Color>
     <Color x:Key="AlertWarningMessageColor">#3C3C3C</Color>
+    <Color x:Key="AlertWarningCloseButtonBackgroundColor">#FFF0D0</Color>
+    <Color x:Key="AlertWarningCloseButtonTextColor">#CC7A00</Color>
     <Color x:Key="AlertErrorBackgroundColor">#FFEBEB</Color>
     <Color x:Key="AlertErrorTitleColor">#FF3B30</Color>
     <Color x:Key="AlertErrorMessageColor">#CC1A00</Color>
+    <Color x:Key="AlertErrorCloseButtonBackgroundColor">#FFE0E0</Color>
+    <Color x:Key="AlertErrorCloseButtonTextColor">#CC0000</Color>
     <Color x:Key="AlertSuccessBackgroundColor">#E8F8E8</Color>
     <Color x:Key="AlertSuccessTitleColor">#34C759</Color>
     <Color x:Key="AlertSuccessMessageColor">#00C853</Color>
+    <Color x:Key="AlertSuccessCloseButtonBackgroundColor">#D0F0D0</Color>
+    <Color x:Key="AlertSuccessCloseButtonTextColor">#009900</Color>
     <Color x:Key="AlertInfoBackgroundColor">#E8F4FD</Color>
     <Color x:Key="AlertInfoTitleColor">#007AFF</Color>
     <Color x:Key="AlertInfoMessageColor">#0066CC</Color>
+    <Color x:Key="AlertInfoCloseButtonBackgroundColor">#D0E8FF</Color>
+    <Color x:Key="AlertInfoCloseButtonTextColor">#0052CC</Color>
     <Color x:Key="AlertCloseButtonBackgroundColor">#E5E5EA</Color>
     <Color x:Key="AlertCloseButtonTextColor">#86868B</Color>
 
