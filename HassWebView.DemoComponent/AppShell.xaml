@@ -65,10 +65,6 @@
         <ShellContent Route="DetailCardExamplePage" ContentTemplate="{DataTemplate views:DetailCardExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Dialog" Icon="💬" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
-        <ShellContent Route="DialogExamplePage" ContentTemplate="{DataTemplate views:DialogExamplePage}" />
-    </FlyoutItem>
-
     <FlyoutItem Title="EntityRow" Icon="📝" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="EntityRowExamplePage" ContentTemplate="{DataTemplate views:EntityRowExamplePage}" />
     </FlyoutItem>

@@ -35,7 +35,6 @@
             <Label Text="• ButtonCard - 按钮卡片组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
             <Label Text="• ButtonGrid - 按钮网格组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
             <Label Text="• DetailCard - 详情卡片组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
-            <Label Text="• Dialog - 对话框组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
             <Label Text="• EntityRow - 实体行组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
             <Label Text="• EntityListGroup - 实体列表分组组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
             <Label Text="• SliderCard - 滑块卡片组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
