@@ -38,8 +38,8 @@
             </Style>
         </Border.Style>
         <Border.StrokeShape>
-            <RoundRectangle CornerRadius="15" />
-        </Border.StrokeShape>
+                <RoundRectangle x:Name="BorderStrokeShape" CornerRadius="15" />
+            </Border.StrokeShape>
         
         <Grid x:Name="SwitchGrid">
             <Grid.Style>
