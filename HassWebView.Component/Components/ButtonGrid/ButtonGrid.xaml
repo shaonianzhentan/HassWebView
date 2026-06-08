@@ -1,32 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<base:AdaptiveComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                        xmlns:base="clr-namespace:HassWebView.Component.Components.Base"
-                        xmlns:models="clr-namespace:HassWebView.Component.Models"
-                        x:Class="HassWebView.Component.Components.ButtonGrid"
-                        x:Name="this">
-
-    <Grid ColumnDefinitions="*,*" RowDefinitions="*,*">
-        <Grid.Style>
-            <Style TargetType="Grid">
-                <Setter Property="RowSpacing" Value="12" />
-                <Setter Property="ColumnSpacing" Value="12" />
-                <Style.Triggers>
-                    <DataTrigger TargetType="Grid" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.Tablet}">
-                        <Setter Property="RowSpacing" Value="20" />
-                        <Setter Property="ColumnSpacing" Value="20" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Grid" Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}" Value="{x:Static models:ComponentSize.TV}">
-                        <Setter Property="RowSpacing" Value="32" />
-                        <Setter Property="ColumnSpacing" Value="32" />
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-        </Grid.Style>
-        <ContentPresenter Grid.Row="0" Grid.Column="0" />
-        <ContentPresenter Grid.Row="0" Grid.Column="1" />
-        <ContentPresenter Grid.Row="1" Grid.Column="0" />
-        <ContentPresenter Grid.Row="1" Grid.Column="1" />
-    </Grid>
-
-</base:AdaptiveComponent>
+<Grid xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+      x:Class="HassWebView.Component.Components.ButtonGrid"
+      x:Name="this"
+      HorizontalOptions="Fill" RowSpacing="12" ColumnSpacing="12">
+</Grid>
