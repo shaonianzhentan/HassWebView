@@ -41,12 +41,12 @@
         <ShellContent Route="ChipExamplePage" ContentTemplate="{DataTemplate views:ChipExamplePage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="ControlSwitch" Icon="🔘" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
-        <ShellContent Route="ControlSwitchExamplePage" ContentTemplate="{DataTemplate views:ControlSwitchExamplePage}" />
-    </FlyoutItem>
-
     <FlyoutItem Title="Input" Icon="✏️" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
         <ShellContent Route="InputExamplePage" ContentTemplate="{DataTemplate views:InputExamplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Switch" Icon="🔘" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">
+        <ShellContent Route="SwitchExamplePage" ContentTemplate="{DataTemplate views:SwitchExamplePage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="Spinner" Icon="🔄" Shell.ItemTemplate="{StaticResource FlyoutItemTemplate}">

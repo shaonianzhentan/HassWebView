@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:components="clr-namespace:HassWebView.Component.Components;assembly=HassWebView.Component"
+             x:Class="HassWebView.DemoComponent.Views.SwitchExamplePage"
+             Title="Switch 组件">
+    
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            
+            <Label Text="Switch 组件示例" FontSize="24" FontAttributes="Bold" />
+            
+            <Label Text="默认尺寸 (Phone)" FontSize="18" />
+            <components:Switch HorizontalOptions="Start" />
+            <components:Switch IsToggled="true" HorizontalOptions="Start" />
+            
+            <Label Text="Tablet 尺寸" FontSize="18" />
+            <components:Switch Size="Tablet" HorizontalOptions="Start" />
+            <components:Switch Size="Tablet" IsToggled="true" HorizontalOptions="Start" />
+            
+            <Label Text="TV 尺寸" FontSize="18" />
+            <components:Switch Size="TV" HorizontalOptions="Start" />
+            <components:Switch Size="TV" IsToggled="true" HorizontalOptions="Start" />
+            
+            <Label Text="禁用状态" FontSize="18" />
+            <components:Switch IsEnabled="false" HorizontalOptions="Start" />
+            <components:Switch IsToggled="true" IsEnabled="false" HorizontalOptions="Start" />
+            
+            <Label Text="状态变化" FontSize="18" />
+            <components:Switch x:Name="BindableSwitch" HorizontalOptions="Start" />
+            <Label x:Name="StatusLabel" Text="当前状态: False" FontSize="14" />
+            
+        </VerticalStackLayout>
+    </ScrollView>
+    
+</ContentPage>

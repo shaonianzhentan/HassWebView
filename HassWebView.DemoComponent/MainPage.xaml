@@ -28,8 +28,8 @@
             <Label Text="组件列表：" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
             <Label Text="• Alert - 警告提示组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
             <Label Text="• Chip - 芯片标签组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
-            <Label Text="• ControlSwitch - 开关组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
             <Label Text="• Input - 输入框组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+            <Label Text="• Switch - 开关组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
             <Label Text="• Spinner - 加载指示器组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
             <Label Text="• Gauge - 仪表盘组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
             <Label Text="• ButtonCard - 按钮卡片组件" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
