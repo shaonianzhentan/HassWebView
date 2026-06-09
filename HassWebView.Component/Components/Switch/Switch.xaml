@@ -6,68 +6,118 @@
     xmlns:models="clr-namespace:HassWebView.Component.Models;assembly=HassWebView.Component"
     x:Class="HassWebView.Component.Components.Switch"
     x:Name="this">
-    
-    <base:AdaptiveComponent.Triggers>
-        <!-- Phone 尺寸 -->
-        <DataTrigger 
-            TargetType="base:AdaptiveComponent"
-            Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}"
-            Value="{x:Static models:ComponentSize.Phone}">
-            <Setter Property="WidthRequest" Value="51" />
-            <Setter Property="HeightRequest" Value="31" />
-        </DataTrigger>
-        
-        <!-- Tablet 尺寸 -->
-        <DataTrigger 
-            TargetType="base:AdaptiveComponent"
-            Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}"
-            Value="{x:Static models:ComponentSize.Tablet}">
-            <Setter Property="WidthRequest" Value="76" />
-            <Setter Property="HeightRequest" Value="46" />
-        </DataTrigger>
-        
-        <!-- TV 尺寸 -->
-        <DataTrigger 
-            TargetType="base:AdaptiveComponent"
-            Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}"
-            Value="{x:Static models:ComponentSize.TV}">
-            <Setter Property="WidthRequest" Value="102" />
-            <Setter Property="HeightRequest" Value="62" />
-        </DataTrigger>
-    </base:AdaptiveComponent.Triggers>
-    
-    <Switch 
-        x:Name="NativeSwitch"
-        OnColor="{DynamicResource AccentColor}"
-        ThumbColor="{StaticResource White}"
-        HorizontalOptions="Center"
-        VerticalOptions="Center">
-        
-        <Switch.Triggers>
-            <!-- Phone 尺寸 (缩放1x) -->
-            <DataTrigger 
-                TargetType="Switch"
-                Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}"
-                Value="{x:Static models:ComponentSize.Phone}">
-                <Setter Property="Scale" Value="1.0" />
-            </DataTrigger>
+
+    <Grid x:Name="ContainerGrid">
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <!-- Phone 尺寸 (默认) -->
+                <Setter Property="WidthRequest" Value="51" />
+                <Setter Property="HeightRequest" Value="31" />
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Style.Triggers>
+                    <!-- Tablet 尺寸 -->
+                    <DataTrigger 
+                        TargetType="Grid"
+                        Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}"
+                        Value="{x:Static models:ComponentSize.Tablet}">
+                        <Setter Property="WidthRequest" Value="76" />
+                        <Setter Property="HeightRequest" Value="46" />
+                    </DataTrigger>
+                    
+                    <!-- TV 尺寸 -->
+                    <DataTrigger 
+                        TargetType="Grid"
+                        Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}"
+                        Value="{x:Static models:ComponentSize.TV}">
+                        <Setter Property="WidthRequest" Value="102" />
+                        <Setter Property="HeightRequest" Value="62" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal" />
+                    <VisualState x:Name="PointerOver">
+                        <VisualState.Setters>
+                            <Setter Property="BackgroundColor" Value="Transparent" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </VisualStateManager.VisualStateGroups>
+
+        <Switch 
+            x:Name="NativeSwitch"
+            WidthRequest="51"
+            HeightRequest="31"
+            MinimumWidthRequest="51"
+            MinimumHeightRequest="31"
+            OnColor="{DynamicResource SwitchOnBackgroundColor}"
+            OffColor="{DynamicResource SwitchOffBackgroundColor}"
+            ThumbColor="{DynamicResource SwitchThumbColor}"
+            BackgroundColor="Transparent"
+            HorizontalOptions="Center"
+            VerticalOptions="Center">
             
-            <!-- Tablet 尺寸 (缩放1.5x) -->
-            <DataTrigger 
-                TargetType="Switch"
-                Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}"
-                Value="{x:Static models:ComponentSize.Tablet}">
-                <Setter Property="Scale" Value="1.5" />
-            </DataTrigger>
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroupList>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal">
+                            <VisualState.Setters>
+                                <Setter Property="BackgroundColor" Value="Transparent" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="Disabled">
+                            <VisualState.Setters>
+                                <Setter Property="OnColor" Value="{DynamicResource SwitchDisabledBackgroundColor}" />
+                                <Setter Property="OffColor" Value="{DynamicResource SwitchDisabledBackgroundColor}" />
+                                <Setter Property="BackgroundColor" Value="Transparent" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="PointerOver">
+                            <VisualState.Setters>
+                                <Setter Property="BackgroundColor" Value="Transparent" />
+                                <Setter Property="OffColor" Value="{DynamicResource SwitchOffBackgroundColor}" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </VisualStateManager.VisualStateGroups>
             
-            <!-- TV 尺寸 (缩放2x) -->
-            <DataTrigger 
-                TargetType="Switch"
-                Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}"
-                Value="{x:Static models:ComponentSize.TV}">
-                <Setter Property="Scale" Value="2.0" />
-            </DataTrigger>
-        </Switch.Triggers>
-    </Switch>
-    
+            <Switch.Triggers>
+                <!-- Phone 尺寸 (缩放1x) -->
+                <DataTrigger 
+                    TargetType="Switch"
+                    Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}"
+                    Value="{x:Static models:ComponentSize.Phone}">
+                    <Setter Property="Scale" Value="1.0" />
+                    <Setter Property="MinimumWidthRequest" Value="51" />
+                    <Setter Property="MinimumHeightRequest" Value="31" />
+                </DataTrigger>
+                
+                <!-- Tablet 尺寸 (缩放1.5x) -->
+                <DataTrigger 
+                    TargetType="Switch"
+                    Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}"
+                    Value="{x:Static models:ComponentSize.Tablet}">
+                    <Setter Property="Scale" Value="1.5" />
+                    <Setter Property="MinimumWidthRequest" Value="51" />
+                    <Setter Property="MinimumHeightRequest" Value="31" />
+                </DataTrigger>
+                
+                <!-- TV 尺寸 (缩放2x) -->
+                <DataTrigger 
+                    TargetType="Switch"
+                    Binding="{Binding Source={x:Reference this}, Path=EffectiveSize}"
+                    Value="{x:Static models:ComponentSize.TV}">
+                    <Setter Property="Scale" Value="2.0" />
+                    <Setter Property="MinimumWidthRequest" Value="51" />
+                    <Setter Property="MinimumHeightRequest" Value="31" />
+                </DataTrigger>
+            </Switch.Triggers>
+        </Switch>
+    </Grid>
 </base:AdaptiveComponent>

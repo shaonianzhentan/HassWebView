@@ -54,9 +54,9 @@
     <Color x:Key="ChipCloseButtonTextColor">#8E8E93</Color>
 
     <!-- Switch 组件颜色 -->
-    <Color x:Key="SwitchOffBackgroundColor">#3A3A3C</Color>
+    <Color x:Key="SwitchOffBackgroundColor">#5A5A5C</Color>
     <Color x:Key="SwitchOnBackgroundColor">#0A84FF</Color>
-    <Color x:Key="SwitchDisabledBackgroundColor">#636366</Color>
+    <Color x:Key="SwitchDisabledBackgroundColor">#8E8E93</Color>
     <Color x:Key="SwitchThumbColor">#FFFFFF</Color>
 
     <!-- Alert 组件颜色 -->

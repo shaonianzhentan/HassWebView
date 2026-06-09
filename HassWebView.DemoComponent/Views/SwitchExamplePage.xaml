@@ -3,32 +3,37 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:components="clr-namespace:HassWebView.Component.Components;assembly=HassWebView.Component"
              x:Class="HassWebView.DemoComponent.Views.SwitchExamplePage"
-             Title="Switch 组件">
+             Title="Switch 组件"
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
     
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
             
-            <Label Text="Switch 组件示例" FontSize="24" FontAttributes="Bold" />
+            <Label Text="Switch 组件示例" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
             
-            <Label Text="默认尺寸 (Phone)" FontSize="18" />
+            <Label Text="默认尺寸 (Phone)" FontSize="18" TextColor="{DynamicResource PrimaryTextColor}" />
             <components:Switch HorizontalOptions="Start" />
             <components:Switch IsToggled="true" HorizontalOptions="Start" />
             
-            <Label Text="Tablet 尺寸" FontSize="18" />
+            <Label Text="Phone 尺寸" FontSize="18" TextColor="{DynamicResource PrimaryTextColor}" />
+            <components:Switch Size="Phone" HorizontalOptions="Start" />
+            <components:Switch Size="Phone" IsToggled="true" HorizontalOptions="Start" />
+            
+            <Label Text="Tablet 尺寸" FontSize="18" TextColor="{DynamicResource PrimaryTextColor}" />
             <components:Switch Size="Tablet" HorizontalOptions="Start" />
             <components:Switch Size="Tablet" IsToggled="true" HorizontalOptions="Start" />
             
-            <Label Text="TV 尺寸" FontSize="18" />
+            <Label Text="TV 尺寸" FontSize="18" TextColor="{DynamicResource PrimaryTextColor}" />
             <components:Switch Size="TV" HorizontalOptions="Start" />
             <components:Switch Size="TV" IsToggled="true" HorizontalOptions="Start" />
             
-            <Label Text="禁用状态" FontSize="18" />
+            <Label Text="禁用状态" FontSize="18" TextColor="{DynamicResource PrimaryTextColor}" />
             <components:Switch IsEnabled="false" HorizontalOptions="Start" />
             <components:Switch IsToggled="true" IsEnabled="false" HorizontalOptions="Start" />
             
-            <Label Text="状态变化" FontSize="18" />
+            <Label Text="状态变化" FontSize="18" TextColor="{DynamicResource PrimaryTextColor}" />
             <components:Switch x:Name="BindableSwitch" HorizontalOptions="Start" />
-            <Label x:Name="StatusLabel" Text="当前状态: False" FontSize="14" />
+            <Label x:Name="StatusLabel" Text="当前状态: False" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
             
         </VerticalStackLayout>
     </ScrollView>
