@@ -355,13 +355,6 @@
                     hideLoading();
                     handleDiscoveryResult(message.data);
                     break;
-                case 'x5/download':
-                    showLoading("下载进度 " + message.data + "%")
-                    break;
-                case 'x5/init':
-                    hideLoading();
-                    showToast("腾讯X5内核加载成功，可以正常使用啦");
-                    break;
                 default:
                     console.warn("Received unknown message type: " + message.type);
                     break;
@@ -518,17 +511,8 @@
                 }
             });
 
-            var compatibility = checkWebViewCompatibility();
-            if (!compatibility.isCompatible) {
-                showLoading("正在加载兼容内核...");
-                showToast(compatibility.reason, 8000);
-                if(window.externalApp && window.externalApp.externalBus){
-                    window.externalApp.externalBus(JSON.stringify({ type: 'x5/init' }));
-                } else {
-                    console.warn("Not in C# environment, cannot call externalApp for X5 init.");
-                }
-            }
-
+            // X5 内核初始化已改为自动模式，在应用启动时自动处理
+            // 这里只负责显示配置界面
             if(window.externalApp && window.externalApp.externalBus){
                 window.externalApp.externalBus(JSON.stringify({ type: 'webview/config' }));
             }

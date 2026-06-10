@@ -186,20 +186,6 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
                     var instances = await HassDiscovery.DiscoverAsync();
                     wv.WindowExternalBus(new { type = "hass/discover/result", data = instances });
                     break;
-
-                case "x5/init": // RESTORED X5 INITIALIZATION LOGIC
-#if ANDROID
-                    string apkUrl = _pageOptions.GetX5ApkUrl?.Invoke() ?? string.Empty;
-                    if (!string.IsNullOrEmpty(apkUrl))
-                    {
-                        Debug.WriteLine($"[HassAuthPage] Initializing Tencent X5 Core with APK: {apkUrl}");
-                        var result = await TencentX5Service.InitializeX5CoreAsync(apkUrl, (progress) => {
-                            wv.WindowExternalBus(new { type = "x5/download", data = progress });
-                        });
-                        if (result) wv.WindowExternalBus(new { type = "x5/init" });
-                    }
-#endif
-                    break;
             }
         }
         catch (JsonException ex)

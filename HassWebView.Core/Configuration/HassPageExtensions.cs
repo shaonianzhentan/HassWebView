@@ -99,18 +99,6 @@ namespace HassWebView.Core.Configuration
                 // 初始化 GetPushUrl 默认实现：延迟从 HttpServer 获取 BaseUrl，避免构造时依赖
                 options.GetPushUrl = () => sp.GetService<HttpServer>()?.BaseUrl ?? string.Empty;
 
-                // 初始化 GetX5ApkUrl 默认实现：根据 CPU 架构返回对应的 APK 下载地址
-                options.GetX5ApkUrl = () =>
-                {
-#if ANDROID
-                    if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
-                        return "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm64_046295.tbs.apk";
-                    else if (RuntimeInformation.ProcessArchitecture == Architecture.Arm)
-                        return "https://gitee.com/shaonianzhentan/app-store/releases/download/1.0.0/arm_045912_x5.tbs.apk";
-#endif
-                    return string.Empty;
-                };
-
                 // 封装设置页导航逻辑默认实现
                 if (settingsPage != null)
                 {
