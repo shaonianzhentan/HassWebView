@@ -26,12 +26,6 @@ public class RemoteControlService : IRemoteControlService
 
         Debug.WriteLine("[RemoteControlService] Registering remote control HTTP routes.");
 
-        httpServer.Get("/webview/remote", async (req, res) =>
-        {
-            var htmlContent = await ResourceHelper.GetResourceAsync("remote.html");
-            await res.Html(htmlContent);
-        });
-
         httpServer.Get("/webview/config", async (req, res) =>
         {
             if (_activeControl != null)

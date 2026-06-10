@@ -26,7 +26,7 @@ namespace HassWebView.Core.Configuration
                 var options = new HassPageOptions();
 
                 // 初始化默认实现
-                options.PlayVideo = async (string url, string? baseUrl, bool external) =>
+                options.PlayVideo = async (url, baseUrl, external) =>
                 {
                     if (external)
                     {
@@ -89,7 +89,7 @@ namespace HassWebView.Core.Configuration
                     });
                 };
 
-                options.OpenWebPage = async (string url) =>
+                options.OpenWebPage = async url =>
                 {
                     var webPage = sp.GetRequiredService<HassWebPage>();
                     webPage.Url = url;

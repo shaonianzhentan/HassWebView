@@ -23,15 +23,57 @@ namespace HassWebView.Core
         /// This includes platform-specific handlers and initialization logic for the underlying web engine.
         /// </summary>
         /// <param name="builder">The <see cref="MauiAppBuilder"/> to add services to.</param>
-        /// <param name="configure">Optional. Configure HassWebView options.</param>
         /// <returns>The <see cref="MauiAppBuilder"/> so that additional calls can be chained.</returns>
-        public static MauiAppBuilder UseHassWebView(this MauiAppBuilder builder, Action<HassWebViewOptions>? configure = null)
+        public static MauiAppBuilder UseHassWebView(this MauiAppBuilder builder)
+        {
+            return UseHassWebView(builder, null);
+        }
+
+        /// <summary>
+        /// Registers the core services for the HassWebView component.
+        /// This includes platform-specific handlers and initialization logic for the underlying web engine.
+        /// </summary>
+        /// <param name="builder">The <see cref="MauiAppBuilder"/> to add services to.</param>
+        /// <param name="configure">Optional. Configure HassWebView options and HttpServer routes.</param>
+        /// <returns>The <see cref="MauiAppBuilder"/> so that additional calls can be chained.</returns>
+        public static MauiAppBuilder UseHassWebView(this MauiAppBuilder builder, Action<HassWebViewOptions, Services.HttpServer>? configure = null)
         {
             // Create default options (default URLs are already set in property initializers)
             var options = new HassWebViewOptions();
-            
-            // Apply user configuration if provided (user can override defaults)
-            configure?.Invoke(options);
+
+            // 自动创建并注册 HttpServer（默认随机端口，智能选择IP）
+            var httpServer = new Services.HttpServer();
+            builder.Services.AddSingleton(httpServer);
+
+            // Apply user configuration if provided (user can override defaults and configure routes)
+            configure?.Invoke(options, httpServer);
+
+            // 立即启动 HTTP 服务器（确保页面加载时服务器已就绪）
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await httpServer.StartAsync();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[HassWebView] Failed to start HttpServer: {ex.Message}");
+                }
+            });
+
+            // 在应用生命周期中管理服务器停止
+            builder.ConfigureLifecycleEvents(events =>
+            {
+#if ANDROID
+                events.AddAndroid(a => a
+                    .OnDestroy(activity => httpServer.Stop())
+                );
+#elif WINDOWS
+                events.AddWindows(w => w
+                    .OnClosed((window, args) => httpServer.Stop())
+                );
+#endif
+            });
             
             // Register platform-specific handlers for the HassWebView control
             builder.ConfigureMauiHandlers(handlers =>
@@ -146,8 +188,7 @@ namespace HassWebView.Core
 #endif
             });
 
-            // 初始化 X5 下载通知服务
-            builder.Services.AddSingleton<Services.X5DownloadNotificationService>();
+            
 
             return builder;
         }

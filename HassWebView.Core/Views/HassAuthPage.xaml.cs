@@ -42,14 +42,129 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
         
         var wv = webView.WebViewControl;
         wv.Navigating += OnWebViewNavigating;
-        wv.ExternalBusMessageReceived += OnExternalBusMessageReceived;
+        
+        RegisterHttpRoutes();
+    }
+    
+    private void UnregisterHttpRoutes()
+    {
+        if (_httpServer == null) return;
+        
+        _httpServer.RemoveGet("/api/webview/config");
+        _httpServer.RemoveGet("/api/webview/qrcode");
+        _httpServer.RemoveGet("/api/hass/discover");
+        _httpServer.RemovePost("/api/webview/auth");
+    }
+    
+    private void RegisterHttpRoutes()
+    {
+        if (_httpServer == null) return;
+        
+        UnregisterHttpRoutes();
+        
+        // 获取配置
+        _httpServer.Get("/api/webview/config", async (req, res) =>
+        {
+            var hassUrl = _authStore != null ? await _authStore.GetHassUrlAsync() : null;
+            string? remoteUrl = null;
+            string? qrCodeUrl = null;
+            
+            if (!string.IsNullOrEmpty(_httpServer.BaseUrl))
+            {
+                remoteUrl = _httpServer.BaseUrl.TrimEnd('/') + "/remote.html";
+                qrCodeUrl = "/api/webview/qrcode?url=" + Uri.EscapeDataString(remoteUrl);
+            }
+            
+            await res.Json(new { hassUrl, remoteUrl, qrCodeUrl });
+        });
+        
+        // 生成二维码图片
+        _httpServer.Get("/api/webview/qrcode", async (req, res) =>
+        {
+            var url = req.Query["url"];
+            var sizeStr = req.Query["size"];
+            int.TryParse(sizeStr, out var size);
+            if (size <= 0) size = 200;
+            
+            if (string.IsNullOrEmpty(url))
+            {
+                await res.Text("Missing 'url' parameter", System.Net.HttpStatusCode.BadRequest);
+                return;
+            }
+            
+            try
+            {
+                var svg = QrCodeService.GenerateSvg(url, size, QrCodeService.ErrorCorrectionLevel.H);
+                res.OriginalResponse.ContentType = "image/svg+xml";
+                await res.Text(svg);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[HassAuthPage] Error generating QR code: {ex.Message}");
+                await res.Text("Failed to generate QR code", System.Net.HttpStatusCode.InternalServerError);
+            }
+        });
+        
+        // 发现 Hass 实例
+        _httpServer.Get("/api/hass/discover", async (req, res) =>
+        {
+            var instances = await HassDiscovery.DiscoverAsync();
+            await res.Json(instances);
+        });
+        
+        // 认证连接
+        _httpServer.Post("/api/webview/auth", async (req, res) =>
+        {
+            var body = await req.JsonAsync<JsonNode>();
+            var urlFromForm = body?["url"]?.GetValue<string>();
+            
+            if (string.IsNullOrEmpty(urlFromForm))
+            {
+                await res.Json(new { success = false, message = "请提供 Home Assistant URL" }, System.Net.HttpStatusCode.BadRequest);
+                return;
+            }
+            
+            var auth = new HassAuth(urlFromForm);
+            if (await auth.CheckApiStatusAsync())
+            {
+                if (_authStore != null)
+                {
+                    await _authStore.SetHassUrlAsync(auth.BaseUrl);
+                }
+                
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    _state = PageState.InLoginFlow;
+                    webView.WebViewControl.Source = auth.AuthorizeUri;
+                });
+                
+                await res.Json(new { success = true, message = "正在跳转至认证页面..." });
+            }
+            else
+            {
+                await res.Json(new { success = false, message = "无法访问提供的 URL，请确保它是正确的 Home Assistant 实例地址。" }, System.Net.HttpStatusCode.BadRequest);
+            }
+        });
     }
 
-    protected override async void OnAppearing()
+    protected override void OnAppearing()
     {
         base.OnAppearing();
-        // When the page appears, always start the authentication process.
-        await webView.LoadEmbeddedHtml("index.html");
+        LoadAuthPage();
+    }
+    
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        UnregisterHttpRoutes();
+    }
+
+    private void LoadAuthPage()
+    {
+        // 使用 localhost 加载 index.html（内部调用，不需要局域网 IP）
+        var url = $"http://localhost:{_httpServer!.Port}/index.html";
+        Debug.WriteLine($"[HassAuthPage] Loading auth page from HTTP: {url}");
+        webView.WebViewControl.Source = url;
     }
 
     private async void OnWebViewNavigating(object? sender, WebNavigatingEventArgs e)
@@ -67,7 +182,7 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
 
             if (_authStore == null)
             {
-                await ShowErrorAndStay("认证存储未初始化。");
+                ShowErrorAndStay("认证存储未初始化。");
                 return;
             }
 
@@ -76,7 +191,7 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
             var tokenResult = await hassAuth.GetRefreshTokenAsync(code);
             if (tokenResult == null)
             {
-                await ShowErrorAndStay("无法获取凭据，请重试。");
+                ShowErrorAndStay("无法获取凭据，请重试。");
                 return;
             }
 
@@ -110,7 +225,7 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
             var registrationResult = await hassApi.RegisterMobileAppAsync(registrationRequest);
             if (registrationResult?.WebhookId == null)
             {
-                await ShowErrorAndStay("注册应用失败，请检查您的 Home Assistant 配置。");
+                ShowErrorAndStay("注册应用失败，请检查您的 Home Assistant 配置。");
                 return;
             }
 
@@ -122,85 +237,13 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
         }
     }
 
-    private async void OnExternalBusMessageReceived(object? sender, string message)
-    {
-        if (string.IsNullOrEmpty(message)) return;
-        var wv = webView.WebViewControl;
-
-        try
-        {
-            var msg = JsonNode.Parse(message);
-            var type = msg?["type"]?.GetValue<string>();
-
-            switch (type)
-            {
-                case "webview/auth":
-                    var urlFromForm = msg?["data"]?.GetValue<string>();
-                    var auth = new HassAuth(urlFromForm ?? string.Empty);
-                    if (await auth.CheckApiStatusAsync())
-                    {
-                        if (_authStore != null)
-                        {
-                            await _authStore.SetHassUrlAsync(auth.BaseUrl);
-                        }
-                        await MainThread.InvokeOnMainThreadAsync(() =>
-                        {
-                            _state = PageState.InLoginFlow;
-                            wv.Source = auth.AuthorizeUri;
-                        });
-                    }
-                    else
-                    {
-                        wv.WindowExternalBus(new { type = "webview/auth", message = "无法访问提供的 URL，请确保它是正确的 Home Assistant 实例地址。" });
-                    }
-                    break;
-                
-                case "webview/config":
-                     var hassUrl = _authStore != null ? await _authStore.GetHassUrlAsync() : null;
-                     string? remoteUrl = null;
-                     string? remoteUrlQrCode = null;
-                     
-                     // 构建完整的远程访问 URL
-                     if (_httpServer != null && !string.IsNullOrEmpty(_httpServer.BaseUrl))
-                     {
-                         remoteUrl = _httpServer.BaseUrl.TrimEnd('/') + "/webview/remote";
-                     }
-                     
-                     // 使用 C# 生成二维码
-                     if (!string.IsNullOrEmpty(remoteUrl))
-                     {
-                         try
-                         {
-                             remoteUrlQrCode = QrCodeService.GenerateSvg(remoteUrl, 200, QrCodeService.ErrorCorrectionLevel.H);
-                         }
-                         catch (Exception ex)
-                         {
-                             Debug.WriteLine($"[HassAuthPage] Error generating QR code: {ex.Message}");
-                         }
-                     }
-                     
-                     wv.WindowExternalBus(new { type = "webview/config", data = new { hassUrl, remoteUrl = remoteUrlQrCode } });
-                     break;
-
-                case "hass/discover":
-                    var instances = await HassDiscovery.DiscoverAsync();
-                    wv.WindowExternalBus(new { type = "hass/discover/result", data = instances });
-                    break;
-            }
-        }
-        catch (JsonException ex)
-        {
-            Debug.WriteLine($"[HassAuthPage] Error parsing JSON: {ex.Message}");
-        }
-    }
-
     // Display an error toast and remain on the auth page.
-    private Task ShowErrorAndStay(string message)
+    private void ShowErrorAndStay(string message)
     {
-        return MainThread.InvokeOnMainThreadAsync(async () =>
+        MainThread.BeginInvokeOnMainThread(() =>
         {
             _state = PageState.NeedsAuth;
-            await webView.LoadEmbeddedHtml("index.html");
+            LoadAuthPage();
             if (!string.IsNullOrEmpty(message)) webView.ShowToast(message);
         });
     }

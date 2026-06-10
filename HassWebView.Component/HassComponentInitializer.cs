@@ -21,15 +21,51 @@ public class HassComponentInitializer : IMauiInitializeService
         try
         {
             var application = serviceProvider.GetService<Application>() ?? Application.Current;
+            
+            // 如果 Application 或 Resources 还未初始化，延迟重试
             if (application?.Resources?.MergedDictionaries == null)
             {
-                System.Diagnostics.Debug.WriteLine("[HassComponentInitializer] ERROR: Application or Resources is null");
+                System.Diagnostics.Debug.WriteLine("[HassComponentInitializer] Application or Resources not ready yet, retrying...");
+                
+                // 使用 Task.Delay 延迟重试，避免阻塞初始化流程
+                _ = Task.Run(async () =>
+                {
+                    // 最多重试 5 次，每次间隔 100ms
+                    for (int retry = 0; retry < 5; retry++)
+                    {
+                        await Task.Delay(100);
+                        
+                        application = Application.Current;
+                        if (application?.Resources?.MergedDictionaries != null)
+                        {
+                            InitializeThemeSystem(application);
+                            return;
+                        }
+                    }
+                    
+                    System.Diagnostics.Debug.WriteLine("[HassComponentInitializer] Failed to initialize after retries");
+                });
+                
                 return;
             }
 
+            // 资源已就绪，直接初始化主题系统
+            InitializeThemeSystem(application);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[HassComponentInitializer] Initialize failed: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[HassComponentInitializer] Stack trace: {ex.StackTrace}");
+        }
+    }
+    
+    private void InitializeThemeSystem(Application application)
+    {
+        try
+        {
             System.Diagnostics.Debug.WriteLine($"[HassComponentInitializer] Application found. MergedDictionaries count: {application.Resources.MergedDictionaries.Count}");
-
-            // 延迟初始化主题系统
+            
+            // 延迟初始化主题系统，确保 UI 线程就绪
             application.Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
             {
                 try
@@ -49,8 +85,7 @@ public class HassComponentInitializer : IMauiInitializeService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[HassComponentInitializer] Initialize failed: {ex.Message}");
-            System.Diagnostics.Debug.WriteLine($"[HassComponentInitializer] Stack trace: {ex.StackTrace}");
+            System.Diagnostics.Debug.WriteLine($"[HassComponentInitializer] InitializeThemeSystem failed: {ex.Message}");
         }
     }
 }

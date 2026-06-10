@@ -3,6 +3,7 @@ using HassWebView.Core.Configuration;
 using HassWebView.HassApi.Models;
 using HassWebView.Component;
 using Microsoft.Extensions.Logging;
+using HassWebView.Core.Services;
 
 namespace HassWebView.Demo;
 
@@ -19,48 +20,43 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             })
-            .UseHttpServer(8125, (sp, server) =>
+            .UseHassWebView()
+            .UseHassComponents()
+            .UseHassPage<SettingsPage>((sp, options) =>
             {
-                server.Get("/", async (req, res) =>
+                var httpServer = sp.GetRequiredService<HttpServer>();
+                httpServer.Post("/", async (req, res) =>
                 {
-                    await res.Text(DateTime.Now.ToString());
-                });
-
-                server.Post("/", async (req, res) =>
-                {
-                    var pageOptions = sp.GetRequiredService<HassPageOptions>();
                     var payload = await req.JsonAsync<NotificationPayload>();
-
                     var msg = payload.Message;
+
                     if (payload.Title == "url" && msg?.StartsWith("http") == true)
                     {
-                        pageOptions.OpenWebPage?.Invoke(msg);
+                        options.OpenWebPage?.Invoke(msg);
                     }
                     else if (payload.Title == "config" && msg?.StartsWith("http") == true)
                     {
-                        // 加载远程配置
-                        await pageOptions.LoadRemoteConfigsAsync(msg);
+                        await options.LoadRemoteConfigsAsync(msg);
                     }
                     else if (payload.Title == "video")
                     {
-                        if (pageOptions.PlayVideo != null)
+                        if (options.PlayVideo != null)
                         {
                             var baseUrl = string.Empty;
                             var data = payload.Data;
-                            if (data != null && data.TryGetValue("baseUrl", out object? baseUrlObject) && baseUrlObject != null)
+                            if (data != null && data.TryGetValue("baseUrl", out var baseUrlObject) && baseUrlObject != null)
                             {
                                 baseUrl = baseUrlObject.ToString() ?? string.Empty;
                             }
-                            // 保留修正：添加 'external: false' 参数以匹配委托签名
-                            await pageOptions.PlayVideo(payload.Message ?? string.Empty, baseUrl, false);
+                            await options.PlayVideo(payload.Message ?? string.Empty, baseUrl, false);
                         }
                     }
                     await res.Text("", System.Net.HttpStatusCode.Created);
                 });
+
+                // 打印服务地址方便调试
+                Console.WriteLine($"[HttpServer] Listening on: {httpServer.BaseUrl}");
             })
-            .UseHassWebView()
-            .UseHassComponents()
-            .UseHassPage<SettingsPage>()
             .UseImmersiveMode()
             .UseRemoteControl();
 

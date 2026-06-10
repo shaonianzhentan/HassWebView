@@ -307,59 +307,66 @@
     <script>
         var hasScanned = false;
 
-        window.externalBus = function (msg) {
-            console.log("Message received from C#: ", msg);
-            
-            var message;
-            if (typeof msg === 'string') {
-                try {
-                    message = JSON.parse(msg);
-                } catch (e) {
-                    console.error("Could not parse string message from C# as JSON: ", msg);
-                    showToast("收到的消息格式无法解析。");
-                    return;
+        async function fetchConfig() {
+            try {
+                const response = await fetch('/api/webview/config');
+                const data = await response.json();
+                hideLoading();
+                if (data.hassUrl) {
+                    populateUrl(data.hassUrl);
                 }
-            } else if (typeof msg === 'object' && msg !== null) {
-                message = msg;
-            } else {
-                console.error("Received message of unexpected type: ", typeof msg);
-                showToast("收到的消息类型无法识别。");
-                return;
+                if (data.qrCodeUrl) {
+                    var el = document.getElementById("qrcode");
+                    el.innerHTML = '<img src="' + data.qrCodeUrl + '" alt="QR Code" style="width:100%;height:100%;"/>';
+                    $("#tv").show();
+                }
+            } catch (error) {
+                console.error("Failed to fetch config:", error);
+                hideLoading();
             }
+        }
 
-            if (!message || typeof message.type === 'undefined') {
-                console.error("Parsed message is invalid or does not have a 'type' property: ", message);
-                return;
+        async function fetchDiscovery() {
+            try {
+                const response = await fetch('/api/hass/discover');
+                const data = await response.json();
+                hideLoading();
+                handleDiscoveryResult(data);
+            } catch (error) {
+                console.error("Failed to fetch discovery:", error);
+                hideLoading();
+                var mockInstances = [
+                    { name: 'Home Assistant', hostName: 'home-assistant.local', port: 8123 },
+                    { name: 'Home Assistant', hostName: 'hass.local', port: 8123 },
+                    { name: 'Home Assistant', hostName: '192.168.1.100', port: 8123 }
+                ];
+                handleDiscoveryResult(mockInstances);
+                showToast("发现服务不可用，显示模拟数据。");
             }
+        }
 
-            switch(message.type){
-                case 'webview/config':
-                    hideLoading();
-                    if (message.data) {
-                        if (message.data.hassUrl) {
-                            populateUrl(message.data.hassUrl);
-                        }
-                        if (message.data.remoteUrl) {
-                            // 使用 C# 生成的 SVG 二维码
-                            var el = document.getElementById("qrcode");
-                            el.innerHTML = message.data.remoteUrl;
-                            $("#tv").show();
-                        }
-                    }
-                    break;
-                case 'webview/auth':
-                    hideLoading();
-                    showToast(message.message);
-                    break;
-                case 'hass/discover/result':
-                    hideLoading();
-                    handleDiscoveryResult(message.data);
-                    break;
-                default:
-                    console.warn("Received unknown message type: " + message.type);
-                    break;
+        async function connectToHass(url) {
+            try {
+                const response = await fetch('/api/webview/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+                const data = await response.json();
+                hideLoading();
+                if (response.ok) {
+                    showToast(data.message || "连接成功");
+                } else {
+                    showToast(data.message || "连接失败");
+                }
+            } catch (error) {
+                console.error("Failed to connect:", error);
+                hideLoading();
+                showToast("连接失败，请重试");
             }
-        };
+        }
 
         function showLoading(message) {
             message = message || '请稍候...';
@@ -462,17 +469,7 @@
         function selectAndConnect(hass) {
             var url = 'http://' + hass.hostName + ':' + hass.port;
             showLoading("正在连接到 " + (hass.name || 'Home Assistant') + "...");
-            
-            if(window.externalApp && window.externalApp.externalBus) {
-                 window.externalApp.externalBus(JSON.stringify({
-                    type: 'webview/auth',
-                    data: url
-                }));
-            } else {
-                console.warn("Not in C# environment. URL to verify: " + url);
-                hideLoading();
-                showToast("当前不在应用环境中，无法连接。");
-            }
+            connectToHass(url);
         }
 
         function scanForHass() {
@@ -480,19 +477,7 @@
             hasScanned = true;
             
             showLoading("正在扫描局域网...");
-            
-            if(window.externalApp && window.externalApp.externalBus){
-                window.externalApp.externalBus(JSON.stringify({ type: 'hass/discover' }));
-            } else {
-                hideLoading();
-                var mockInstances = [
-                    { name: 'Home Assistant', hostName: 'home-assistant.local', port: 8123 },
-                    { name: 'Home Assistant', hostName: 'hass.local', port: 8123 },
-                    { name: 'Home Assistant', hostName: '192.168.1.100', port: 8123 }
-                ];
-                handleDiscoveryResult(mockInstances);
-                showToast("当前不在应用环境中，显示模拟数据。");
-            }
+            fetchDiscovery();
         }
 
         $(document).ready(function() {
@@ -511,11 +496,7 @@
                 }
             });
 
-            // X5 内核初始化已改为自动模式，在应用启动时自动处理
-            // 这里只负责显示配置界面
-            if(window.externalApp && window.externalApp.externalBus){
-                window.externalApp.externalBus(JSON.stringify({ type: 'webview/config' }));
-            }
+            fetchConfig();
 
             setTimeout(function() {
                 scanForHass();
@@ -552,17 +533,7 @@
                 if (urlToVerify) {
                     if ($("#loading").is(":visible")) { return; }
                     showLoading("正在验证地址...");
-                    
-                    if(window.externalApp && window.externalApp.externalBus) {
-                         window.externalApp.externalBus(JSON.stringify({
-                            type: 'webview/auth',
-                            data: urlToVerify
-                        }));
-                    } else {
-                        console.warn("Not in C# environment. URL to verify: " + urlToVerify);
-                        hideLoading();
-                        showToast("当前不在应用环境中，无法连接。");
-                    }
+                    connectToHass(urlToVerify);
                 }
             });
         });
