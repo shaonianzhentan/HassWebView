@@ -1,6 +1,7 @@
 using HassWebView.Core;
 using HassWebView.Core.Configuration;
 using HassWebView.HassApi.Models;
+using HassWebView.Component;
 using Microsoft.Extensions.Logging;
 
 namespace HassWebView.Demo;
@@ -58,6 +59,7 @@ public static class MauiProgram
                 });
             })
             .UseHassWebView()
+            .UseHassComponents()
             .UseHassPage<SettingsPage>()
             .UseImmersiveMode()
             .UseRemoteControl();

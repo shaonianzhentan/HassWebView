@@ -1,291 +1,85 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:component="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.Demo.SettingsPage"
              Title="设置"
-             BackgroundColor="{AppThemeBinding Light='#F2F2F7', Dark='#000000'}">
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="16">
+        <VerticalStackLayout Padding="16" Spacing="24">
 
-            <!-- 关于 -->
-            <Label Text="关于"
-                   FontSize="12"
-                   FontAttributes="Bold"
-                   TextColor="{AppThemeBinding Light='#8E8E93', Dark='#8E8E93'}"
-                   Padding="0,8,0,4" />
+            <!-- 外观设置 -->
+            <component:SettingsGroup Title="外观设置">
+                <component:InfoRow Icon="🎨" 
+                                   Label="主题模式" 
+                                   Value="{Binding CurrentThemeText}" />
+            </component:SettingsGroup>
+            
+            <component:SettingsGroup Title="主题选择">
+                <component:ThemeSelector />
+            </component:SettingsGroup>
 
-            <Border StrokeThickness="0"
-                    BackgroundColor="{AppThemeBinding Light='#FFFFFF', Dark='#2C2C2E'}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="16" />
-                </Border.StrokeShape>
-                <Border.Shadow>
-                    <Shadow Brush="#000000" Offset="0,2" Radius="8" Opacity="0.08" />
-                </Border.Shadow>
-                <VerticalStackLayout Spacing="0">
-                    <Grid ColumnDefinitions="*,Auto" Padding="16,16,16,12">
-                        <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
-                            <Label Text="HassWebView"
-                                   FontSize="16"
-                                   FontAttributes="Bold"
-                                   TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-                            <Label Text="Home Assistant 智能控制中心"
-                                   FontSize="14"
-                                   TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}" />
-                        </VerticalStackLayout>
-                        <Border Grid.Column="1"
-                              WidthRequest="28"
-                              HeightRequest="28"
-                              VerticalOptions="Center"
-                              Margin="8,0,0,0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="14" />
-                            </Border.StrokeShape>
-                            <Border.BackgroundColor>#34C759</Border.BackgroundColor>
-                            <Label Text="●"
-                                   FontSize="16"
-                                   TextColor="White"
-                                   HorizontalOptions="Center"
-                                   VerticalOptions="Center" />
-                        </Border>
-                    </Grid>
-                    <BoxView HeightRequest="0.5"
-                             HorizontalOptions="Fill"
-                             Margin="16,0"
-                             Color="{AppThemeBinding Light='#E5E5EA', Dark='#38383A'}" />
-                    <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="12"
-                          Padding="16,12">
-                        <Label Grid.Column="0"
-                               Text="版本"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-                        <Label Grid.Column="1"
-                               Text="{Binding AppVersion}"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}"
-                               HorizontalOptions="End" />
-                    </Grid>
-                    <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="12"
-                          Padding="16,12">
-                        <Label Grid.Column="0"
-                               Text="运行时"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-                        <Label Grid.Column="1"
-                               Text=".NET MAUI"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}"
-                               HorizontalOptions="End" />
-                    </Grid>
-                </VerticalStackLayout>
-            </Border>
+            <component:SettingsGroup Title="界面尺寸">
+                <component:InfoRow Icon="📐" 
+                                   Label="当前尺寸" 
+                                   Value="{Binding CurrentSizeText}" />
+            </component:SettingsGroup>
+            
+            <component:SettingsGroup Title="尺寸选择">
+                <component:SizeSelector />
+            </component:SettingsGroup>
 
             <!-- 连接信息 -->
-            <Label Text="连接信息"
-                   FontSize="12"
-                   FontAttributes="Bold"
-                   TextColor="{AppThemeBinding Light='#8E8E93', Dark='#8E8E93'}"
-                   Padding="0,8,0,4" />
-
-            <Border StrokeThickness="0"
-                    BackgroundColor="{AppThemeBinding Light='#FFFFFF', Dark='#2C2C2E'}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="16" />
-                </Border.StrokeShape>
-                <Border.Shadow>
-                    <Shadow Brush="#000000" Offset="0,2" Radius="8" Opacity="0.08" />
-                </Border.Shadow>
-                <VerticalStackLayout Spacing="0">
-                    <Grid Padding="16,16,16,12">
-                        <Label Text="Home Assistant"
-                               FontSize="16"
-                               FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-                    </Grid>
-                    <BoxView HeightRequest="0.5"
-                             HorizontalOptions="Fill"
-                             Margin="16,0"
-                             Color="{AppThemeBinding Light='#E5E5EA', Dark='#38383A'}" />
-                    <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="12"
-                          Padding="16,12">
-                        <Label Grid.Column="0"
-                               Text="实例地址"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-                        <Label Grid.Column="1"
-                               Text="{Binding HassUrl}"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}"
-                               HorizontalOptions="End" />
-                    </Grid>
-                    <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="12"
-                          Padding="16,12">
-                        <Label Grid.Column="0"
-                               Text="推送 URL"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-                        <Label Grid.Column="1"
-                               Text="{Binding PushUrl}"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}"
-                               HorizontalOptions="End" />
-                    </Grid>
-                </VerticalStackLayout>
-            </Border>
+            <component:SettingsGroup Title="连接信息">
+                <component:InfoRow Icon="🏠" 
+                                   Label="实例地址" 
+                                   Value="{Binding HassUrl}" />
+                <component:InfoRow Icon="📡" 
+                                   Label="推送 URL" 
+                                   Value="{Binding PushUrl}" />
+            </component:SettingsGroup>
 
             <!-- 设备信息 -->
-            <Label Text="设备信息"
-                   FontSize="12"
-                   FontAttributes="Bold"
-                   TextColor="{AppThemeBinding Light='#8E8E93', Dark='#8E8E93'}"
-                   Padding="0,8,0,4" />
+            <component:SettingsGroup Title="设备信息">
+                <component:InfoRow Icon="📱" 
+                                   Label="平台" 
+                                   Value="{Binding Platform}" />
+                <component:InfoRow Icon="💻" 
+                                   Label="设备" 
+                                   Value="{Binding DeviceName}" />
+                <component:InfoRow Icon="🏭" 
+                                   Label="制造商" 
+                                   Value="{Binding Manufacturer}" />
+                <component:InfoRow Icon="⚙️" 
+                                   Label="系统版本" 
+                                   Value="{Binding OsVersion}" />
+            </component:SettingsGroup>
 
-            <Border StrokeThickness="0"
-                    BackgroundColor="{AppThemeBinding Light='#FFFFFF', Dark='#2C2C2E'}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="16" />
-                </Border.StrokeShape>
-                <Border.Shadow>
-                    <Shadow Brush="#000000" Offset="0,2" Radius="8" Opacity="0.08" />
-                </Border.Shadow>
-                <VerticalStackLayout Spacing="0">
-                    <Grid Padding="16,16,16,12">
-                        <Label Text="当前设备"
-                               FontSize="16"
-                               FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-                    </Grid>
-                    <BoxView HeightRequest="0.5"
-                             HorizontalOptions="Fill"
-                             Margin="16,0"
-                             Color="{AppThemeBinding Light='#E5E5EA', Dark='#38383A'}" />
-                    <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="12"
-                          Padding="16,12">
-                        <Label Grid.Column="0"
-                               Text="平台"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-                        <Label Grid.Column="1"
-                               Text="{Binding Platform}"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}"
-                               HorizontalOptions="End" />
-                    </Grid>
-                    <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="12"
-                          Padding="16,12">
-                        <Label Grid.Column="0"
-                               Text="设备"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-                        <Label Grid.Column="1"
-                               Text="{Binding DeviceName}"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}"
-                               HorizontalOptions="End" />
-                    </Grid>
-                    <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="12"
-                          Padding="16,12">
-                        <Label Grid.Column="0"
-                               Text="制造商"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-                        <Label Grid.Column="1"
-                               Text="{Binding Manufacturer}"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}"
-                               HorizontalOptions="End" />
-                    </Grid>
-                    <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="12"
-                          Padding="16,12">
-                        <Label Grid.Column="0"
-                               Text="系统版本"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-                        <Label Grid.Column="1"
-                               Text="{Binding OsVersion}"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}"
-                               HorizontalOptions="End" />
-                    </Grid>
-                </VerticalStackLayout>
-            </Border>
+            <!-- 关于 -->
+            <component:SettingsGroup Title="关于">
+                <component:InfoRow Icon="ℹ️" 
+                                   Label="应用版本" 
+                                   Value="{Binding AppVersion}" />
+                <component:InfoRow Icon="🔧" 
+                                   Label="运行时" 
+                                   Value=".NET MAUI" />
+            </component:SettingsGroup>
 
             <!-- 开源许可 -->
-            <Label Text="开源许可"
-                   FontSize="12"
-                   FontAttributes="Bold"
-                   TextColor="{AppThemeBinding Light='#8E8E93', Dark='#8E8E93'}"
-                   Padding="0,8,0,4" />
+            <component:SettingsGroup Title="开源许可">
+                <component:InfoRow Icon="📄" 
+                                   Label=".NET MAUI" 
+                                   Value="MIT" />
+                <component:InfoRow Icon="📄" 
+                                   Label="YamlDotNet" 
+                                   Value="MIT" />
+                <component:InfoRow Icon="📄" 
+                                   Label="Home Assistant" 
+                                   Value="Apache 2.0" />
+            </component:SettingsGroup>
 
-            <Border StrokeThickness="0"
-                    BackgroundColor="{AppThemeBinding Light='#FFFFFF', Dark='#2C2C2E'}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="16" />
-                </Border.StrokeShape>
-                <Border.Shadow>
-                    <Shadow Brush="#000000" Offset="0,2" Radius="8" Opacity="0.08" />
-                </Border.Shadow>
-                <VerticalStackLayout Spacing="0">
-                    <Grid Padding="16,16,16,12">
-                        <Label Text="第三方组件"
-                               FontSize="16"
-                               FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-                    </Grid>
-                    <BoxView HeightRequest="0.5"
-                             HorizontalOptions="Fill"
-                             Margin="16,0"
-                             Color="{AppThemeBinding Light='#E5E5EA', Dark='#38383A'}" />
-                    <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="12"
-                          Padding="16,12">
-                        <Label Grid.Column="0"
-                               Text=".NET MAUI"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-                        <Label Grid.Column="1"
-                               Text="MIT"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}"
-                               HorizontalOptions="End" />
-                    </Grid>
-                    <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="12"
-                          Padding="16,12">
-                        <Label Grid.Column="0"
-                               Text="YamlDotNet"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-                        <Label Grid.Column="1"
-                               Text="MIT"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}"
-                               HorizontalOptions="End" />
-                    </Grid>
-                    <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="12"
-                          Padding="16,12">
-                        <Label Grid.Column="0"
-                               Text="Home Assistant"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#000000', Dark='#FFFFFF'}" />
-                        <Label Grid.Column="1"
-                               Text="Apache 2.0"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light='#9E9E9E', Dark='#8E8E93'}"
-                               HorizontalOptions="End" />
-                    </Grid>
-                </VerticalStackLayout>
-            </Border>
+            <BoxView HeightRequest="40" />
 
         </VerticalStackLayout>
     </ScrollView>

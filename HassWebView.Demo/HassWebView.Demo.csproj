@@ -70,6 +70,9 @@
 
 	<ItemGroup>
   <ProjectReference Include="..\HassWebView.Core\HassWebView.Core.csproj" />
+  <ProjectReference Include="..\HassWebView.Component\HassWebView.Component.csproj">
+    <Properties>IsMauiLibrary=true;TargetFramework=$(TargetFramework)</Properties>
+  </ProjectReference>
 </ItemGroup>
 
 </Project>
