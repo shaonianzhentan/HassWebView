@@ -28,6 +28,10 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
     private readonly IHassApiService _hassApiService;
     private readonly HttpServer? _httpServer;
     private readonly KeyService? _keyService;
+    
+    // 缓存的 Hass 实例列表（非阻塞扫描）
+    private List<object>? _cachedHassInstances;
+    private bool _isDiscovering;
 
     // Constructor to accept all necessary services from HassPage
     public HassAuthPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService? keyService = null, HttpServer? httpServer = null)
@@ -44,6 +48,9 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
         wv.Navigating += OnWebViewNavigating;
         
         RegisterHttpRoutes();
+        
+        // 后台启动局域网扫描（非阻塞）
+        StartBackgroundDiscovery();
     }
     
     private void UnregisterHttpRoutes()
@@ -51,65 +58,50 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
         if (_httpServer == null) return;
         
         _httpServer.RemoveGet("/api/webview/config");
-        _httpServer.RemoveGet("/api/webview/qrcode");
         _httpServer.RemoveGet("/api/hass/discover");
         _httpServer.RemovePost("/api/webview/auth");
     }
     
     private void RegisterHttpRoutes()
     {
-        if (_httpServer == null) return;
+        Debug.WriteLine($"[HassAuthPage] RegisterHttpRoutes called, _httpServer: {_httpServer != null}");
+        
+        if (_httpServer == null)
+        {
+            Debug.WriteLine("[HassAuthPage] _httpServer is null, cannot register routes");
+            return;
+        }
         
         UnregisterHttpRoutes();
+        Debug.WriteLine("[HassAuthPage] Routes unregistered, now registering new routes");
         
         // 获取配置
         _httpServer.Get("/api/webview/config", async (req, res) =>
         {
             var hassUrl = _authStore != null ? await _authStore.GetHassUrlAsync() : null;
             string? remoteUrl = null;
-            string? qrCodeUrl = null;
             
             if (!string.IsNullOrEmpty(_httpServer.BaseUrl))
             {
                 remoteUrl = _httpServer.BaseUrl.TrimEnd('/') + "/remote.html";
-                qrCodeUrl = "/api/webview/qrcode?url=" + Uri.EscapeDataString(remoteUrl);
             }
             
-            await res.Json(new { hassUrl, remoteUrl, qrCodeUrl });
+            await res.Json(new { hassUrl, remoteUrl });
         });
         
-        // 生成二维码图片
-        _httpServer.Get("/api/webview/qrcode", async (req, res) =>
-        {
-            var url = req.Query["url"];
-            var sizeStr = req.Query["size"];
-            int.TryParse(sizeStr, out var size);
-            if (size <= 0) size = 200;
-            
-            if (string.IsNullOrEmpty(url))
-            {
-                await res.Text("Missing 'url' parameter", System.Net.HttpStatusCode.BadRequest);
-                return;
-            }
-            
-            try
-            {
-                var svg = QrCodeService.GenerateSvg(url, size, QrCodeService.ErrorCorrectionLevel.H);
-                res.OriginalResponse.ContentType = "image/svg+xml";
-                await res.Text(svg);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[HassAuthPage] Error generating QR code: {ex.Message}");
-                await res.Text("Failed to generate QR code", System.Net.HttpStatusCode.InternalServerError);
-            }
-        });
         
-        // 发现 Hass 实例
+        
+        // 发现 Hass 实例（非阻塞，立即返回缓存结果）
         _httpServer.Get("/api/hass/discover", async (req, res) =>
         {
-            var instances = await HassDiscovery.DiscoverAsync();
-            await res.Json(instances);
+            // 立即返回缓存结果，不等待扫描完成
+            await res.Json(_cachedHassInstances ?? new List<object>());
+            
+            // 如果正在扫描，触发一次刷新
+            if (_isDiscovering && _cachedHassInstances == null)
+            {
+                StartBackgroundDiscovery();
+            }
         });
         
         // 认证连接
@@ -145,6 +137,8 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
                 await res.Json(new { success = false, message = "无法访问提供的 URL，请确保它是正确的 Home Assistant 实例地址。" }, System.Net.HttpStatusCode.BadRequest);
             }
         });
+        
+        Debug.WriteLine("[HassAuthPage] All HTTP routes registered successfully");
     }
 
     protected override void OnAppearing()
@@ -165,6 +159,36 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
         var url = $"http://localhost:{_httpServer!.Port}/index.html";
         Debug.WriteLine($"[HassAuthPage] Loading auth page from HTTP: {url}");
         webView.WebViewControl.Source = url;
+    }
+    
+    /// <summary>
+    /// 在后台启动局域网扫描（非阻塞）
+    /// </summary>
+    private void StartBackgroundDiscovery()
+    {
+        if (_isDiscovering) return;
+        
+        _isDiscovering = true;
+        
+        // 使用 Task.Run 在后台执行扫描，不阻塞主线程
+        Task.Run(async () =>
+        {
+            try
+            {
+                Debug.WriteLine("[HassAuthPage] Starting background Hass discovery...");
+                var instances = await HassDiscovery.DiscoverAsync();
+                _cachedHassInstances = instances.Cast<object>().ToList();
+                Debug.WriteLine($"[HassAuthPage] Discovery completed, found {_cachedHassInstances.Count} instances");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[HassAuthPage] Background discovery error: {ex.Message}");
+            }
+            finally
+            {
+                _isDiscovering = false;
+            }
+        });
     }
 
     private async void OnWebViewNavigating(object? sender, WebNavigatingEventArgs e)

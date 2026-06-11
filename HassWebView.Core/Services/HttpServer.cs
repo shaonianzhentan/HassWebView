@@ -81,7 +81,8 @@ namespace HassWebView.Core.Services
 
             public async Task Text(string text, HttpStatusCode statusCode = HttpStatusCode.OK)
             {
-                _res.ContentType = "text/plain";
+                if (_res.ContentType == null)
+                    _res.ContentType = "text/plain";
                 _res.StatusCode = (int)statusCode;
                 var buf = Encoding.UTF8.GetBytes(text);
                 _res.ContentLength64 = buf.Length;
@@ -179,24 +180,6 @@ namespace HassWebView.Core.Services
         public void RemovePost(string path) => RemoveRoute("POST", path);
         public void RemovePut(string path) => RemoveRoute("PUT", path);
         public void RemoveDelete(string path) => RemoveRoute("DELETE", path);
-
-        /// <summary>
-        /// 生成二维码图片（Base64 PNG）
-        /// </summary>
-        public string GenerateQrCodeImage(string content, int size = 200)
-        {
-            try
-            {
-                var svg = QrCodeService.GenerateSvg(content, size, QrCodeService.ErrorCorrectionLevel.H);
-                // 这里可以扩展为返回 PNG 格式，目前返回 SVG
-                return svg;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[HttpServer] Error generating QR code: {ex.Message}");
-                return string.Empty;
-            }
-        }
 
         // ========== 启动 / 停止 ==========
 
