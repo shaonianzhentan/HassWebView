@@ -26,7 +26,7 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
     private readonly HassPageOptions _pageOptions;
     private readonly IAuthStore? _authStore;
     private readonly IHassApiService _hassApiService;
-    private readonly HttpServer? _httpServer;
+    private readonly HttpServer _httpServer;
     private readonly KeyService? _keyService;
     
     // 缓存的 Hass 实例列表（非阻塞扫描）
@@ -34,7 +34,7 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
     private bool _isDiscovering;
 
     // Constructor to accept all necessary services from HassPage
-    public HassAuthPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService? keyService = null, HttpServer? httpServer = null)
+    public HassAuthPage(HassPageOptions pageOptions, IHassApiService hassApiService, HttpServer httpServer, KeyService? keyService = null)
     {
         InitializeComponent();
         
@@ -55,8 +55,6 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
     
     private void UnregisterHttpRoutes()
     {
-        if (_httpServer == null) return;
-        
         _httpServer.RemoveGet("/api/webview/config");
         _httpServer.RemoveGet("/api/hass/discover");
         _httpServer.RemovePost("/api/webview/auth");
@@ -64,13 +62,7 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
     
     private void RegisterHttpRoutes()
     {
-        Debug.WriteLine($"[HassAuthPage] RegisterHttpRoutes called, _httpServer: {_httpServer != null}");
-        
-        if (_httpServer == null)
-        {
-            Debug.WriteLine("[HassAuthPage] _httpServer is null, cannot register routes");
-            return;
-        }
+        Debug.WriteLine("[HassAuthPage] RegisterHttpRoutes called");
         
         UnregisterHttpRoutes();
         Debug.WriteLine("[HassAuthPage] Routes unregistered, now registering new routes");
@@ -88,8 +80,6 @@ public partial class HassAuthPage : ContentPage, IKeyHandler
             
             await res.Json(new { hassUrl, remoteUrl });
         });
-        
-        
         
         // 发现 Hass 实例（非阻塞，立即返回缓存结果）
         _httpServer.Get("/api/hass/discover", async (req, res) =>

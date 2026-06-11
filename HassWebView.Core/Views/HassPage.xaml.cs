@@ -17,7 +17,7 @@ public partial class HassPage : ContentPage, IKeyHandler
     private enum PageState { Initializing, Authenticated }
     private PageState _state = PageState.Initializing;
 
-    private readonly HttpServer? _httpServer;
+    private readonly HttpServer _httpServer;
     private readonly KeyService? _keyService;
     private readonly IRemoteControlService? _remoteControlService;
     private readonly HassPageOptions _pageOptions;
@@ -27,15 +27,15 @@ public partial class HassPage : ContentPage, IKeyHandler
     private bool _isAuthPagePresented = false; // Prevents re-entrant navigation
     private bool _authDismissed = false; // Prevents re-showing auth after user dismissed it
 
-    public HassPage(HassPageOptions pageOptions, IHassApiService hassApiService, KeyService? keyService = null, HttpServer? httpServer = null, IRemoteControlService? remoteControlService = null)
+    public HassPage(HassPageOptions pageOptions, IHassApiService hassApiService, HttpServer httpServer, KeyService? keyService = null, IRemoteControlService? remoteControlService = null)
     {
         InitializeComponent();
 
         _pageOptions = pageOptions;
         _authStore = pageOptions.AuthStore;
-        _keyService = keyService;
         _httpServer = httpServer;
         _hassApiService = hassApiService;
+        _keyService = keyService;
         _remoteControlService = remoteControlService;
 
 
@@ -173,15 +173,6 @@ public partial class HassPage : ContentPage, IKeyHandler
                 if (_pageOptions.ShowSettingsScreen != null)
                     await _pageOptions.ShowSettingsScreen();
                 break;
-            case "webview/config":
-                string? hassUrl = null;
-                if (_authStore != null)
-                {
-                    hassUrl = await _authStore.GetHassUrlAsync();
-                }
-                string? remoteUrl = _httpServer != null ? _httpServer.BaseUrl + "webview/remote" : null;
-                wv.WindowExternalBus(new { type = "webview/config", data = new { hassUrl, remoteUrl } });
-                break;
         }
     }
 
@@ -228,7 +219,7 @@ public partial class HassPage : ContentPage, IKeyHandler
         if (!string.IsNullOrEmpty(message)) webView.ShowToast(message);
 
         // Create the auth page, passing all necessary dependencies.
-        var authPage = new HassAuthPage(_pageOptions, _hassApiService, _keyService, _httpServer);
+        var authPage = new HassAuthPage(_pageOptions, _hassApiService, _httpServer, _keyService);
 
         // When auth page is closed, check if authentication was successful.
         // If not, mark as dismissed to prevent re-showing auth in OnAppearing.

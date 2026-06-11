@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:component="clr-namespace:HassWebView.Component.Components"
              x:Class="HassWebView.Demo.SettingsPage"
-             Title="设置"
              BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <ScrollView>

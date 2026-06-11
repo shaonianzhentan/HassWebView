@@ -21,8 +21,17 @@ namespace HassWebView.Core.Services
             var instances = new ConcurrentBag<HassInstance>();
             var discoveredUrls = new ConcurrentHashSet<string>();
 
+            Debug.WriteLine("[HassDiscovery] Starting discovery...");
+
             try
             {
+                var localIps = GetLocalIpAddresses();
+                Debug.WriteLine($"[HassDiscovery] Found {localIps.Count} local IP addresses");
+                foreach (var ip in localIps)
+                {
+                    Debug.WriteLine($"[HassDiscovery]   - {ip}");
+                }
+
                 var tasks = new List<Task>
                 {
                     DiscoverViaMDnsAsync(instances, discoveredUrls, cancellationToken),
@@ -34,8 +43,10 @@ namespace HassWebView.Core.Services
             catch (Exception ex)
             {
                 Debug.WriteLine($"[HassDiscovery] Discovery error: {ex.Message}");
+                Debug.WriteLine($"[HassDiscovery] Stack trace: {ex.StackTrace}");
             }
 
+            Debug.WriteLine($"[HassDiscovery] Discovery completed, found {instances.Count} instances");
             return instances.ToList();
         }
 
@@ -45,25 +56,32 @@ namespace HassWebView.Core.Services
             try
             {
                 var localIps = GetLocalIpAddresses();
+                Debug.WriteLine($"[HassDiscovery.mDNS] Starting mDNS discovery on {localIps.Count} interfaces");
+                
                 if (localIps.Count == 0)
                 {
-                    Debug.WriteLine("[HassDiscovery] No local IP addresses found");
+                    Debug.WriteLine("[HassDiscovery.mDNS] No local IP addresses found");
                     return;
                 }
 
                 var query = BuildMDnsQuery(MDnsServiceType);
+                Debug.WriteLine($"[HassDiscovery.mDNS] Query built, size: {query.Length} bytes");
+                
                 var tasks = new List<Task>();
 
                 foreach (var localIp in localIps)
                 {
+                    Debug.WriteLine($"[HassDiscovery.mDNS] Starting discovery on interface {localIp}");
                     tasks.Add(DiscoverOnInterfaceAsync(localIp, query, instances, discoveredUrls, cancellationToken));
                 }
 
                 await Task.WhenAll(tasks);
+                Debug.WriteLine($"[HassDiscovery.mDNS] mDNS discovery completed");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[HassDiscovery] mDNS discovery error: {ex.Message}");
+                Debug.WriteLine($"[HassDiscovery.mDNS] mDNS discovery error: {ex.Message}");
+                Debug.WriteLine($"[HassDiscovery.mDNS] Stack trace: {ex.StackTrace}");
             }
         }
 
@@ -71,42 +89,79 @@ namespace HassWebView.Core.Services
             ConcurrentBag<HassInstance> instances, ConcurrentHashSet<string> discoveredUrls,
             CancellationToken cancellationToken)
         {
+            UdpClient? udpClient = null;
             try
             {
-                using var udpClient = new UdpClient();
+                Debug.WriteLine($"[HassDiscovery.Interface] Setting up UDP client on {localIp}");
+                
+                udpClient = new UdpClient();
                 udpClient.EnableBroadcast = true;
                 udpClient.MulticastLoopback = true;
                 udpClient.Client.ReceiveTimeout = DiscoveryTimeoutMs;
                 udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
 
+                Debug.WriteLine($"[HassDiscovery.Interface] Binding to {localIp}");
                 udpClient.Client.Bind(new IPEndPoint(localIp, 0));
-                udpClient.JoinMulticastGroup(IPAddress.Parse(MDnsMulticastAddress), localIp);
+                
+                Debug.WriteLine($"[HassDiscovery.Interface] Joining multicast group {MDnsMulticastAddress}");
+                try
+                {
+                    udpClient.JoinMulticastGroup(IPAddress.Parse(MDnsMulticastAddress), localIp);
+                    Debug.WriteLine($"[HassDiscovery.Interface] Successfully joined multicast group");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[HassDiscovery.Interface] Failed to join multicast group: {ex.Message}");
+                }
 
-                await udpClient.SendAsync(query, query.Length, new IPEndPoint(IPAddress.Parse(MDnsMulticastAddress), MDnsPort));
+                Debug.WriteLine($"[HassDiscovery.Interface] Sending mDNS query to {MDnsMulticastAddress}:{MDnsPort}");
+                try
+                {
+                    var sentBytes = await udpClient.SendAsync(query, query.Length, new IPEndPoint(IPAddress.Parse(MDnsMulticastAddress), MDnsPort));
+                    Debug.WriteLine($"[HassDiscovery.Interface] Query sent successfully, {sentBytes} bytes");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[HassDiscovery.Interface] Failed to send query: {ex.Message}");
+                    return;
+                }
 
                 var timeoutToken = new CancellationTokenSource(DiscoveryTimeoutMs);
                 var linkedToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutToken.Token).Token;
 
+                int responseCount = 0;
                 while (!linkedToken.IsCancellationRequested)
                 {
                     try
                     {
                         var result = await udpClient.ReceiveAsync().WaitAsync(linkedToken);
+                        responseCount++;
+                        Debug.WriteLine($"[HassDiscovery.Interface] Received response #{responseCount} from {result.RemoteEndPoint}");
+                        Debug.WriteLine($"[HassDiscovery.Interface] Response size: {result.Buffer.Length} bytes");
                         ParseMDnsResponse(result.Buffer, result.RemoteEndPoint, instances, discoveredUrls);
                     }
                     catch (OperationCanceledException)
                     {
+                        Debug.WriteLine($"[HassDiscovery.Interface] Receive cancelled");
                         break;
                     }
-                    catch (SocketException)
+                    catch (SocketException ex)
                     {
+                        Debug.WriteLine($"[HassDiscovery.Interface] Socket error: {ex.Message} (ErrorCode: {ex.ErrorCode})");
                         break;
                     }
                 }
+                
+                Debug.WriteLine($"[HassDiscovery.Interface] Interface scan completed, received {responseCount} responses");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[HassDiscovery] Interface {localIp} error: {ex.Message}");
+                Debug.WriteLine($"[HassDiscovery.Interface] {localIp} error: {ex.Message}");
+                Debug.WriteLine($"[HassDiscovery.Interface] Stack trace: {ex.StackTrace}");
+            }
+            finally
+            {
+                udpClient?.Dispose();
             }
         }
 
@@ -339,8 +394,10 @@ namespace HassWebView.Core.Services
                 "hassos.local"
             };
 
-            var tasks = hostnames.Select(hostname => TryResolveHostnameAsync(hostname, instances, discoveredUrls));
+            Debug.WriteLine("[HassDiscovery.Hostname] Starting hostname resolution");
+            var tasks = hostnames.Select(hostname => TryResolveHostnameAsync(hostname, instances, discoveredUrls)).ToList();
             await Task.WhenAll(tasks);
+            Debug.WriteLine("[HassDiscovery.Hostname] Hostname resolution completed");
         }
 
         private static async Task TryResolveHostnameAsync(string hostname, 
@@ -348,6 +405,7 @@ namespace HassWebView.Core.Services
         {
             try
             {
+                Debug.WriteLine($"[HassDiscovery.Hostname] Resolving {hostname}...");
                 var result = await Dns.GetHostEntryAsync(hostname);
                 if (result.AddressList.Length > 0)
                 {
@@ -361,40 +419,62 @@ namespace HassWebView.Core.Services
                             HostName = hostname,
                             Port = DefaultHassPort
                         });
-                        Debug.WriteLine($"[HassDiscovery] Resolved hostname: {url}");
+                        Debug.WriteLine($"[HassDiscovery.Hostname] Resolved hostname: {url}");
                     }
                 }
+                else
+                {
+                    Debug.WriteLine($"[HassDiscovery.Hostname] {hostname} resolved but no IP addresses found");
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                // Hostname resolution failed, ignore
+                Debug.WriteLine($"[HassDiscovery.Hostname] {hostname} resolution failed: {ex.Message}");
             }
         }
 
         private static List<IPAddress> GetLocalIpAddresses()
         {
             var ips = new List<IPAddress>();
+            Debug.WriteLine("[HassDiscovery.Network] Scanning network interfaces...");
 
             foreach (var iface in NetworkInterface.GetAllNetworkInterfaces())
             {
-                if (iface.OperationalStatus != OperationalStatus.Up) continue;
-                if (iface.NetworkInterfaceType == NetworkInterfaceType.Loopback) continue;
-                if (iface.NetworkInterfaceType == NetworkInterfaceType.Tunnel) continue;
+                Debug.WriteLine($"[HassDiscovery.Network] Interface: {iface.Name} ({iface.Description})");
+                Debug.WriteLine($"  Status: {iface.OperationalStatus}, Type: {iface.NetworkInterfaceType}");
+                
+                if (iface.OperationalStatus != OperationalStatus.Up)
+                {
+                    Debug.WriteLine($"  Skipping: Interface is down");
+                    continue;
+                }
+                if (iface.NetworkInterfaceType == NetworkInterfaceType.Loopback)
+                {
+                    Debug.WriteLine($"  Skipping: Loopback interface");
+                    continue;
+                }
+                if (iface.NetworkInterfaceType == NetworkInterfaceType.Tunnel)
+                {
+                    Debug.WriteLine($"  Skipping: Tunnel interface");
+                    continue;
+                }
 
                 foreach (var addrInfo in iface.GetIPProperties().UnicastAddresses)
                 {
                     if (addrInfo.Address.AddressFamily == AddressFamily.InterNetwork)
                     {
+                        Debug.WriteLine($"  Adding IPv4: {addrInfo.Address}");
                         ips.Add(addrInfo.Address);
                     }
                 }
             }
 
+            Debug.WriteLine($"[HassDiscovery.Network] Found {ips.Count} usable IPv4 addresses");
             return ips;
         }
 
         // Simple concurrent hash set implementation
-        private class ConcurrentHashSet<T>
+        private class ConcurrentHashSet<T> where T : notnull
         {
             private readonly ConcurrentDictionary<T, byte> _dict = new ConcurrentDictionary<T, byte>();
 

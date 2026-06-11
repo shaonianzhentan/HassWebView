@@ -21,7 +21,7 @@ namespace HassWebView.Core.Configuration
         {
             builder.Services.TryAddSingleton<IHassApiService, HassApiService>();
 
-            builder.Services.TryAddSingleton(sp =>
+            builder.Services.TryAddSingleton<HassPageOptions>(sp =>
             {
                 var options = new HassPageOptions();
 
@@ -106,7 +106,10 @@ namespace HassWebView.Core.Configuration
                     options.ShowSettingsScreen = async () =>
                     {
                         var page = (Page)ActivatorUtilities.CreateInstance(sp, capturedType);
-                        await Shell.Current.Navigation.PushModalAsync(new NavigationPage(page));
+                        var navPage = new NavigationPage(page);
+                        // 隐藏导航栏（标题栏）
+                        NavigationPage.SetHasNavigationBar(page, false);
+                        await Shell.Current.Navigation.PushModalAsync(navPage);
                     };
                 }
 
