@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:component="clr-namespace:HassWebView.Component.Components"
-             xmlns:models="clr-namespace:HassWebView.Component.Models"
+             xmlns:component="clr-namespace:HassWebView.Component.Components;assembly=HassWebView.Component"
+             xmlns:models="clr-namespace:HassWebView.Component.Models;assembly=HassWebView.Component"
              x:Class="HassWebView.DemoComponent.Views.SettingsGroupExamplePage"
              Title="SettingsGroup 组件示例"
              BackgroundColor="{DynamicResource PageBackgroundColor}">
